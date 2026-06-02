@@ -25,7 +25,7 @@ import { ConsultationService } from '../../services/consultation';
     MatIconModule
   ],
   templateUrl: './consultation-form.html',
-  styleUrl:['./consultation-form.css']
+  styleUrl:'./consultation-form.css'
 })
 export class ConsultationFormComponent implements OnInit {
 
