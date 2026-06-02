@@ -1,6 +1,6 @@
 export type UrgencyLevel = 'low' | 'medium' | 'critical';
 
-export interface Consultation {
+export interface Consultations {
   _id: string;
   patientId: string;
   doctorId: string;
@@ -26,6 +26,6 @@ export interface CreateConsultationDto {
 
 export interface ConsultationResponse {
   success: boolean;
-  data: Consultation[];
+  data: Consultations[];
   count: number;
 }
