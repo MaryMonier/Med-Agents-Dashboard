@@ -8,26 +8,28 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConsultationService } from '../../services/consultation';
 import { Consultations } from '../../models/consultations';
-
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 @Component({
   selector: 'app-consultation-list',
   standalone: true,
-  imports: [
+ imports: [
     CommonModule, RouterModule, FormsModule,
     MatTableModule, MatPaginatorModule,
+    MatFormFieldModule,
     MatInputModule, MatButtonModule,
     MatIconModule, MatChipsModule, MatDialogModule
-  ],
-  templateUrl: './consultation-list.component.html',
-  styleUrl: './consultation-list.component.css'
+],
+templateUrl: './consultation-list.html',
+styleUrl: './consultation-list.css'
+
 })
 export class ConsultationListComponent implements OnInit {
 
-  consultations: Consultation[] = [];
-  filteredConsultations: Consultation[] = [];
+  consultations: Consultations[] = [];
+  filteredConsultations: Consultations[] = [];
   searchQuery = '';
   pageSize = 10;
   pageIndex = 0;

@@ -1,8 +1,8 @@
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
@@ -14,12 +14,18 @@ import { ConsultationService } from '../../services/consultation';
   selector: 'app-consultation-form',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, RouterModule,
-    MatInputModule, MatButtonModule,
-    MatSelectModule, MatProgressSpinnerModule, MatIconModule
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatProgressSpinnerModule,
+    MatIconModule
   ],
-  templateUrl: './consultation-form.component.html',
-  styleUrl: './consultation-form.component.css'
+  templateUrl: './consultation-form.html',
+  styleUrl: './consultation-form.css'
 })
 export class ConsultationFormComponent implements OnInit {
 
