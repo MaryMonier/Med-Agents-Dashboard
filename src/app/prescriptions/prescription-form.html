@@ -1,0 +1,75 @@
+<div class="page">
+  <div class="header">
+    <div>
+      <h2>Add Prescription</h2>
+      <p>Create a new prescription for a patient</p>
+    </div>
+
+    <a routerLink="/prescriptions" class="back-btn">Back to List</a>
+  </div>
+
+  <div class="form-card">
+    <label>Consultation ID</label>
+    <input
+      type="text"
+      [ngModel]="consultationId()"
+      (ngModelChange)="consultationId.set($event)"
+      placeholder="Enter consultation ID"
+    />
+
+    <label>Patient ID</label>
+    <input
+      type="text"
+      [ngModel]="patientId()"
+      (ngModelChange)="patientId.set($event)"
+      placeholder="Enter patient ID"
+    />
+
+    <label>Language</label>
+    <select [ngModel]="language()" (ngModelChange)="language.set($event)">
+      <option value="en">English</option>
+      <option value="ar">Arabic</option>
+    </select>
+
+    <h3>Medication</h3>
+
+    <label>Medication Name</label>
+    <input
+      type="text"
+      [ngModel]="medicationName()"
+      (ngModelChange)="medicationName.set($event)"
+      placeholder="Aspirin"
+    />
+
+    <label>Dose</label>
+    <input
+      type="text"
+      [ngModel]="dose()"
+      (ngModelChange)="dose.set($event)"
+      placeholder="100mg"
+    />
+
+    <label>Frequency</label>
+    <input
+      type="text"
+      [ngModel]="frequency()"
+      (ngModelChange)="frequency.set($event)"
+      placeholder="Once daily"
+    />
+
+    <label>Duration</label>
+    <input
+      type="text"
+      [ngModel]="duration()"
+      (ngModelChange)="duration.set($event)"
+      placeholder="7 days"
+    />
+
+    <p class="error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+    <p class="success" *ngIf="successMessage()">{{ successMessage() }}</p>
+
+    <button (click)="createPrescription()" [disabled]="isLoading()">
+      {{ isLoading() ? 'Saving...' : 'Create Prescription' }}
+    </button>
+  </div>
+</div>
