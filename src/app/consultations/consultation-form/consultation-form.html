@@ -1,0 +1,61 @@
+<div class="form-container">
+  <h2>{{ isEditMode ? 'Edit' : 'New' }} Consultation</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <mat-form-field appearance="outline">
+      <mat-label>Patient ID</mat-label>
+      <input matInput formControlName="patientId"/>
+      @if(form.get('patientId')?.hasError('required') && form.get('patientId')?.touched) {
+        <mat-error>Patient ID is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Doctor's Notes</mat-label>
+      <textarea matInput formControlName="rawInput" rows="4"></textarea>
+      @if(form.get('rawInput')?.hasError('required') && form.get('rawInput')?.touched) {
+        <mat-error>Notes are required</mat-error>
+      }
+      @if(form.get('rawInput')?.hasError('minlength') && form.get('rawInput')?.touched) {
+        <mat-error>Minimum 10 characters</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Symptoms (comma separated)</mat-label>
+      <input matInput formControlName="symptoms"
+             placeholder="headache, fever, cough"/>
+      @if(form.get('symptoms')?.hasError('required') && form.get('symptoms')?.touched) {
+        <mat-error>Symptoms are required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Diagnosis (optional)</mat-label>
+      <input matInput formControlName="diagnosis"/>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Language</mat-label>
+      <mat-select formControlName="language">
+        <mat-option value="en">English</mat-option>
+        <mat-option value="ar">Arabic</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="actions">
+      <button mat-button type="button" routerLink="/consultations">
+        Cancel
+      </button>
+      <button mat-raised-button color="primary"
+              type="submit" [disabled]="isLoading">
+        @if(isLoading) {
+          <mat-progress-spinner diameter="20" mode="indeterminate"/>
+        }
+        {{ isEditMode ? 'Update' : 'Create' }}
+      </button>
+    </div>
+
+  </form>
+</div>
