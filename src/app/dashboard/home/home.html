@@ -1,1 +1,27 @@
-<p>home works!</p>
+
+<div class="layout">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <app-navbar></app-navbar>
+    <div class="page-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">patients</div>
+          <div class="stat-value">{{ totalPatients() }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">consultations</div>
+          <div class="stat-value">{{ totalConsultation() }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">drug warnings</div>
+          <div class="stat-value">{{ totalWarnings() }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">follow-ups</div>
+          <div class="stat-value">{{ totalFollowups() }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
