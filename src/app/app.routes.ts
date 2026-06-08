@@ -15,6 +15,10 @@ export const routes : Routes =[
     loadChildren: ()=>
       import('./dashboard/dashboard-routing-module').then(m=>m.DashboardRoutingModule)
   },
+
+  
+
+
   {
     path: '**', redirectTo:'auth/login'
   },
