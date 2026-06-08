@@ -1,13 +1,4 @@
-// import { Component } from '@angular/core';
-
-// @Component({
-//   selector: 'app-patients-list',
-//   imports: [],
-//   templateUrl: './patients-list.html',
-//   styleUrl: './patients-list.css',
-// })
-// export class PatientsList {}
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PatientService, Patient } from "../../services/patient";
@@ -19,9 +10,9 @@ import { PatientService, Patient } from "../../services/patient";
   styleUrl: './patients-list.css',
 })
 export class PatientsList implements OnInit {
-  patients: Patient[] = [];
-  isLoading = false;
-  errorMessage = '';
+  patients = signal<Patient[]>([]);
+  isLoading = signal(false);
+  errorMessage = signal('');
 
   constructor(private patientService: PatientService, private router: Router) {}
 
@@ -30,15 +21,15 @@ export class PatientsList implements OnInit {
   }
 
   loadPatients(): void {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.patientService.getAll().subscribe({
       next: (res) => {
-        this.patients = res.data;
-        this.isLoading = false;
+        this.patients.set(res.data);
+        this.isLoading.set(false);
       },
-      error: () => {
-        this.errorMessage = 'Failed to load patients';
-        this.isLoading = false;
+      error: (err) => {
+        this.errorMessage.set('Failed to load patients');
+        this.isLoading.set(false);
       },
     });
   }
@@ -55,10 +46,10 @@ export class PatientsList implements OnInit {
     if (!confirm('Are you sure you want to delete this patient?')) return;
     this.patientService.delete(id).subscribe({
       next: () => {
-        this.patients = this.patients.filter((p) => p._id !== id);
+        this.patients.update(list => list.filter(p => p._id !== id));
       },
       error: () => {
-        this.errorMessage = 'Failed to delete patient';
+        this.errorMessage.set('Failed to delete patient');
       },
     });
   }

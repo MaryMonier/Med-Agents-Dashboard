@@ -29,6 +29,7 @@ export class PatientService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<{ success: boolean; data: Patient[] }> {
+    
     return this.http.get<{ success: boolean; data: Patient[] }>(this.apiUrl);
   }
 
