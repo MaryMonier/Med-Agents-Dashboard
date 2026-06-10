@@ -1,0 +1,103 @@
+<div class="form-page">
+
+  <div class="page-header">
+    <button class="btn-back" (click)="goBack()">← Back</button>
+    <h2>{{ isEditMode() ? 'Edit Patient' : 'Add New Patient' }}</h2>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  <div class="form-card">
+    <div class="form-group">
+      <label>Full Name *</label>
+      <input type="text"
+        [ngModel]="patient().name"
+        (ngModelChange)="updateField('name', $event)"
+        placeholder="Patient full name" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date of Birth *</label>
+        <input type="date"
+          [ngModel]="patient().dateOfBirth"
+          (ngModelChange)="updateField('dateOfBirth', $event)" />
+      </div>
+      <div class="form-group">
+        <label>Gender *</label>
+        <select
+          [ngModel]="patient().gender"
+          (ngModelChange)="updateField('gender', $event)">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Blood Type *</label>
+        <select
+          [ngModel]="patient().bloodType"
+          (ngModelChange)="updateField('bloodType', $event)">
+          @for (bt of bloodTypes; track bt) {
+            <option [value]="bt">{{ bt }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Allergies -->
+    <div class="form-group">
+      <label>Allergies</label>
+      <div class="tag-input">
+        <input type="text"
+          [ngModel]="allergyInput()"
+          (ngModelChange)="allergyInput.set($event)"
+          placeholder="Type allergy and press Add"
+          (keyup.enter)="addAllergy()" />
+        <button type="button" (click)="addAllergy()">Add</button>
+      </div>
+      <div class="tags">
+        @for (allergy of patient().allergies; track allergy; let i = $index) {
+          <span class="tag">
+            {{ allergy }}
+            <span class="remove" (click)="removeAllergy(i)">×</span>
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Chronic Conditions -->
+    <div class="form-group">
+      <label>Chronic Conditions</label>
+      <div class="tag-input">
+        <input type="text"
+          [ngModel]="conditionInput()"
+          (ngModelChange)="conditionInput.set($event)"
+          placeholder="Type condition and press Add"
+          (keyup.enter)="addCondition()" />
+        <button type="button" (click)="addCondition()">Add</button>
+      </div>
+      <div class="tags">
+        @for (condition of patient().chronicConditions; track condition; let i = $index) {
+          <span class="tag">
+            {{ condition }}
+            <span class="remove" (click)="removeCondition(i)">×</span>
+          </span>
+        }
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-cancel" (click)="goBack()">Cancel</button>
+      <button class="btn-save" (click)="onSubmit()" [disabled]="isLoading()">
+        {{ isEditMode() ? 'Save Changes' : 'Add Patient' }}
+      </button>
+    </div>
+  </div>
+
+</div>

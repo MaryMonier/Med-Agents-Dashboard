@@ -1,0 +1,72 @@
+<div class="patients-page">
+
+  <div class="page-header">
+    <h2>Patients</h2>
+    <button class="btn-add" (click)="goToAdd()">+ Add Patient</button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (!isLoading() && patients().length === 0) {
+    <div class="empty">No patients found. Add your first patient!</div>
+  }
+
+  @if (!isLoading() && patients().length > 0) {
+    <table class="patients-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Age</th>
+          <th>Gender</th>
+          <th>Blood Type</th>
+          <th>Allergies</th>
+          <th>Chronic Conditions</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (patient of patients(); track patient._id) {
+          <tr>
+            <td>{{ patient.name }}</td>
+            <td>{{ calculateAge(patient.dateOfBirth) }}</td>
+            <td>
+              <span class="badge" [class.male]="patient.gender === 'male'" [class.female]="patient.gender === 'female'">
+                {{ patient.gender }}
+              </span>
+            </td>
+            <td><span class="blood-type">{{ patient.bloodType }}</span></td>
+            <td>
+              @for (allergy of patient.allergies; track allergy) {
+                <span class="tag">{{ allergy }}</span>
+              }
+              @if (!patient.allergies || patient.allergies.length === 0) {
+                <span>—</span>
+              }
+            </td>
+            <td>
+              @for (condition of patient.chronicConditions; track condition) {
+                <span class="tag">{{ condition }}</span>
+              }
+              @if (!patient.chronicConditions || patient.chronicConditions.length === 0) {
+                <span>—</span>
+              }
+            </td>
+            <td>
+              <div class="actions">
+                <button class="btn-edit" (click)="goToEdit(patient._id!)">Edit</button>
+                <button class="btn-delete" (click)="deletePatient(patient._id!)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+</div>

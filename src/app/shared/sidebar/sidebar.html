@@ -7,38 +7,39 @@
 
   <div class="nav-section">
     <div class="nav-label">main</div>
-    <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
-      <i class="ti ti-layout-dashboard"></i> Dashboard
-    </a>
-    <a class="nav-item" routerLink="/dashboard/patients" routerLinkActive="active">
-      <i class="ti ti-users"></i> Patients
-    </a>
-    <a class="nav-item" routerLink="/dashboard/consultations" routerLinkActive="active">
-      <i class="ti ti-stethoscope"></i> Consultations
-    </a>
+   <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+  <i class="ti ti-layout-dashboard"></i> Dashboard
+</a>
+   <a class="nav-item" routerLink="/dashboard/patients" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+  <i class="ti ti-users"></i> Patients
+</a>
+
+   <a class="nav-item" routerLink="/dashboard/consultations" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+  <i class="ti ti-stethoscope"></i> Consultations
+</a>
   </div>
 
   <div class="nav-section">
     <div class="nav-label">medical</div>
-    <a class="nav-item" routerLink="/dashboard/prescriptions" routerLinkActive="active">
-      <i class="ti ti-pill"></i> Prescriptions
-    </a>
-    <a class="nav-item" routerLink="/dashboard/reports" routerLinkActive="active">
-      <i class="ti ti-file-text"></i> Reports
-    </a>
-    <a class="nav-item" routerLink="/dashboard/followups" routerLinkActive="active">
-      <i class="ti ti-calendar"></i> Follow-ups
-    </a>
+   <a class="nav-item" routerLink="/dashboard/prescriptions" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+  <i class="ti ti-pill"></i> Prescriptions
+</a>
+  <a class="nav-item" routerLink="/dashboard/reports" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+  <i class="ti ti-file-text"></i> Reports
+</a>
+  <a class="nav-item" routerLink="/dashboard/followups" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+  <i class="ti ti-calendar"></i> Follow-ups
+</a>
   </div>
 
   <div class="nav-section">
     <div class="nav-label">AI</div>
-    <a class="nav-item" routerLink="/dashboard/ai-chat" routerLinkActive="active">
-      <i class="ti ti-robot"></i> AI Chat
-    </a>
-    <a class="nav-item" routerLink="/dashboard/drug-safety" routerLinkActive="active">
-      <i class="ti ti-shield-check"></i> Drug Safety
-    </a>
+  <a class="nav-item" routerLink="/dashboard/ai-chat" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+  <i class="ti ti-robot"></i> AI Chat
+</a>
+   <a class="nav-item" routerLink="/dashboard/drug-safety" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+  <i class="ti ti-shield-check"></i> Drug Safety
+</a>
   </div>
 
   <div class="sidebar-footer">

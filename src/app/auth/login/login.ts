@@ -23,6 +23,7 @@ export class Login {
 
     this.authService.login(this.email(),this.password()).subscribe({
       next:(res)=>{
+        console.log(res)
         this.authService.saveToken(res.data.token);
         this.isLoading.set(false);
         this.router.navigate(['/dashboard'])
