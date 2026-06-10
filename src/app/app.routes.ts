@@ -1,25 +1,48 @@
-import { Routes } from "@angular/router";
-import { authGuard } from "./guards/auth.guard";
+import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
 
-export const routes : Routes =[
+export const routes: Routes = [
   {
-    path:'', redirectTo: 'auth/login', pathMatch:'full'
+    path: '',
+    redirectTo: 'auth/login',
+    pathMatch: 'full',
   },
+
   {
-    path:'auth',
-    loadChildren: ()=> import('./auth/auth-routing-module').then(m =>m.AuthRoutingModule)
+    path: 'auth',
+    loadChildren: () =>
+      import('./auth/auth-routing-module').then((m) => m.AuthRoutingModule),
   },
+
   {
     path: 'dashboard',
     canActivate: [authGuard],
-    loadChildren: ()=>
-      import('./dashboard/dashboard-routing-module').then(m=>m.DashboardRoutingModule)
+    loadChildren: () =>
+      import('./dashboard/dashboard-routing-module').then(
+        (m) => m.DashboardRoutingModule
+      ),
   },
-
-  
-
 
   {
-    path: '**', redirectTo:'auth/login'
+    path: 'consultations',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./consultations/consultations-module').then(
+        (m) => m.ConsultationsModule
+      ),
   },
-]
+
+  {
+    path: 'prescriptions',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./prescriptions/prescriptions-module').then(
+        (m) => m.PrescriptionsModule
+      ),
+  },
+
+  {
+    path: '**',
+    redirectTo: 'auth/login',
+  },
+];
