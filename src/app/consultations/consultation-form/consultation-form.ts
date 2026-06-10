@@ -8,24 +8,20 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConsultationService } from '../../services/consultation';
 
 @Component({
   selector: 'app-consultation-form',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatProgressSpinnerModule,
-    MatIconModule
+    CommonModule, ReactiveFormsModule, RouterModule,
+    MatFormFieldModule, MatInputModule, MatButtonModule,
+    MatSelectModule, MatProgressSpinnerModule, MatIconModule,
+    TranslateModule
   ],
   templateUrl: './consultation-form.html',
-  styleUrl:'./consultation-form.css'
+  styleUrl: './consultation-form.css'
 })
 export class ConsultationFormComponent implements OnInit {
 
@@ -38,7 +34,8 @@ export class ConsultationFormComponent implements OnInit {
     private fb: FormBuilder,
     private consultationService: ConsultationService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {

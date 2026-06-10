@@ -1,61 +1,70 @@
 <div class="form-container">
-  <h2>{{ isEditMode ? 'Edit' : 'New' }} Consultation</h2>
+  <div class="form-card">
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
-    <mat-form-field appearance="outline">
-      <mat-label>Patient ID</mat-label>
-      <input matInput formControlName="patientId"/>
-      @if(form.get('patientId')?.hasError('required') && form.get('patientId')?.touched) {
-        <mat-error>Patient ID is required</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Doctor's Notes</mat-label>
-      <textarea matInput formControlName="rawInput" rows="4"></textarea>
-      @if(form.get('rawInput')?.hasError('required') && form.get('rawInput')?.touched) {
-        <mat-error>Notes are required</mat-error>
-      }
-      @if(form.get('rawInput')?.hasError('minlength') && form.get('rawInput')?.touched) {
-        <mat-error>Minimum 10 characters</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Symptoms (comma separated)</mat-label>
-      <input matInput formControlName="symptoms"
-             placeholder="headache, fever, cough"/>
-      @if(form.get('symptoms')?.hasError('required') && form.get('symptoms')?.touched) {
-        <mat-error>Symptoms are required</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Diagnosis (optional)</mat-label>
-      <input matInput formControlName="diagnosis"/>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Language</mat-label>
-      <mat-select formControlName="language">
-        <mat-option value="en">English</mat-option>
-        <mat-option value="ar">Arabic</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <div class="actions">
-      <button mat-button type="button" routerLink="/consultations">
-        Cancel
-      </button>
-      <button mat-raised-button color="primary"
-              type="submit" [disabled]="isLoading">
-        @if(isLoading) {
-          <mat-progress-spinner diameter="20" mode="indeterminate"/>
-        }
-        {{ isEditMode ? 'Update' : 'Create' }}
-      </button>
+    <div class="form-header">
+      <h2>{{ isEditMode ? ('FORM.TITLE_EDIT' | translate) : ('FORM.TITLE_NEW' | translate) }}</h2>
     </div>
 
-  </form>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'FORM.PATIENT_ID' | translate }}</mat-label>
+          <input matInput formControlName="patientId"/>
+          @if (form.get('patientId')?.hasError('required')) {
+            <mat-error>{{ 'FORM.REQUIRED' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'FORM.LANGUAGE' | translate }}</mat-label>
+          <mat-select formControlName="language">
+            <mat-option value="en">English</mat-option>
+            <mat-option value="ar">Arabic</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width span-2">
+          <mat-label>{{ 'FORM.NOTES' | translate }}</mat-label>
+          <textarea matInput formControlName="rawInput" rows="4"></textarea>
+          @if (form.get('rawInput')?.hasError('required')) {
+            <mat-error>{{ 'FORM.REQUIRED' | translate }}</mat-error>
+          }
+          @if (form.get('rawInput')?.hasError('minlength')) {
+            <mat-error>{{ 'FORM.MIN_LENGTH' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width span-2">
+          <mat-label>{{ 'FORM.SYMPTOMS' | translate }}</mat-label>
+          <input matInput formControlName="symptoms"
+                 placeholder="headache, fever, cough"/>
+          @if (form.get('symptoms')?.hasError('required')) {
+            <mat-error>{{ 'FORM.REQUIRED' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width span-2">
+          <mat-label>{{ 'FORM.DIAGNOSIS' | translate }}</mat-label>
+          <input matInput formControlName="diagnosis"/>
+        </mat-form-field>
+
+      </div>
+
+      <div class="form-actions">
+        <button mat-stroked-button type="button" routerLink="/consultations">
+          <mat-icon>arrow_back</mat-icon>
+          {{ 'FORM.CANCEL' | translate }}
+        </button>
+        <button mat-raised-button color="primary"
+                type="submit" [disabled]="isLoading">
+          @if (isLoading) {
+            <mat-spinner diameter="20"></mat-spinner>
+          }
+          {{ isEditMode ? ('FORM.UPDATE' | translate) : ('FORM.CREATE' | translate) }}
+        </button>
+      </div>
+
+    </form>
+  </div>
 </div>
