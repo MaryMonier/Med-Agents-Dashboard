@@ -8,23 +8,25 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConsultationService } from '../../services/consultation';
 import { Consultations } from '../../models/consultations';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+
 @Component({
   selector: 'app-consultation-list',
   standalone: true,
- imports: [
+  imports: [
     CommonModule, RouterModule, FormsModule,
     MatTableModule, MatPaginatorModule,
-    MatFormFieldModule,
-    MatInputModule, MatButtonModule,
-    MatIconModule, MatChipsModule, MatDialogModule
-],
-templateUrl: './consultation-list.html',
-styleUrl: './consultation-list.css'
-
+    MatFormFieldModule, MatInputModule,
+    MatButtonModule, MatIconModule,
+    MatChipsModule, MatDialogModule,
+    TranslateModule
+  ],
+  templateUrl: './consultation-list.html',
+  styleUrl: './consultation-list.css'
 })
 export class ConsultationListComponent implements OnInit {
 
@@ -42,8 +44,10 @@ export class ConsultationListComponent implements OnInit {
 
   constructor(
     private consultationService: ConsultationService,
-    private dialog: MatDialog
-  ) {}
+    private translate: TranslateService
+  ) {
+    this.translate.setDefaultLang('en');
+  }
 
   ngOnInit(): void {
     this.loadConsultations();
@@ -76,17 +80,12 @@ export class ConsultationListComponent implements OnInit {
     this.loadConsultations();
   }
 
-  getUrgencyColor(level: string): string {
-    const colors: Record<string, string> = {
-      low: 'primary',
-      medium: 'accent',
-      critical: 'warn'
-    };
-    return colors[level] || 'primary';
+  switchLanguage(lang: string): void {
+    this.translate.use(lang);
   }
 
   deleteConsultation(id: string): void {
-    if (confirm('Are you sure you want to delete this consultation?')) {
+    if (confirm('Are you sure?')) {
       this.consultationService.delete(id).subscribe(() => {
         this.loadConsultations();
       });
