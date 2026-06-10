@@ -1,0 +1,96 @@
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <a routerLink="/dashboard" class="back-arrow">&#8592;</a>
+      <div>
+        <h2>Follow-ups</h2>
+        <p>Manage all patient follow-ups</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-card">
+    <label>Search by Patient ID</label>
+    <div class="search-row">
+      <input
+        type="text"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+        placeholder="Enter patient ID"
+      />
+      <button (click)="applySearch()" [disabled]="isLoading()">Search</button>
+      <button class="clear-btn" (click)="clearSearch()">Clear</button>
+    </div>
+  </div>
+
+  <p class="error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+  <p class="loading" *ngIf="isLoading()">Loading...</p>
+
+  <div class="table-card" *ngIf="pagedFollowups.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Instructions</th>
+          <th>Scheduled Date</th>
+          <th>Reminder Sent</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let followup of pagedFollowups">
+          <td>{{ followup.instructions }}</td>
+          <td>
+            {{ followup.scheduledDate ? (followup.scheduledDate | date: 'mediumDate') : '—' }}
+          </td>
+          <td>
+            <span [class]="followup.reminderSent ? 'badge-yes' : 'badge-no'">
+              {{ followup.reminderSent ? 'Yes' : 'No' }}
+            </span>
+          </td>
+          <td>
+            <span [class]="followup.status === 'done' ? 'badge-done' : 'badge-pending'">
+              {{ followup.status }}
+            </span>
+          </td>
+          <td class="actions">
+            <button
+              [class]="followup.status === 'pending' ? 'done-btn' : 'pending-btn'"
+              (click)="toggleStatus(followup)"
+            >
+              Mark as {{ followup.status === 'pending' ? 'Done' : 'Pending' }}
+            </button>
+            <button class="delete-btn" (click)="deleteFollowup(followup._id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <div class="pagination-info">
+        Showing {{ startItem }}–{{ endItem }} of {{ totalItems }}
+        &nbsp;|&nbsp;
+        <select class="page-size-select" (change)="onPageSizeChange($event)">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="25">25</option>
+        </select>
+        per page
+      </div>
+
+      <div class="pagination-controls">
+        <button (click)="goToPage(pageIndex - 1)" [disabled]="pageIndex === 0">&#8592;</button>
+        <button *ngFor="let p of pages" [class.active]="p === pageIndex" (click)="goToPage(p)">
+          {{ p + 1 }}
+        </button>
+        <button (click)="goToPage(pageIndex + 1)" [disabled]="pageIndex >= totalPages - 1">
+          &#8594;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <p class="empty" *ngIf="!isLoading() && pagedFollowups.length === 0 && !errorMessage()">
+    No follow-ups to display.
+  </p>
+</div>
