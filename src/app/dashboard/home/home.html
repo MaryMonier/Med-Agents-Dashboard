@@ -1,27 +1,236 @@
+<!-- ══════════════════════════════════════════════════════════════
+     MED AGENTS — DASHBOARD HOME
+     ══════════════════════════════════════════════════════════════ -->
 
-<div class="layout">
-  <app-sidebar></app-sidebar>
-  <div class="main-content">
-    <app-navbar></app-navbar>
-    <div class="page-content">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">patients</div>
-          <div class="stat-value">{{ totalPatients() }}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">consultations</div>
-          <div class="stat-value">{{ totalConsultation() }}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">drug warnings</div>
-          <div class="stat-value">{{ totalWarnings() }}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">follow-ups</div>
-          <div class="stat-value">{{ totalFollowups() }}</div>
-        </div>
+<!-- ── Page header ─────────────────────────────────────────────── -->
+<header class="ph">
+  <div class="ph__left">
+    <p class="ph__greeting">{{ greeting }}, Doctor 👋</p>
+    <p class="ph__date">{{ currentDate }}</p>
+  </div>
+  <div class="ph__actions">
+    <button class="btn btn--ghost" (click)="loadAll()">
+      <i class="ti ti-refresh"></i> Refresh
+    </button>
+    <button class="btn btn--ghost" (click)="exportReport()" [disabled]="exportLoading">
+      <span *ngIf="exportLoading" class="spin spin--xs"></span>
+      <i *ngIf="!exportLoading" class="ti ti-download"></i>
+      {{ exportLoading ? 'Generating…' : 'Export' }}
+    </button>
+    <button class="btn btn--primary" (click)="goTo('/dashboard/consultations/add')">
+      <i class="ti ti-plus"></i> New Consultation
+    </button>
+  </div>
+</header>
+
+<!-- ── Error banner ─────────────────────────────────────────────── -->
+<div class="alert alert--error" *ngIf="statsError">
+  <i class="ti ti-alert-circle"></i>
+  Backend unreachable — showing last available data.
+  <button class="btn-link" (click)="loadAll()">Retry</button>
+</div>
+
+<!-- ── KPI Cards ───────────────────────────────────────────────── -->
+<section class="kpi-grid">
+  <div class="kpi" *ngFor="let c of kpiCards" [style.--kpi-color]="c.color" [style.--kpi-bg]="c.bg" [style.--kpi-icon-bg]="c.iconBg">
+
+    <!-- skeleton -->
+    <ng-container *ngIf="c.loading">
+      <div class="kpi__icon sk sk--icon"></div>
+      <div class="sk sk--num"></div>
+      <div class="sk sk--label"></div>
+    </ng-container>
+
+    <!-- loaded -->
+    <ng-container *ngIf="!c.loading">
+      <div class="kpi__top">
+        <div class="kpi__icon-wrap"><i [class]="c.icon"></i></div>
+        <span class="kpi__pill">
+          <i class="ti ti-trending-up"></i> {{ c.value }}
+        </span>
+      </div>
+      <div class="kpi__value">{{ c.value }}</div>
+      <div class="kpi__label">{{ c.label }}</div>
+      <div class="kpi__sub">{{ c.sub }}</div>
+    </ng-container>
+
+  </div>
+</section>
+
+<!-- ── Charts row ──────────────────────────────────────────────── -->
+<section class="charts-row">
+
+  <!-- Line chart -->
+  <div class="card chart-card">
+    <div class="card__hd">
+      <div>
+        <h2 class="card__title">Activity Overview</h2>
+        <p class="card__sub">Consultations vs follow-ups</p>
+      </div>
+      <div class="period-tabs">
+        <button class="period-tab" [class.period-tab--on]="activePeriod==='week'"
+          (click)="loadChart('week')" [disabled]="chartLoading">Week</button>
+        <button class="period-tab" [class.period-tab--on]="activePeriod==='month'"
+          (click)="loadChart('month')" [disabled]="chartLoading">Month</button>
+        <button class="period-tab" [class.period-tab--on]="activePeriod==='quarter'"
+          (click)="loadChart('quarter')" [disabled]="chartLoading">Quarter</button>
+      </div>
+    </div>
+    <div class="chart-wrap" [class.chart-wrap--dimmed]="chartLoading">
+      <div class="chart-overlay" *ngIf="chartLoading"><span class="spin"></span></div>
+      <canvas baseChart [data]="lineData" [options]="lineOpts" [type]="lineType"></canvas>
+    </div>
+  </div>
+
+  <!-- Doughnut -->
+  <div class="card donut-card">
+    <div class="card__hd">
+      <div>
+        <h2 class="card__title">Urgency Breakdown</h2>
+        <p class="card__sub">By severity level</p>
+      </div>
+    </div>
+    <div class="donut-wrap">
+      <canvas baseChart [data]="donutData" [options]="donutOpts" [type]="donutType"></canvas>
+      <div class="donut-center">
+        <span class="donut-center__n">{{ totalConsultations }}</span>
+        <span class="donut-center__l">Total</span>
       </div>
     </div>
   </div>
-</div>
+
+</section>
+
+<!-- ── Bottom row ──────────────────────────────────────────────── -->
+<section class="bottom-row">
+
+  <!-- Recent patients table -->
+  <div class="card patients-card">
+    <div class="card__hd">
+      <div>
+        <h2 class="card__title">Recent Consultations</h2>
+        <p class="card__sub">Last 8 sessions</p>
+      </div>
+      <a class="view-all" routerLink="/dashboard/consultations">
+        View all <i class="ti ti-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- skeleton rows -->
+    <div class="ptable" *ngIf="patientsLoading">
+      <div class="ptable__row ptable__row--sk" *ngFor="let _ of [1,2,3,4,5]">
+        <div class="sk sk--av"></div>
+        <div class="sk-lines">
+          <div class="sk sk--lg"></div>
+          <div class="sk sk--sm"></div>
+        </div>
+        <div class="sk sk--badge"></div>
+        <div class="sk sk--badge"></div>
+      </div>
+    </div>
+
+    <!-- error -->
+    <div class="empty" *ngIf="!patientsLoading && patientsError">
+      <i class="ti ti-alert-circle empty__icon empty__icon--err"></i>
+      <p>Failed to load consultations.</p>
+    </div>
+
+    <!-- no data -->
+    <div class="empty" *ngIf="!patientsLoading && !patientsError && patientRows.length === 0">
+      <i class="ti ti-clipboard-list empty__icon"></i>
+      <p>No consultations yet.</p>
+      <a routerLink="/dashboard/consultations/add" class="btn btn--primary btn--sm">Start first consultation</a>
+    </div>
+
+    <!-- data rows -->
+    <div class="ptable" *ngIf="!patientsLoading && !patientsError && patientRows.length > 0">
+      <div class="ptable__row" *ngFor="let p of patientRows; trackBy: trackById">
+        <div class="av" [style.background]="p.avatarBg">{{ p.initials }}</div>
+        <div class="ptable__info">
+          <span class="ptable__name">{{ p.name }}</span>
+          <span class="ptable__cond">{{ p.condition }}</span>
+        </div>
+        <span class="badge badge--u-{{p.urgency}}">{{ urgencyLabel(p.urgency) }}</span>
+        <span class="badge badge--s-{{p.status}}">{{ statusLabel(p.status) }}</span>
+        <span class="ptable__time"><i class="ti ti-clock"></i> {{ p.time }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right column: activity + quick actions -->
+  <div class="right-col">
+
+    <!-- Quick actions -->
+    <div class="card qa-card">
+      <div class="card__hd">
+        <h2 class="card__title">Quick Actions</h2>
+      </div>
+      <div class="qa-grid">
+        <button class="qa" (click)="goTo('/dashboard/consultations/add')">
+          <span class="qa__icon qa__icon--blue"><i class="ti ti-stethoscope"></i></span>
+          <span class="qa__label">New Consultation</span>
+        </button>
+        <button class="qa" (click)="goTo('/dashboard/reports')">
+          <span class="qa__icon qa__icon--teal"><i class="ti ti-file-analytics"></i></span>
+          <span class="qa__label">Generate Report</span>
+        </button>
+        <button class="qa" (click)="goTo('/dashboard/prescriptions')">
+          <span class="qa__icon qa__icon--violet"><i class="ti ti-pill"></i></span>
+          <span class="qa__label">Prescription</span>
+        </button>
+        <button class="qa" (click)="goTo('/dashboard/ai-chat')">
+          <span class="qa__icon qa__icon--amber"><i class="ti ti-robot"></i></span>
+          <span class="qa__label">AI Chat</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Activity timeline -->
+    <div class="card timeline-card">
+      <div class="card__hd">
+        <div>
+          <h2 class="card__title">Recent Activity</h2>
+          <p class="card__sub">Live feed</p>
+        </div>
+      </div>
+
+      <div class="timeline" *ngIf="!patientsLoading && recentActivity.length > 0">
+        <div class="tl-item" *ngFor="let a of recentActivity">
+          <div class="tl-dot" [style.background]="a.dotColor"></div>
+          <div class="tl-body">
+            <p class="tl-title">{{ a.title }}</p>
+            <p class="tl-sub">{{ a.sub }}</p>
+          </div>
+          <span class="tl-time">{{ a.time }}</span>
+        </div>
+      </div>
+
+      <div class="timeline" *ngIf="patientsLoading">
+        <div class="tl-item" *ngFor="let _ of [1,2,3,4]">
+          <div class="sk sk--dot"></div>
+          <div class="tl-body">
+            <div class="sk sk--lg"></div>
+            <div class="sk sk--sm" style="margin-top:5px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty empty--sm" *ngIf="!patientsLoading && recentActivity.length === 0">
+        <p>No recent activity.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── Critical alert banner ────────────────────────────────────── -->
+<section class="crit-banner" *ngIf="!statsLoading && totalWarnings > 0">
+  <div class="crit-banner__icon"><i class="ti ti-shield-exclamation"></i></div>
+  <div class="crit-banner__body">
+    <strong>{{ totalWarnings }} critical case{{ totalWarnings > 1 ? 's' : '' }} detected</strong>
+    <span>High-urgency consultations flagged — review for drug interactions and prescriptions.</span>
+  </div>
+  <button class="btn btn--danger" (click)="goTo('/dashboard/consultations')">
+    Review Now <i class="ti ti-arrow-right"></i>
+  </button>
+</section>

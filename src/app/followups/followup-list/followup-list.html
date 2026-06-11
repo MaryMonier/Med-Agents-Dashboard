@@ -1,0 +1,56 @@
+<header class="page-header">
+  <div class="page-header__text">
+    <h1 class="page-title">Follow-ups</h1>
+    <p class="page-subtitle">Pending and completed follow-up plans</p>
+  </div>
+</header>
+
+<div *ngIf="isLoading" style="text-align:center; padding:2rem;">
+  <span class="spinner"></span> Loading follow-ups…
+</div>
+
+<div *ngIf="errorMessage && !isLoading" class="error-banner">
+  {{ errorMessage }}
+  <button class="btn-retry" (click)="load()">Retry</button>
+</div>
+
+<div class="card" *ngIf="!isLoading && !errorMessage">
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <th style="padding:.75rem 1rem; text-align:left; color:#64748b; font-size:.8rem;">Instructions</th>
+        <th style="padding:.75rem 1rem; text-align:left; color:#64748b; font-size:.8rem;">Scheduled</th>
+        <th style="padding:.75rem 1rem; text-align:left; color:#64748b; font-size:.8rem;">Status</th>
+        <th style="padding:.75rem 1rem; text-align:left; color:#64748b; font-size:.8rem;">Language</th>
+        <th style="padding:.75rem 1rem; text-align:left; color:#64748b; font-size:.8rem;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let f of followups" style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:.75rem 1rem; max-width:300px;">{{ f.instructions }}</td>
+        <td style="padding:.75rem 1rem; color:#64748b;">{{ formatDate(f.scheduledDate || '') }}</td>
+        <td style="padding:.75rem 1rem;">
+          <span class="badge"
+            [ngClass]="f.status === 'done' ? 'badge--status-completed' : 'badge--urgency-low'">
+            {{ f.status === 'done' ? 'Done' : 'Pending' }}
+          </span>
+        </td>
+        <td style="padding:.75rem 1rem; color:#64748b; text-transform:uppercase;">{{ f.language }}</td>
+        <td style="padding:.75rem 1rem;">
+          <button
+            *ngIf="f.status !== 'done'"
+            class="btn-primary"
+            style="font-size:.8rem; padding:.35rem .75rem;"
+            (click)="markDone(f._id)">
+            Mark Done
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="followups.length === 0">
+        <td colspan="5" style="padding:2rem; text-align:center; color:#94a3b8;">
+          No follow-ups found.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
