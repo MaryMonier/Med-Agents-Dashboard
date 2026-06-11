@@ -12,19 +12,21 @@
   <!-- Search -->
   <mat-form-field appearance="outline" class="search-field">
     <mat-label>Search</mat-label>
-    <input matInput [(ngModel)]="searchQuery"
-           (ngModelChange)="onSearch()"
+    <input matInput
+           [value]="searchQuery()"
+           (input)="onSearch($any($event.target).value)"
            placeholder="Search consultations..."/>
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 
-  <!-- Table Wrapper للـ scroll على الموبايل -->
+  <!-- Table -->
   <div class="table-wrapper">
-    <table mat-table [dataSource]="filteredConsultations" class="mat-elevation-z2">
+    <table mat-table [dataSource]="filteredConsultations()" class="mat-elevation-z2">
 
-      <ng-container matColumnDef="patientId">
+      <!-- ✅ بيعرض اسم المريض مش الـ object -->
+      <ng-container matColumnDef="patientName">
         <th mat-header-cell *matHeaderCellDef>Patient</th>
-        <td mat-cell *matCellDef="let c">{{ c.patientId }}</td>
+        <td mat-cell *matCellDef="let c">{{ getPatientName(c.patientId) }}</td>
       </ng-container>
 
       <ng-container matColumnDef="symptoms">
@@ -72,7 +74,7 @@
   </div>
 
   <!-- Empty State -->
-  @if (filteredConsultations.length === 0) {
+  @if (filteredConsultations().length === 0) {
     <div class="empty-state">
       <mat-icon>medical_services</mat-icon>
       <p>No consultations found</p>
@@ -81,8 +83,8 @@
 
   <!-- Pagination -->
   <mat-paginator
-    [length]="totalItems"
-    [pageSize]="pageSize"
+    [length]="totalItems()"
+    [pageSize]="pageSize()"
     [pageSizeOptions]="[5, 10, 25]"
     (page)="onPageChange($event)">
   </mat-paginator>
