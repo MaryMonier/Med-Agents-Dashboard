@@ -10,15 +10,25 @@
 
         <mat-form-field appearance="outline" class="full-width span-2">
           <mat-label>Patient</mat-label>
-          <mat-select formControlName="patientId">
-            @for (patient of patients(); track patient._id) {
-              <mat-option [value]="patient._id">
+          <input
+            matInput
+            formControlName="patientName"
+            [matAutocomplete]="auto"
+            (input)="onPatientInputChange()"
+            placeholder="Type patient name..."
+          />
+          <mat-autocomplete
+            #auto="matAutocomplete"
+            (optionSelected)="onPatientSelected($event.option.value)"
+          >
+            @for (patient of filteredPatients(); track patient._id) {
+              <mat-option [value]="patient">
                 {{ patient.name }}
               </mat-option>
             }
-          </mat-select>
-          @if (form.get('patientId')?.hasError('required')) {
-            <mat-error>Please select a patient</mat-error>
+          </mat-autocomplete>
+          @if (form.get('patientId')?.hasError('required') && form.get('patientName')?.dirty) {
+            <mat-error>Please select a patient from the list</mat-error>
           }
         </mat-form-field>
 

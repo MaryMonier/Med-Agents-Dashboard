@@ -8,8 +8,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { HttpClient } from '@angular/common/http';
 import { ConsultationService } from '../../services/consultation';
+import { computed } from '@angular/core';
 
 @Component({
   selector: 'app-consultation-form',
@@ -17,7 +19,8 @@ import { ConsultationService } from '../../services/consultation';
   imports: [
     CommonModule, ReactiveFormsModule, RouterModule,
     MatFormFieldModule, MatInputModule, MatButtonModule,
-    MatSelectModule, MatProgressSpinnerModule, MatIconModule
+    MatSelectModule, MatProgressSpinnerModule, MatIconModule,
+    MatAutocompleteModule
   ],
   templateUrl: './consultation-form.html',
   styleUrl: './consultation-form.css'
@@ -26,11 +29,19 @@ export class ConsultationFormComponent implements OnInit {
 
   form!: FormGroup;
   isEditMode = false;
-  consultationId = '';
+  consultationId: string | null = null;
 
-  // signals
   isLoading = signal(false);
   patients = signal<any[]>([]);
+
+  // القايمة المفلترة بناءً على اللي بتكتبيه
+  filteredPatients = computed(() => {
+    const search = (this.form?.get('patientName')?.value ?? '').toLowerCase();
+    if (!search) return this.patients();
+    return this.patients().filter(p =>
+      p.name.toLowerCase().includes(search)
+    );
+  });
 
   constructor(
     private fb: FormBuilder,
@@ -44,7 +55,7 @@ export class ConsultationFormComponent implements OnInit {
     this.initForm();
     this.loadPatients();
 
-    this.consultationId = this.route.snapshot.params['id'];
+    this.consultationId = this.route.snapshot.params['id'] ?? null;
     if (this.consultationId) {
       this.isEditMode = true;
       this.loadConsultation();
@@ -53,14 +64,14 @@ export class ConsultationFormComponent implements OnInit {
 
   initForm(): void {
     this.form = this.fb.group({
-      patientId: ['', Validators.required],
-      rawInput:  ['', [Validators.required, Validators.minLength(10)]],
-      symptoms:  ['', Validators.required],
-      diagnosis: [''],
-      language:  ['en', Validators.required]
+      patientId:   ['', Validators.required],
+      patientName: ['', Validators.required],   // للعرض فقط في الـ input
+      rawInput:    ['', [Validators.required, Validators.minLength(10)]],
+      symptoms:    ['', Validators.required],
+      diagnosis:   [''],
+      language:    ['en', Validators.required]
     });
   }
-
 
   loadPatients(): void {
     this.http.get<any>('http://localhost:5000/api/patient').subscribe({
@@ -70,33 +81,55 @@ export class ConsultationFormComponent implements OnInit {
   }
 
   loadConsultation(): void {
-    this.consultationService.getById(this.consultationId).subscribe({
+    this.consultationService.getById(this.consultationId!).subscribe({
       next: (res) => {
+        const patient = this.patients().find(p => p._id === res.data.patientId);
         this.form.patchValue({
           ...res.data,
-          symptoms: res.data.symptoms.join(', ')
+          patientName: patient?.name ?? '',
+          symptoms: Array.isArray(res.data.symptoms)
+            ? res.data.symptoms.join(', ')
+            : res.data.symptoms ?? ''
         });
-      }
+      },
+      error: (err) => console.error('Failed to load consultation', err)
     });
+  }
+
+  // لما المستخدم يختار من القايمة
+  onPatientSelected(patient: any): void {
+    this.form.patchValue({
+      patientId:   patient._id,
+      patientName: patient.name
+    });
+  }
+
+  // لو مسحت الاسم نظّفي الـ patientId
+  onPatientInputChange(): void {
+    this.form.patchValue({ patientId: '' });
   }
 
   onSubmit(): void {
     if (this.form.invalid) return;
     this.isLoading.set(true);
 
+    const { patientName, ...rest } = this.form.value;   // شيلي patientName قبل الإرسال
+
     const formValue = {
-      ...this.form.value,
-      symptoms: this.form.value.symptoms.split(',').map((s: string) => s.trim())
+      ...rest,
+      symptoms: this.form.value.symptoms
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter((s: string) => s.length > 0)
     };
 
     const request$ = this.isEditMode
-      ? this.consultationService.update(this.consultationId, formValue)
+      ? this.consultationService.update(this.consultationId!, formValue)
       : this.consultationService.create(formValue);
 
     request$.subscribe({
       next: () => {
         this.isLoading.set(false);
-      
         this.router.navigate(['/consultations']);
       },
       error: () => this.isLoading.set(false)
