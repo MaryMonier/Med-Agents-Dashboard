@@ -154,7 +154,7 @@ export class ConsultationFormComponent implements OnInit {
     request$.subscribe({
      next: () => {
   this.isLoading.set(false);
-  // ✅ كده
+ 
   this.router.navigateByUrl('/consultations');
 },
     });
