@@ -335,20 +335,35 @@ button:disabled {
 
 @media (max-width: 480px) {
   .followups-page {
-    padding: 12px;
+    padding: 8px;
   }
+
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
+
+  .stat-card,
+  .search-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .stat-card {
+    padding: 14px;
+  }
+
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
+
   .pagination {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .pagination-controls {
     width: 100%;
     justify-content: center;
@@ -357,6 +372,18 @@ button:disabled {
 
 /* ─── Mobile Table (زي الـ patients بالظبط) ─────────────────────────────── */
 @media (max-width: 600px) {
+  /* Search */
+  .search-row {
+    flex-direction: column;
+  }
+
+  .search-row input,
+  .search-row button {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Table */
   .followups-table thead {
     display: none;
   }
@@ -391,6 +418,7 @@ button:disabled {
     min-width: 100px;
   }
 
+  /* Actions */
   .actions {
     flex-direction: column;
     width: 100%;
@@ -402,5 +430,95 @@ button:disabled {
     width: 100%;
     text-align: center;
     padding: 8px;
+  }
+  .search-card {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .search-row {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .search-row input,
+  .search-row button {
+    width: 100%;
+    font-size: 15px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .search-row {
+    width: 100%;
+  }
+}
+
+@media (max-width: 320px) {
+  .followups-page {
+    padding: 4px;
+  }
+
+  .stats-grid {
+    gap: 6px;
+  }
+
+  .stat-card,
+  .search-card {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .search-row input,
+  .search-row button {
+    width: 100%;
+  }
+
+  .followups-table tr {
+    padding: 6px;
+  }
+
+  .followups-table td {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 6px 2px;
+  }
+
+  .followups-table td::before {
+    min-width: auto;
+    display: block;
+  }
+
+  .pagination {
+    padding: 8px;
+  }
+
+  .pagination-info {
+    font-size: 11px;
+    flex-wrap: wrap;
+  }
+
+  .pagination-controls {
+    width: 100%;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .pagination-controls button {
+    min-width: 24px;
+    padding: 4px 6px;
+    font-size: 12px;
   }
 }

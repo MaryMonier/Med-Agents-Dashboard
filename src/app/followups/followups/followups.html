@@ -67,7 +67,7 @@
         @for (followup of pagedFollowups; track followup._id) {
           <tr>
             <td data-label="Patient">{{ followup.patientId?.name || '—' }}</td>
-            <td data-label="Doctor">{{ followup.consultationId?.doctorId?.name || '—' }}/td></td>
+            <td data-label="Doctor">{{ followup.consultationId?.doctorId?.name || '—' }}</td>
             <td data-label="Instructions">{{ followup.instructions }}</td>
             <td data-label="Scheduled Date">
               {{ followup.scheduledDate ? (followup.scheduledDate | date: 'mediumDate') : '—' }}
