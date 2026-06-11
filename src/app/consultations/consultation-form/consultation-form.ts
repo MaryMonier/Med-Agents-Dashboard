@@ -28,7 +28,7 @@ export class ConsultationFormComponent implements OnInit {
   isEditMode = false;
   consultationId = '';
 
-  // ✅ signals
+  // signals
   isLoading = signal(false);
   patients = signal<any[]>([]);
 
@@ -61,7 +61,7 @@ export class ConsultationFormComponent implements OnInit {
     });
   }
 
-  // ✅ بيجيب المرضى من الـ Backend
+
   loadPatients(): void {
     this.http.get<any>('http://localhost:5000/api/patient').subscribe({
       next: (res) => this.patients.set(res.data || res),
@@ -96,7 +96,7 @@ export class ConsultationFormComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.isLoading.set(false);
-        // ✅ navigation صح للـ consultations مش login
+      
         this.router.navigate(['/consultations']);
       },
       error: () => this.isLoading.set(false)
