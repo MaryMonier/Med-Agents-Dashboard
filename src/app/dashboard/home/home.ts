@@ -10,6 +10,7 @@ import { RouterModule } from '@angular/router';
   styleUrl: './home.css',
 })
 export class Home implements OnInit {
+  totaldoctors = signal(0);
   totalPatients = signal(0);
   totalConsultation = signal(0);
   totalWarnings = signal(0);
@@ -24,6 +25,10 @@ export class Home implements OnInit {
   }
 
   loadStats() {
+    this.http.get<any>(`${this.apiUrl}/auth/doctors`).subscribe({
+      next: (res) => this.totaldoctors.set(res.data?.length || 0),
+      error: () => this.totaldoctors.set(0)
+    });
     this.http.get<any>(`${this.apiUrl}/patients`).subscribe({
       next: (res) => this.totalPatients.set(res.data?.length || 0),
       error: () => this.totalPatients.set(0)
