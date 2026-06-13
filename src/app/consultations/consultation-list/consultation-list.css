@@ -112,3 +112,34 @@ tr:hover {
   display: block;
   width: 100%;
 }
+ .status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Pending  */
+.status-badge.Pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* Completed
+.status-badge.Completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* In Progress  */
+.status-badge.InProgress {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+/* Cancelled  */
+.status-badge.Cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}

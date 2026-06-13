@@ -39,8 +39,12 @@ export class ConsultationListComponent implements OnInit {
   totalItems = signal(0);
 
   displayedColumns = [
-    'patientName', 'symptoms', 'urgencyLevel',
-    'suggestedSpecialist', 'status', 'actions'
+    'patientName',
+    'symptoms',
+    'urgencyLevel',
+    'suggestedSpecialist',
+    'status',
+    'actions'
   ];
 
   constructor(private consultationService: ConsultationService) {}
@@ -48,7 +52,6 @@ export class ConsultationListComponent implements OnInit {
   ngOnInit(): void {
     this.loadConsultations();
   }
-
 
   loadConsultations(): void {
     this.consultationService.getAll().subscribe({
@@ -63,19 +66,11 @@ export class ConsultationListComponent implements OnInit {
     });
   }
 
-  applyPagination(): void {
-    const start = this.pageIndex() * this.pageSize();
-    this.filteredConsultations.set(
-      this.consultations().slice(start, start + this.pageSize())
-    );
-  }
-
   onPageChange(event: PageEvent): void {
     this.pageIndex.set(event.pageIndex);
     this.pageSize.set(event.pageSize);
     this.filterLocally();
   }
-
 
   onSearch(value: string): void {
     this.searchQuery.set(value);
@@ -96,17 +91,18 @@ export class ConsultationListComponent implements OnInit {
     }
 
     const filtered = this.consultations().filter(c => {
+
       const patientName = this.getPatientName(c.patientId).toLowerCase();
-      const symptoms = c.symptoms.join(', ').toLowerCase();
+      const symptoms = (c.symptoms || []).join(', ').toLowerCase();
       const specialist = (c.suggestedSpecialist || '').toLowerCase();
       const status = (c.status || '').toLowerCase();
       const urgency = (c.urgencyLevel || '').toLowerCase();
 
       return patientName.includes(query) ||
-             symptoms.includes(query) ||
-             specialist.includes(query) ||
-             status.includes(query) ||
-             urgency.includes(query);
+        symptoms.includes(query) ||
+        specialist.includes(query) ||
+        status.includes(query) ||
+        urgency.includes(query);
     });
 
     const start = this.pageIndex() * this.pageSize();
@@ -115,7 +111,6 @@ export class ConsultationListComponent implements OnInit {
     );
     this.totalItems.set(filtered.length);
   }
-
 
   deleteConsultation(id: string): void {
     Swal.fire({
@@ -128,6 +123,7 @@ export class ConsultationListComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
+
         Swal.fire({
           title: 'Deleting...',
           allowOutsideClick: false,
@@ -136,6 +132,7 @@ export class ConsultationListComponent implements OnInit {
 
         this.consultationService.delete(id).subscribe({
           next: () => {
+
             Swal.fire({
               title: 'Deleted!',
               text: 'Consultation deleted successfully.',
@@ -147,9 +144,11 @@ export class ConsultationListComponent implements OnInit {
             this.consultations.update(list =>
               list.filter(c => c._id !== id)
             );
+
             this.totalItems.update(n => n - 1);
             this.filterLocally();
           },
+
           error: () => {
             Swal.fire('Error', 'Delete failed', 'error');
           }
@@ -158,6 +157,23 @@ export class ConsultationListComponent implements OnInit {
     });
   }
 
+  // 👇 VIEW DETAILS (NEW)
+  viewConsultation(c: any): void {
+    Swal.fire({
+      title: 'Consultation Details',
+      html: `
+        <div style="text-align:left; font-size:14px; line-height:1.6">
+          <p><b>Patient:</b> ${this.getPatientName(c.patientId)}</p>
+          <p><b>Symptoms:</b> ${(c.symptoms || []).join(', ')}</p>
+          <p><b>Urgency:</b> ${c.urgencyLevel}</p>
+          <p><b>Specialist:</b> ${c.suggestedSpecialist}</p>
+          <p><b>Status:</b> ${c.status}</p>
+        </div>
+      `,
+      icon: 'info',
+      confirmButtonText: 'Close'
+    });
+  }
 
   getPatientName(patient: any): string {
     if (typeof patient === 'object' && patient !== null) {
@@ -175,3 +191,6 @@ export class ConsultationListComponent implements OnInit {
     return colors[level] || 'primary';
   }
 }
+
+
+
