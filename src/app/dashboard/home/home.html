@@ -1,1 +1,31 @@
-<p>home works!</p>
+<div class="home-container">
+
+  @if (isAdmin()) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Doctors</div>
+        <div class="stat-value">{{ totalDoctors() }}</div>
+      </div>
+    </div>
+  } @else {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">patients</div>
+        <div class="stat-value">{{ totalPatients() }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">consultations</div>
+        <div class="stat-value">{{ totalConsultation() }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">drug warnings</div>
+        <div class="stat-value">{{ totalWarnings() }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">follow-ups</div>
+        <div class="stat-value">{{ totalFollowups() }}</div>
+      </div>
+    </div>
+  }
+
+</div>

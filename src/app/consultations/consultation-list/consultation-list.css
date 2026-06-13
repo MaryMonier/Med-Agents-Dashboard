@@ -100,3 +100,7 @@ tr:hover {
   .new-btn { width: 100%; justify-content: center; }
   .header h2 { font-size: 18px; }
 }
+:host {
+  display: block;
+  width: 100%;
+}

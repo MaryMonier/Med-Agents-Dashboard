@@ -22,3 +22,7 @@ mat-form-field {
   gap: 12px;
   margin-top: 24px;
 }
+:host {
+  display: block;
+  width: 100%;
+}
