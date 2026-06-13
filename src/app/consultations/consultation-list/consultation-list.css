@@ -1,6 +1,10 @@
+:host {
+  display: block;
+  width: 100%;
+}
 
 .consultations-container {
-  padding: 24px;
+  padding: 16px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -9,12 +13,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .header h2 {
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 700;
   color: #1976d2;
   margin: 0;
 }
@@ -24,17 +30,75 @@
   margin-bottom: 16px;
 }
 
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
 table {
   width: 100%;
+  min-width: 600px;
 }
 
 tr:hover {
   background-color: #f5f5f5;
 }
 
-mat-chip {
+.urgency-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
+  text-transform: capitalize;
+}
+
+.urgency-badge.low {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.urgency-badge.medium {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.urgency-badge.critical {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: #9e9e9e;
+}
+
+.empty-state mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .consultations-container { padding: 12px; }
+  .header h2 { font-size: 20px; }
+}
+
+@media (max-width: 480px) {
+  .consultations-container { padding: 8px; }
+  .header { flex-direction: column; align-items: stretch; }
+  .new-btn { width: 100%; justify-content: center; }
+  .header h2 { font-size: 18px; }
 }
 :host {
   display: block;
