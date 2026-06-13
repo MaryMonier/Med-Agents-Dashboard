@@ -3,6 +3,7 @@ import { AuthService } from '../../services/auth';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { jwtDecode } from 'jwt-decode';
 
 @Component({
   selector: 'app-login',
@@ -17,22 +18,29 @@ export class Login {
   errorMessage= signal('');
   constructor( private authService: AuthService ,private router: Router  ){}
 
-  onLogin(){
-    this.isLoading.set(true);
-    this.errorMessage.set('');
+ onLogin() {
+  this.isLoading.set(true);
+  this.errorMessage.set('');
 
-    this.authService.login(this.email(),this.password()).subscribe({
-      next:(res)=>{
-        console.log(res)
-        this.authService.saveToken(res.data.token);
+  this.authService.login(this.email(), this.password()).subscribe({
+    next: (res) => {
+      const token = res.data.token;
+      const decoded: any = jwtDecode(token);
+      
+      if (decoded.role !== 'admin') {
+        this.errorMessage.set('Access denied. Admin accounts only.');
         this.isLoading.set(false);
-        this.router.navigate(['/dashboard'])
-      },
-      error:(err)=>{
-        this.errorMessage.set('invalid email or password');
-        this.isLoading.set(false);
+        return;
       }
-    })
 
-  }
+      this.authService.saveToken(token);
+      this.isLoading.set(false);
+      this.router.navigate(['/dashboard']);
+    },
+    error: () => {
+      this.errorMessage.set('Invalid email or password');
+      this.isLoading.set(false);
+    }
+  });
+}
 }

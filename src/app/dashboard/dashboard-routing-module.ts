@@ -10,12 +10,11 @@ const routes: Routes = [
     children: [
       { path: '', component: Home },
       {
-        
-  path: 'admin',
+  path: 'doctors',
   loadChildren: () =>
-    import('../admin/admin-module').then(m => m.AdminModule)
+    import('../doctors/doctors-module').then(m => m.DoctorsModule)
+},
 
-      },
       {
         path: 'patients',
         loadChildren: () =>

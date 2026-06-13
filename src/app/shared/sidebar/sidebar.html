@@ -9,6 +9,11 @@
     <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
       <i class="ti ti-layout-dashboard"></i> Dashboard
     </a>
+
+      <a class="nav-item" routerLink="/dashboard/doctors" routerLinkActive="active">
+      <i class="ti ti-stethoscope"></i> Doctors
+    </a>
+
     <a class="nav-item" routerLink="/dashboard/patients" routerLinkActive="active">
       <i class="ti ti-users"></i> Patients
     </a>
@@ -40,14 +45,7 @@
     </a>
   </div>
 
-  @if (isAdmin()) {
-  <div class="nav-section">
-    <div class="nav-label">Admin</div>
-    <a class="nav-item" routerLink="/dashboard/admin" routerLinkActive="active">
-      <i class="ti ti-settings"></i> Admin Panel
-    </a>
-  </div>
-  }
+
 
   <div class="sidebar-footer">
     <button class="logout-btn" (click)="logout()">

@@ -1,0 +1,76 @@
+<div class="patients-page">
+  <div class="page-header">
+    <h2>Doctors Management</h2>
+    <button class="btn-add" (click)="goToAdd()">+ Add Doctor</button>
+  </div>
+
+  <div class="search-wrap">
+    <p>Search by Name or Email</p>
+    <div class="search-row">
+      <input type="text" placeholder="Enter name or email"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event); loadDoctors()" />
+      <button class="btn-search" (click)="loadDoctors()">Search</button>
+      <button class="btn-clear" (click)="searchQuery.set(''); loadDoctors()">Clear</button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (!isLoading() && doctors().length === 0) {
+    <div class="empty">No doctors found.</div>
+  }
+
+  @if (!isLoading() && doctors().length > 0) {
+    <table class="patients-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Specialty</th>
+          <th>Language</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (doctor of doctors(); track doctor._id) {
+          <tr>
+            <td>{{ doctor.name }}</td>
+            <td>{{ doctor.email }}</td>
+            <td>{{ doctor.specialty || 'N/A' }}</td>
+            <td>{{ doctor.language || 'en' }}</td>
+            <td><span class="badge">{{ doctor.role }}</span></td>
+            <td>
+              <div class="actions">
+                <button class="btn-edit" (click)="goToEdit(doctor._id)">Edit</button>
+                <button class="btn-delete" (click)="deleteDoctor(doctor._id)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button class="page-btn" (click)="prevPage()" [disabled]="currentPage() === 1">← Prev</button>
+      @for (page of [].constructor(totalPages()); track $index) {
+        <button class="page-btn"
+          [class.active]="currentPage() === $index + 1"
+          (click)="goToPage($index + 1)">
+          {{ $index + 1 }}
+        </button>
+      }
+      <button class="page-btn" (click)="nextPage()" [disabled]="currentPage() === totalPages()">Next →</button>
+      <span class="page-info">{{ currentPage() }} of {{ totalPages() }} — {{ totalDoctors() }} doctors</span>
+    </div>
+  }
+</div>

@@ -3,7 +3,7 @@ import { RouterModule } from '@angular/router';
 import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
-import { jwtDecode } from 'jwt-decode';
+
 
 @Component({
   selector: 'app-sidebar',
@@ -11,18 +11,12 @@ import { jwtDecode } from 'jwt-decode';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
-export class Sidebar implements OnInit {
-  isAdmin = signal(false);
+export class Sidebar  {
+
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  ngOnInit() {
-    const token = this.authService.getToken();
-    if (token) {
-      const decoded: any = jwtDecode(token);
-      this.isAdmin.set(decoded.role === 'admin');
-    }
-  }
+
 
   logout() {
     this.authService.logout();
