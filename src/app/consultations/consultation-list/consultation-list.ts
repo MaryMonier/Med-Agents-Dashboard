@@ -157,7 +157,7 @@ export class ConsultationListComponent implements OnInit {
     });
   }
 
-  // 👇 VIEW DETAILS (NEW)
+  //  VIEW DETAILS 
   viewConsultation(c: any): void {
     Swal.fire({
       title: 'Consultation Details',
