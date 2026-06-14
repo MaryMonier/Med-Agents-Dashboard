@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { FollowupService } from '../../services/followup';
 import { Followup } from '../../models/followup';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-followups',
@@ -13,42 +14,36 @@ import { Followup } from '../../models/followup';
   styleUrl: './followups.css',
 })
 export class Followups implements OnInit {
-  allFollowups: Followup[] = [];
-  filteredFollowups: Followup[] = [];
-  pagedFollowups: Followup[] = [];
+  allFollowups = signal<Followup[]>([]);
+  filteredFollowups = signal<Followup[]>([]);
 
   searchTerm = signal('');
   isLoading = signal(false);
   errorMessage = signal('');
 
   // Pagination
-  pageIndex = 0;
-  pageSize = 10;
-  totalItems = 0;
+  pageIndex = signal(0);
+  pageSize = signal(10);
+
+  totalItems = computed(() => this.filteredFollowups().length);
+
+  pagedFollowups = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.filteredFollowups().slice(start, start + this.pageSize());
+  });
 
   // Stats
-  get totalFollowups(): number {
-    return this.allFollowups.length;
-  }
-  get totalDone(): number {
-    return this.allFollowups.filter((f) => f.status === 'done').length;
-  }
-  get totalPending(): number {
-    return this.allFollowups.filter((f) => f.status === 'pending').length;
-  }
+  totalFollowups = computed(() => this.allFollowups().length);
+  totalDone = computed(() => this.allFollowups().filter((f) => f.status === 'done').length);
+  totalPending = computed(() => this.allFollowups().filter((f) => f.status === 'pending').length);
+  totalCancelled = computed(
+    () => this.allFollowups().filter((f) => f.status === 'cancelled').length,
+  );
 
-  get totalPages(): number {
-    return Math.ceil(this.totalItems / this.pageSize);
-  }
-  get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i);
-  }
-  get startItem(): number {
-    return this.pageIndex * this.pageSize + 1;
-  }
-  get endItem(): number {
-    return Math.min((this.pageIndex + 1) * this.pageSize, this.totalItems);
-  }
+  totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
+  pages = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i));
+  startItem = computed(() => this.pageIndex() * this.pageSize() + 1);
+  endItem = computed(() => Math.min((this.pageIndex() + 1) * this.pageSize(), this.totalItems()));
 
   constructor(private followupService: FollowupService) {}
 
@@ -62,7 +57,7 @@ export class Followups implements OnInit {
 
     this.followupService.getAllFollowups().subscribe({
       next: (res) => {
-        this.allFollowups = res.data || [];
+        this.allFollowups.set(res.data || []);
         this.applySearch();
         this.isLoading.set(false);
       },
@@ -75,13 +70,15 @@ export class Followups implements OnInit {
 
   applySearch(): void {
     const term = this.searchTerm().trim().toLowerCase();
+    const all = this.allFollowups();
+
     const filtered = term
-      ? this.allFollowups.filter((f) => {
+      ? all.filter((f) => {
           if (!f.patientId) return false;
           const patientId = (f.patientId as any)?._id;
           return patientId?.toLowerCase().includes(term);
         })
-      : this.allFollowups;
+      : all;
 
     if (term && filtered.length === 0) {
       this.errorMessage.set('No follow-ups found for this patient ID');
@@ -89,27 +86,18 @@ export class Followups implements OnInit {
       this.errorMessage.set('');
     }
 
-    this.filteredFollowups = filtered;
-    this.totalItems = filtered.length;
-    this.pageIndex = 0;
-    this.updatePage();
-  }
-
-  updatePage(): void {
-    const start = this.pageIndex * this.pageSize;
-    this.pagedFollowups = this.filteredFollowups.slice(start, start + this.pageSize);
+    this.filteredFollowups.set(filtered);
+    this.pageIndex.set(0);
   }
 
   goToPage(index: number): void {
-    if (index < 0 || index >= this.totalPages) return;
-    this.pageIndex = index;
-    this.updatePage();
+    if (index < 0 || index >= this.totalPages()) return;
+    this.pageIndex.set(index);
   }
 
   onPageSizeChange(event: Event): void {
-    this.pageSize = Number((event.target as HTMLSelectElement).value);
-    this.pageIndex = 0;
-    this.updatePage();
+    this.pageSize.set(Number((event.target as HTMLSelectElement).value));
+    this.pageIndex.set(0);
   }
 
   clearSearch(): void {
@@ -117,49 +105,95 @@ export class Followups implements OnInit {
     this.applySearch();
   }
 
+  // ─── Toggle Status ──────────────────────────────────────────────────────
+  // لما تبقى done، الزرار يتعطل ومش هينفع ترجع pending تاني
   toggleStatus(followup: Followup): void {
-    const newStatus = followup.status === 'pending' ? 'done' : 'pending';
-    const oldStatus = followup.status;
+    if (followup.status === 'done') return;
 
-    this.pagedFollowups = this.pagedFollowups.map((f) =>
-      f._id === followup._id ? { ...f, status: newStatus } : f,
-    );
-    this.allFollowups = this.allFollowups.map((f) =>
-      f._id === followup._id ? { ...f, status: newStatus } : f,
-    );
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Mark this follow-up as done?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3B5BDB',
+      cancelButtonColor: '#e53e3e',
+      confirmButtonText: 'Yes, mark as done!',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
 
-    this.followupService.updateStatus(followup._id, newStatus).subscribe({
-      error: () => {
-        this.pagedFollowups = this.pagedFollowups.map((f) =>
-          f._id === followup._id ? { ...f, status: oldStatus } : f,
-        );
-        this.allFollowups = this.allFollowups.map((f) =>
-          f._id === followup._id ? { ...f, status: oldStatus } : f,
-        );
-        this.errorMessage.set('Failed to update status');
-      },
+      const newStatus: 'done' = 'done';
+      const oldStatus = followup.status;
+
+      // عدّل الـ UI فوراً (Optimistic Update) - signals بتحدث الشاشة فوراً
+      this.allFollowups.update((list) =>
+        list.map((f) => (f._id === followup._id ? { ...f, status: newStatus } : f)),
+      );
+      this.filteredFollowups.update((list) =>
+        list.map((f) => (f._id === followup._id ? { ...f, status: newStatus } : f)),
+      );
+
+      // بعت للـ API في الخلفية
+      this.followupService.updateStatus(followup._id, newStatus).subscribe({
+        next: () => {
+          Swal.fire('Done!', 'Follow-up marked as done.', 'success');
+        },
+        error: () => {
+          this.allFollowups.update((list) =>
+            list.map((f) => (f._id === followup._id ? { ...f, status: oldStatus } : f)),
+          );
+          this.filteredFollowups.update((list) =>
+            list.map((f) => (f._id === followup._id ? { ...f, status: oldStatus } : f)),
+          );
+          Swal.fire('Error!', 'Failed to update status.', 'error');
+        },
+      });
     });
   }
 
-  deleteFollowup(id: string): void {
-    if (!confirm('Are you sure you want to delete this follow-up?')) return;
+  // ─── Cancel Followup ────────────────────────────────────────────────────
+  // بدل الحذف، بنغير الحالة لـ cancelled
+  cancelFollowup(followup: Followup): void {
+    if (followup.status === 'done' || followup.status === 'cancelled') return;
 
-    const deleted = this.allFollowups.find((f) => f._id === id);
-    this.pagedFollowups = this.pagedFollowups.filter((f) => f._id !== id);
-    this.allFollowups = this.allFollowups.filter((f) => f._id !== id);
-    this.filteredFollowups = this.filteredFollowups.filter((f) => f._id !== id);
-    this.totalItems = this.filteredFollowups.length;
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You will not be able to revert this!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#e53e3e',
+      cancelButtonColor: '#3B5BDB',
+      confirmButtonText: 'Yes, cancel it!',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
 
-    this.followupService.deleteFollowup(id).subscribe({
-      error: () => {
-        if (deleted) {
-          this.allFollowups.push(deleted);
-          this.filteredFollowups.push(deleted);
-          this.totalItems = this.filteredFollowups.length;
-          this.updatePage();
-        }
-        this.errorMessage.set('Failed to delete follow-up');
-      },
+      const newStatus: 'cancelled' = 'cancelled';
+      const oldStatus = followup.status;
+
+      // عدّل الـ UI فوراً (Optimistic Update)
+      this.allFollowups.update((list) =>
+        list.map((f) => (f._id === followup._id ? { ...f, status: newStatus } : f)),
+      );
+      this.filteredFollowups.update((list) =>
+        list.map((f) => (f._id === followup._id ? { ...f, status: newStatus } : f)),
+      );
+
+      // بعت للـ API في الخلفية
+      this.followupService.updateStatus(followup._id, newStatus).subscribe({
+        next: () => {
+          Swal.fire('Cancelled!', 'Follow-up has been cancelled.', 'success');
+        },
+        error: () => {
+          this.allFollowups.update((list) =>
+            list.map((f) => (f._id === followup._id ? { ...f, status: oldStatus } : f)),
+          );
+          this.filteredFollowups.update((list) =>
+            list.map((f) => (f._id === followup._id ? { ...f, status: oldStatus } : f)),
+          );
+          Swal.fire('Error!', 'Failed to cancel follow-up.', 'error');
+        },
+      });
     });
   }
 }

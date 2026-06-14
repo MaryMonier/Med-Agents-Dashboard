@@ -15,13 +15,10 @@ export class FollowupService {
     return this.http.get<FollowupResponse>(`${this.baseUrl}/patient/${patientId}`);
   }
 
-  updateStatus(id: string, status: 'pending' | 'done'): Observable<any> {
+  updateStatus(id: string, status: 'pending' | 'done' | 'cancelled'): Observable<any> {
     return this.http.put(`${this.baseUrl}/${id}`, { status });
   }
 
-  deleteFollowup(id: string): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/${id}`);
-  }
   getAllFollowups(): Observable<FollowupResponse> {
     return this.http.get<FollowupResponse>(this.baseUrl);
   }
