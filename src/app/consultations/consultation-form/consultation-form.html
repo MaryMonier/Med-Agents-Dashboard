@@ -58,6 +58,25 @@
           </mat-select>
         </mat-form-field>
 
+        <!-- ✅ Follow-up Date بالـ Calendar -->
+        <mat-form-field appearance="outline" class="full-width span-2">
+          <mat-label>Follow-up Date (optional)</mat-label>
+          <input matInput [matDatepicker]="picker"
+                 formControlName="followUpDate"
+                 [min]="minDate"
+                 [max]="maxDate"
+                 placeholder="Select follow-up date"/>
+          <mat-datepicker-toggle matIconSuffix [for]="picker">
+          </mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          @if (form.get('followUpDate')?.hasError('pastDate')) {
+            <mat-error>Follow-up date cannot be today or in the past</mat-error>
+          }
+          @if (form.get('followUpDate')?.hasError('maxDate')) {
+            <mat-error>Follow-up date cannot exceed 6 months from today</mat-error>
+          }
+        </mat-form-field>
+
       </div>
 
       <div class="form-actions">
