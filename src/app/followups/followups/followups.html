@@ -11,15 +11,19 @@
   <div class="stats-grid">
     <div class="stat-card">
       <p class="stat-label">total</p>
-      <p class="stat-value">{{ totalFollowups }}</p>
+      <p class="stat-value">{{ totalFollowups() }}</p>
     </div>
     <div class="stat-card">
       <p class="stat-label">done</p>
-      <p class="stat-value stat-done">{{ totalDone }}</p>
+      <p class="stat-value stat-done">{{ totalDone() }}</p>
     </div>
     <div class="stat-card">
       <p class="stat-label">pending</p>
-      <p class="stat-value stat-pending">{{ totalPending }}</p>
+      <p class="stat-value stat-pending">{{ totalPending() }}</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">cancelled</p>
+      <p class="stat-value stat-cancelled">{{ totalCancelled() }}</p>
     </div>
   </div>
 
@@ -46,11 +50,11 @@
     <div class="error">{{ errorMessage() }}</div>
   }
 
-  @if (!isLoading() && pagedFollowups.length === 0 && !errorMessage()) {
+  @if (!isLoading() && pagedFollowups().length === 0 && !errorMessage()) {
     <div class="empty">No follow-ups to display.</div>
   }
 
-  @if (!isLoading() && pagedFollowups.length > 0) {
+  @if (!isLoading() && pagedFollowups().length > 0) {
     <table class="followups-table">
       <thead>
         <tr>
@@ -64,7 +68,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (followup of pagedFollowups; track followup._id) {
+        @for (followup of pagedFollowups(); track followup._id) {
           <tr>
             <td data-label="Patient">{{ followup.patientId?.name || '—' }}</td>
             <td data-label="Doctor">{{ followup.consultationId?.doctorId?.name || '—' }}</td>
@@ -78,19 +82,34 @@
               </span>
             </td>
             <td data-label="Status">
-              <span [class]="followup.status === 'done' ? 'badge-done' : 'badge-pending'">
+              <span
+                [class]="
+                  followup.status === 'done'
+                    ? 'badge-done'
+                    : followup.status === 'cancelled'
+                      ? 'badge-cancelled'
+                      : 'badge-pending'
+                "
+              >
                 {{ followup.status }}
               </span>
             </td>
             <td data-label="Actions">
               <div class="actions">
                 <button
-                  [class]="followup.status === 'pending' ? 'btn-done' : 'btn-pending'"
+                  class="btn-done"
+                  [disabled]="followup.status !== 'pending'"
                   (click)="toggleStatus(followup)"
                 >
-                  Mark as {{ followup.status === 'pending' ? 'Done' : 'Pending' }}
+                  Mark as Done
                 </button>
-                <button class="btn-delete" (click)="deleteFollowup(followup._id)">Delete</button>
+                <button
+                  class="btn-cancel"
+                  [disabled]="followup.status !== 'pending'"
+                  (click)="cancelFollowup(followup)"
+                >
+                  Cancel
+                </button>
               </div>
             </td>
           </tr>
@@ -101,7 +120,7 @@
     <!-- Pagination -->
     <div class="pagination">
       <div class="pagination-info">
-        Showing {{ startItem }}–{{ endItem }} of {{ totalItems }}
+        Showing {{ startItem() }}–{{ endItem() }} of {{ totalItems() }}
         &nbsp;|&nbsp;
         <select class="page-size-select" (change)="onPageSizeChange($event)">
           <option value="5">5</option>
@@ -111,11 +130,11 @@
         per page
       </div>
       <div class="pagination-controls">
-        <button (click)="goToPage(pageIndex - 1)" [disabled]="pageIndex === 0">&#8592;</button>
-        @for (p of pages; track p) {
-          <button [class.active]="p === pageIndex" (click)="goToPage(p)">{{ p + 1 }}</button>
+        <button (click)="goToPage(pageIndex() - 1)" [disabled]="pageIndex() === 0">&#8592;</button>
+        @for (p of pages(); track p) {
+          <button [class.active]="p === pageIndex()" (click)="goToPage(p)">{{ p + 1 }}</button>
         }
-        <button (click)="goToPage(pageIndex + 1)" [disabled]="pageIndex >= totalPages - 1">
+        <button (click)="goToPage(pageIndex() + 1)" [disabled]="pageIndex() >= totalPages() - 1">
           &#8594;
         </button>
       </div>
