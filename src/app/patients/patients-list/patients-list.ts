@@ -78,7 +78,9 @@ export class PatientsList implements OnInit {
   goToEdit(id: string): void {
     this.router.navigate(['/dashboard/patients/edit', id]);
   }
-
+goToHistory(id: string): void {
+  this.router.navigate(['/dashboard/patients/history', id]);
+}
 
 deletePatient(id: string): void {
   Swal.fire({
@@ -114,3 +116,4 @@ deletePatient(id: string): void {
     return age;
   }
 }
+
