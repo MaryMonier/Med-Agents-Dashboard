@@ -10,21 +10,14 @@
 
         <mat-form-field appearance="outline" class="full-width span-2">
           <mat-label>Patient</mat-label>
-          <input
-            matInput
-            formControlName="patientName"
-            [matAutocomplete]="auto"
-            (input)="onPatientInputChange()"
-            placeholder="Type patient name..."
-          />
-          <mat-autocomplete
-            #auto="matAutocomplete"
-            (optionSelected)="onPatientSelected($event.option.value)"
-          >
+          <input matInput formControlName="patientName"
+                 [matAutocomplete]="auto"
+                 (input)="onPatientInputChange()"
+                 placeholder="Type patient name..."/>
+          <mat-autocomplete #auto="matAutocomplete"
+                            (optionSelected)="onPatientSelected($event.option.value)">
             @for (patient of filteredPatients(); track patient._id) {
-              <mat-option [value]="patient">
-                {{ patient.name }}
-              </mat-option>
+              <mat-option [value]="patient">{{ patient.name }}</mat-option>
             }
           </mat-autocomplete>
           @if (form.get('patientId')?.hasError('required') && form.get('patientName')?.dirty) {
@@ -69,7 +62,6 @@
 
       <div class="form-actions">
         <button mat-stroked-button type="button" routerLink="/consultations">
-          <mat-icon>arrow_back</mat-icon>
           Cancel
         </button>
         <button mat-raised-button color="primary"

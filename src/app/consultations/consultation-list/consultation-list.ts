@@ -1,6 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
 import Swal from 'sweetalert2';
-
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +11,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-
 import { ConsultationService } from '../../services/consultation';
 import { Consultations } from '../../models/consultations';
 
@@ -39,12 +37,8 @@ export class ConsultationListComponent implements OnInit {
   totalItems = signal(0);
 
   displayedColumns = [
-    'patientName',
-    'symptoms',
-    'urgencyLevel',
-    'suggestedSpecialist',
-    'status',
-    'actions'
+    'patientName', 'symptoms', 'urgencyLevel',
+    'suggestedSpecialist', 'status', 'followUpDate', 'actions'
   ];
 
   constructor(private consultationService: ConsultationService) {}
@@ -66,18 +60,6 @@ export class ConsultationListComponent implements OnInit {
     });
   }
 
-  onPageChange(event: PageEvent): void {
-    this.pageIndex.set(event.pageIndex);
-    this.pageSize.set(event.pageSize);
-    this.filterLocally();
-  }
-
-  onSearch(value: string): void {
-    this.searchQuery.set(value);
-    this.pageIndex.set(0);
-    this.filterLocally();
-  }
-
   filterLocally(): void {
     const query = this.searchQuery().toLowerCase().trim();
 
@@ -91,18 +73,17 @@ export class ConsultationListComponent implements OnInit {
     }
 
     const filtered = this.consultations().filter(c => {
-
       const patientName = this.getPatientName(c.patientId).toLowerCase();
-      const symptoms = (c.symptoms || []).join(', ').toLowerCase();
+      const symptoms = c.symptoms.join(', ').toLowerCase();
       const specialist = (c.suggestedSpecialist || '').toLowerCase();
       const status = (c.status || '').toLowerCase();
       const urgency = (c.urgencyLevel || '').toLowerCase();
 
       return patientName.includes(query) ||
-        symptoms.includes(query) ||
-        specialist.includes(query) ||
-        status.includes(query) ||
-        urgency.includes(query);
+             symptoms.includes(query) ||
+             specialist.includes(query) ||
+             status.includes(query) ||
+             urgency.includes(query);
     });
 
     const start = this.pageIndex() * this.pageSize();
@@ -110,6 +91,45 @@ export class ConsultationListComponent implements OnInit {
       filtered.slice(start, start + this.pageSize())
     );
     this.totalItems.set(filtered.length);
+  }
+
+  applyPagination(): void {
+    const start = this.pageIndex() * this.pageSize();
+    this.filteredConsultations.set(
+      this.consultations().slice(start, start + this.pageSize())
+    );
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
+    this.filterLocally();
+  }
+
+  onSearch(value: string): void {
+    this.searchQuery.set(value);
+    this.pageIndex.set(0);
+    this.filterLocally();
+  }
+
+  viewConsultation(c: Consultations): void {
+    Swal.fire({
+      title: 'Consultation Details',
+      html: `
+        <div style="text-align:left">
+          <p><b>Patient:</b> ${this.getPatientName(c.patientId)}</p>
+          <p><b>Symptoms:</b> ${c.symptoms.join(', ')}</p>
+          <p><b>Diagnosis:</b> ${c.diagnosis || '—'}</p>
+          <p><b>Structured Note:</b> ${c.structuredNote || '—'}</p>
+          <p><b>Specialist:</b> ${c.suggestedSpecialist || '—'}</p>
+          <p><b>Urgency:</b> ${c.urgencyLevel}</p>
+          <p><b>Status:</b> ${c.status}</p>
+          <p><b>Follow-up:</b> ${c.followUpDate || '—'}</p>
+        </div>
+      `,
+      icon: 'info',
+      confirmButtonText: 'Close'
+    });
   }
 
   deleteConsultation(id: string): void {
@@ -123,7 +143,6 @@ export class ConsultationListComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-
         Swal.fire({
           title: 'Deleting...',
           allowOutsideClick: false,
@@ -132,7 +151,6 @@ export class ConsultationListComponent implements OnInit {
 
         this.consultationService.delete(id).subscribe({
           next: () => {
-
             Swal.fire({
               title: 'Deleted!',
               text: 'Consultation deleted successfully.',
@@ -140,38 +158,17 @@ export class ConsultationListComponent implements OnInit {
               timer: 2000,
               showConfirmButton: false
             });
-
             this.consultations.update(list =>
               list.filter(c => c._id !== id)
             );
-
             this.totalItems.update(n => n - 1);
             this.filterLocally();
           },
-
           error: () => {
             Swal.fire('Error', 'Delete failed', 'error');
           }
         });
       }
-    });
-  }
-
-  //  VIEW DETAILS 
-  viewConsultation(c: any): void {
-    Swal.fire({
-      title: 'Consultation Details',
-      html: `
-        <div style="text-align:left; font-size:14px; line-height:1.6">
-          <p><b>Patient:</b> ${this.getPatientName(c.patientId)}</p>
-          <p><b>Symptoms:</b> ${(c.symptoms || []).join(', ')}</p>
-          <p><b>Urgency:</b> ${c.urgencyLevel}</p>
-          <p><b>Specialist:</b> ${c.suggestedSpecialist}</p>
-          <p><b>Status:</b> ${c.status}</p>
-        </div>
-      `,
-      icon: 'info',
-      confirmButtonText: 'Close'
     });
   }
 
@@ -191,6 +188,3 @@ export class ConsultationListComponent implements OnInit {
     return colors[level] || 'primary';
   }
 }
-
-
-
