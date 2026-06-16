@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
-
+import { NotFound } from './shared/not-found/not-found';
 export const routes: Routes = [
   {
     path: '',
@@ -43,6 +43,6 @@ export const routes: Routes = [
 
   {
     path: '**',
-    redirectTo: 'auth/login',
+    component: NotFound,
   },
 ];
