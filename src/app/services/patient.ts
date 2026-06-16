@@ -23,6 +23,28 @@ export interface Patient {
   createdAt?: string;
 }
 
+export interface PrescriptionInfo {
+  medications: { name: string; dosage?: string; frequency?: string }[];
+  interactions: string[];
+  warnings: string[];
+}
+
+export interface ConsultationHistory {
+  consultationId: string;
+  date: string;
+  symptoms: string[];
+  diagnosis: string;
+  urgencyLevel: string;
+  suggestedSpecialist: string | null;
+  structuredNote: string | null;
+  prescription: PrescriptionInfo | null;
+}
+
+export interface IPatientHistory {
+  patient: Patient;
+  history: ConsultationHistory[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class PatientService {
   private apiUrl = 'http://localhost:5000/api/patients';
@@ -42,7 +64,9 @@ getAll(search = '', page = 1, limit = 10): Observable<{
   getById(id: string): Observable<{ success: boolean; data: Patient }> {
     return this.http.get<{ success: boolean; data: Patient }>(`${this.apiUrl}/${id}`);
   }
-
+  getHistory(id: string): Observable<{ success: boolean; data: IPatientHistory }> {
+    return this.http.get<{ success: boolean; data: IPatientHistory }>(`${this.apiUrl}/${id}/history`);
+  }
   create(patient: Partial<Patient>): Observable<{ success: boolean; data: Patient }> {
     return this.http.post<{ success: boolean; data: Patient }>(this.apiUrl, patient);
   }
