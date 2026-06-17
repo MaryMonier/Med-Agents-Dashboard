@@ -14,7 +14,7 @@ export interface Followup {
   instructions: string;
   scheduledDate: string;
   reminderSent: boolean;
-  status: 'pending' | 'done' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'cancelled';
   language: 'en' | 'ar';
   createdAt: string;
   updatedAt: string;
