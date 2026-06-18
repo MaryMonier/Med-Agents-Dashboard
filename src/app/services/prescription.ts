@@ -20,7 +20,9 @@ export interface PrescriptionPayload {
   providedIn: 'root',
 })
 export class PrescriptionService {
-  private apiUrl = 'http://localhost:5000/api/prescriptions';
+  private prescriptionApiUrl = 'http://localhost:5000/api/prescriptions';
+  private patientsApiUrl = 'http://localhost:5000/api/patients';
+  private drugSafetyApiUrl = 'http://localhost:5000/api/drug-safety';
 
   constructor(private http: HttpClient) {}
 
@@ -33,32 +35,50 @@ export class PrescriptionService {
   }
 
   createPrescription(data: PrescriptionPayload): Observable<any> {
-    return this.http.post(this.apiUrl, data, {
+    return this.http.post(this.prescriptionApiUrl, data, {
       headers: this.getHeaders(),
     });
   }
 
   getPrescriptionById(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}`, {
+    return this.http.get(`${this.prescriptionApiUrl}/${id}`, {
       headers: this.getHeaders(),
     });
   }
 
   getPrescriptionsByPatient(patientId: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/patient/${patientId}`, {
+    return this.http.get(`${this.prescriptionApiUrl}/patient/${patientId}`, {
       headers: this.getHeaders(),
     });
   }
 
   updatePrescription(id: string, data: Partial<PrescriptionPayload>): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/${id}`, data, {
+    return this.http.patch(`${this.prescriptionApiUrl}/${id}`, data, {
       headers: this.getHeaders(),
     });
   }
 
   deletePrescription(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`, {
+    return this.http.delete(`${this.prescriptionApiUrl}/${id}`, {
       headers: this.getHeaders(),
     });
+  }
+
+  getPatientById(patientId: string): Observable<any> {
+    return this.http.get(`${this.patientsApiUrl}/${patientId}`, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  checkDrugSafetyForPatient(
+    patientId: string,
+    medications: Medication[],
+    language: string
+  ): Observable<any> {
+    return this.http.post(
+      `${this.drugSafetyApiUrl}/check/${patientId}`,
+      { medications, language },
+      { headers: this.getHeaders() }
+    );
   }
 }

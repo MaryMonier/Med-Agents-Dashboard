@@ -1,61 +1,97 @@
 <div class="form-container">
-  <h2>{{ isEditMode ? 'Edit' : 'New' }} Consultation</h2>
+  <div class="form-card">
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
-    <mat-form-field appearance="outline">
-      <mat-label>Patient ID</mat-label>
-      <input matInput formControlName="patientId"/>
-      @if(form.get('patientId')?.hasError('required') && form.get('patientId')?.touched) {
-        <mat-error>Patient ID is required</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Doctor's Notes</mat-label>
-      <textarea matInput formControlName="rawInput" rows="4"></textarea>
-      @if(form.get('rawInput')?.hasError('required') && form.get('rawInput')?.touched) {
-        <mat-error>Notes are required</mat-error>
-      }
-      @if(form.get('rawInput')?.hasError('minlength') && form.get('rawInput')?.touched) {
-        <mat-error>Minimum 10 characters</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Symptoms (comma separated)</mat-label>
-      <input matInput formControlName="symptoms"
-             placeholder="headache, fever, cough"/>
-      @if(form.get('symptoms')?.hasError('required') && form.get('symptoms')?.touched) {
-        <mat-error>Symptoms are required</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Diagnosis (optional)</mat-label>
-      <input matInput formControlName="diagnosis"/>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Language</mat-label>
-      <mat-select formControlName="language">
-        <mat-option value="en">English</mat-option>
-        <mat-option value="ar">Arabic</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <div class="actions">
-      <button mat-button type="button" routerLink="/consultations">
-        Cancel
-      </button>
-      <button mat-raised-button color="primary"
-              type="submit" [disabled]="isLoading">
-        @if(isLoading) {
-          <mat-progress-spinner diameter="20" mode="indeterminate"/>
-        }
-        {{ isEditMode ? 'Update' : 'Create' }}
-      </button>
+    <div class="form-header">
+      <h2>{{ isEditMode ? 'Edit Consultation' : 'New Consultation' }}</h2>
     </div>
 
-  </form>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+
+        <mat-form-field appearance="outline" class="full-width span-2">
+          <mat-label>Patient</mat-label>
+          <input matInput formControlName="patientName"
+                 [matAutocomplete]="auto"
+                 (input)="onPatientInputChange()"
+                 placeholder="Type patient name..."/>
+          <mat-autocomplete #auto="matAutocomplete"
+                            (optionSelected)="onPatientSelected($event.option.value)">
+            @for (patient of filteredPatients(); track patient._id) {
+              <mat-option [value]="patient">{{ patient.name }}</mat-option>
+            }
+          </mat-autocomplete>
+          @if (form.get('patientId')?.hasError('required') && form.get('patientName')?.dirty) {
+            <mat-error>Please select a patient from the list</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width span-2">
+          <mat-label>Doctor's Notes</mat-label>
+          <textarea matInput formControlName="rawInput" rows="4"></textarea>
+          @if (form.get('rawInput')?.hasError('required')) {
+            <mat-error>Notes are required</mat-error>
+          }
+          @if (form.get('rawInput')?.hasError('minlength')) {
+            <mat-error>Minimum 10 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width span-2">
+          <mat-label>Symptoms (comma separated)</mat-label>
+          <input matInput formControlName="symptoms"
+                 placeholder="headache, fever, cough"/>
+          @if (form.get('symptoms')?.hasError('required')) {
+            <mat-error>Symptoms are required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Diagnosis (optional)</mat-label>
+          <input matInput formControlName="diagnosis"/>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Language</mat-label>
+          <mat-select formControlName="language">
+            <mat-option value="en">English</mat-option>
+            <mat-option value="ar">Arabic</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+      
+        <mat-form-field appearance="outline" class="full-width span-2">
+          <mat-label>Follow-up Date (optional)</mat-label>
+          <input matInput [matDatepicker]="picker"
+                 formControlName="followUpDate"
+                 [min]="minDate"
+                 [max]="maxDate"
+                 placeholder="Select follow-up date"/>
+          <mat-datepicker-toggle matIconSuffix [for]="picker">
+          </mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          @if (form.get('followUpDate')?.hasError('pastDate')) {
+            <mat-error>Follow-up date cannot be today or in the past</mat-error>
+          }
+          @if (form.get('followUpDate')?.hasError('maxDate')) {
+            <mat-error>Follow-up date cannot exceed 6 months from today</mat-error>
+          }
+        </mat-form-field>
+
+      </div>
+
+      <div class="form-actions">
+        <button mat-stroked-button type="button" routerLink="/consultations">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary"
+                type="submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <mat-spinner diameter="20"></mat-spinner>
+          }
+          {{ isEditMode ? 'Update' : 'Create' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
 </div>

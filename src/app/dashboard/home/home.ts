@@ -144,7 +144,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     },
   };
 
-  // ─── هنا التعديل الجديد اللي صلح المشكلة ───
   donutType: ChartType = 'doughnut';
   donutData: ChartData<'doughnut'> = {
     labels: ['Low', 'Moderate', 'Critical'],
@@ -154,7 +153,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
         borderWidth: 0,
         hoverOffset: 4,
-        // cutout: '75%' // تم نقلها هنا بنجاح متوافق مع النوع
       }
     ]
   };
@@ -242,7 +240,6 @@ export class HomeComponent implements OnInit, OnDestroy {
           };
         });
 
-        // تحديث الـ Donut مع الحفاظ على خاصية الـ cutout داخل الـ dataset
         this.donutData = {
           ...this.donutData,
           datasets: [{

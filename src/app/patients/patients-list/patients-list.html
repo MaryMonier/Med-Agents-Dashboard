@@ -1,0 +1,93 @@
+<div class="patients-page">
+
+  <div class="page-header">
+    <h2>Patients</h2>
+    <button class="btn-add" (click)="goToAdd()">+ Add Patient</button>
+  </div>
+
+  <div class="search-wrap">
+    <p>Search by Patient ID</p>
+    <div class="search-row">
+      <input
+        type="text"
+        placeholder="Enter patient ID"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event); loadPatients()" />
+      <button class="btn-search" (click)="loadPatients()">Search</button>
+      <button class="btn-clear" (click)="searchQuery.set(''); loadPatients()">Clear</button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (!isLoading() && patients().length === 0) {
+    <div class="empty">No patients found. Add your first patient!</div>
+  }
+
+  @if (!isLoading() && patients().length > 0) {
+    <div class="table-wrapper">
+      <table class="patients-table">
+        <thead>
+          <tr>
+            <th data-label="Name">Name</th>
+            <th data-label="National ID">National ID</th>
+            <th data-label="Age">Age</th>
+            <th data-label="Gender">Gender</th>
+            <th data-label="Actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (patient of patients(); track patient._id) {
+            <tr>
+              <td>{{ patient.name }}</td>
+              <td>{{ patient.nationalID }}</td>
+              <td>{{ calculateAge(patient.dateOfBirth) }}</td>
+              <td>
+                <span class="badge" [class.male]="patient.gender === 'male'" [class.female]="patient.gender === 'female'">
+                  {{ patient.gender }}
+                </span>
+              </td>
+              <td>
+                <div class="actions">
+                  <button class="btn-history" (click)="goToHistory(patient._id!)">History</button>
+                  <button class="btn-edit" (click)="goToEdit(patient._id!)">Edit</button>
+                  <button class="btn-delete" (click)="deletePatient(patient._id!)">Delete</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (totalPages() > 1 && !searchQuery()) {
+    <div class="pagination">
+      <button class="page-btn" (click)="prevPage()" [disabled]="currentPage() === 1">
+        ← Prev
+      </button>
+
+      @for (page of [].constructor(totalPages()); track $index) {
+        <button class="page-btn"
+          [class.active]="currentPage() === $index + 1"
+          (click)="goToPage($index + 1)">
+          {{ $index + 1 }}
+        </button>
+      }
+
+      <button class="page-btn" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+        Next →
+      </button>
+
+      <span class="page-info">
+        Show {{ currentPage() }} of {{ totalPages() }} — {{ totalPatients() }} patients
+      </span>
+    </div>
+  }
+</div>

@@ -1,8 +1,3 @@
-<!-- ══════════════════════════════════════════════════════════════
-     MED AGENTS — DASHBOARD HOME
-     ══════════════════════════════════════════════════════════════ -->
-
-<!-- ── Page header ─────────────────────────────────────────────── -->
 <header class="ph">
   <div class="ph__left">
     <p class="ph__greeting">{{ greeting }}, Doctor 👋</p>
@@ -23,25 +18,21 @@
   </div>
 </header>
 
-<!-- ── Error banner ─────────────────────────────────────────────── -->
 <div class="alert alert--error" *ngIf="statsError">
   <i class="ti ti-alert-circle"></i>
   Backend unreachable — showing last available data.
   <button class="btn-link" (click)="loadAll()">Retry</button>
 </div>
 
-<!-- ── KPI Cards ───────────────────────────────────────────────── -->
 <section class="kpi-grid">
   <div class="kpi" *ngFor="let c of kpiCards" [style.--kpi-color]="c.color" [style.--kpi-bg]="c.bg" [style.--kpi-icon-bg]="c.iconBg">
 
-    <!-- skeleton -->
     <ng-container *ngIf="c.loading">
       <div class="kpi__icon sk sk--icon"></div>
       <div class="sk sk--num"></div>
       <div class="sk sk--label"></div>
     </ng-container>
 
-    <!-- loaded -->
     <ng-container *ngIf="!c.loading">
       <div class="kpi__top">
         <div class="kpi__icon-wrap"><i [class]="c.icon"></i></div>
@@ -57,10 +48,8 @@
   </div>
 </section>
 
-<!-- ── Charts row ──────────────────────────────────────────────── -->
 <section class="charts-row">
 
-  <!-- Line chart -->
   <div class="card chart-card">
     <div class="card__hd">
       <div>
@@ -82,7 +71,6 @@
     </div>
   </div>
 
-  <!-- Doughnut -->
   <div class="card donut-card">
     <div class="card__hd">
       <div>
@@ -101,10 +89,8 @@
 
 </section>
 
-<!-- ── Bottom row ──────────────────────────────────────────────── -->
 <section class="bottom-row">
 
-  <!-- Recent patients table -->
   <div class="card patients-card">
     <div class="card__hd">
       <div>
@@ -116,7 +102,6 @@
       </a>
     </div>
 
-    <!-- skeleton rows -->
     <div class="ptable" *ngIf="patientsLoading">
       <div class="ptable__row ptable__row--sk" *ngFor="let _ of [1,2,3,4,5]">
         <div class="sk sk--av"></div>
@@ -129,20 +114,17 @@
       </div>
     </div>
 
-    <!-- error -->
     <div class="empty" *ngIf="!patientsLoading && patientsError">
       <i class="ti ti-alert-circle empty__icon empty__icon--err"></i>
       <p>Failed to load consultations.</p>
     </div>
 
-    <!-- no data -->
     <div class="empty" *ngIf="!patientsLoading && !patientsError && patientRows.length === 0">
       <i class="ti ti-clipboard-list empty__icon"></i>
       <p>No consultations yet.</p>
       <a routerLink="/dashboard/consultations/add" class="btn btn--primary btn--sm">Start first consultation</a>
     </div>
 
-    <!-- data rows -->
     <div class="ptable" *ngIf="!patientsLoading && !patientsError && patientRows.length > 0">
       <div class="ptable__row" *ngFor="let p of patientRows; trackBy: trackById">
         <div class="av" [style.background]="p.avatarBg">{{ p.initials }}</div>
@@ -157,10 +139,8 @@
     </div>
   </div>
 
-  <!-- Right column: activity + quick actions -->
   <div class="right-col">
 
-    <!-- Quick actions -->
     <div class="card qa-card">
       <div class="card__hd">
         <h2 class="card__title">Quick Actions</h2>
@@ -185,7 +165,6 @@
       </div>
     </div>
 
-    <!-- Activity timeline -->
     <div class="card timeline-card">
       <div class="card__hd">
         <div>
@@ -223,7 +202,6 @@
   </div>
 </section>
 
-<!-- ── Critical alert banner ────────────────────────────────────── -->
 <section class="crit-banner" *ngIf="!statsLoading && totalWarnings > 0">
   <div class="crit-banner__icon"><i class="ti ti-shield-exclamation"></i></div>
   <div class="crit-banner__body">

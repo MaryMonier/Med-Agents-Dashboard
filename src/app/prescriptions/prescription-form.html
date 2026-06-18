@@ -2,29 +2,47 @@
   <div class="header">
     <div>
       <h2>Add Prescription</h2>
-      <p>Create a new prescription for a patient</p>
+      <p>Create prescription from selected consultation</p>
     </div>
 
-    <a routerLink="/prescriptions" class="back-btn">Back to List</a>
+    <a routerLink="/consultations" class="back-btn">Back to Consultations</a>
+  </div>
+
+  <div class="patient-card">
+    <div class="patient-avatar">
+      {{ patientName() ? patientName().charAt(0).toUpperCase() : 'P' }}
+    </div>
+
+    <div class="patient-info">
+      <p class="label">Patient</p>
+
+      <h3 *ngIf="!isPatientLoading()">{{ patientName() || 'Loading patient...' }}</h3>
+      <h3 *ngIf="isPatientLoading()">Loading patient...</h3>
+
+      <p class="sub-text">
+        Prescription is linked to the selected consultation.
+      </p>
+
+      <div class="chips">
+        <span class="chip" *ngIf="patientAllergies().length">
+          Allergies: {{ patientAllergies().join(', ') }}
+        </span>
+
+        <span class="chip" *ngIf="patientChronicConditions().length">
+          Chronic: {{ patientChronicConditions().join(', ') }}
+        </span>
+
+        <span
+          class="chip muted"
+          *ngIf="!patientAllergies().length && !patientChronicConditions().length"
+        >
+          No allergies or chronic conditions recorded
+        </span>
+      </div>
+    </div>
   </div>
 
   <div class="form-card">
-    <label>Consultation ID</label>
-    <input
-      type="text"
-      [ngModel]="consultationId()"
-      (ngModelChange)="consultationId.set($event)"
-      placeholder="Enter consultation ID"
-    />
-
-    <label>Patient ID</label>
-    <input
-      type="text"
-      [ngModel]="patientId()"
-      (ngModelChange)="patientId.set($event)"
-      placeholder="Enter patient ID"
-    />
-
     <label>Language</label>
     <select [ngModel]="language()" (ngModelChange)="language.set($event)">
       <option value="en">English</option>
@@ -37,7 +55,7 @@
     <input
       type="text"
       [ngModel]="medicationName()"
-      (ngModelChange)="medicationName.set($event)"
+      (ngModelChange)="medicationName.set($event); resetSafety()"
       placeholder="Aspirin"
     />
 
@@ -45,7 +63,7 @@
     <input
       type="text"
       [ngModel]="dose()"
-      (ngModelChange)="dose.set($event)"
+      (ngModelChange)="dose.set($event); resetSafety()"
       placeholder="100mg"
     />
 
@@ -53,7 +71,7 @@
     <input
       type="text"
       [ngModel]="frequency()"
-      (ngModelChange)="frequency.set($event)"
+      (ngModelChange)="frequency.set($event); resetSafety()"
       placeholder="Once daily"
     />
 
@@ -61,15 +79,42 @@
     <input
       type="text"
       [ngModel]="duration()"
-      (ngModelChange)="duration.set($event)"
+      (ngModelChange)="duration.set($event); resetSafety()"
       placeholder="7 days"
     />
 
-    <p class="error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
-    <p class="success" *ngIf="successMessage()">{{ successMessage() }}</p>
+    <div class="button-row">
+      <button
+        type="button"
+        class="secondary-btn"
+        (click)="checkDrugSafety()"
+        [disabled]="isCheckingSafety() || !patientId() || !hasMedicationName()"
+      >
+        {{ isCheckingSafety() ? 'Checking...' : 'Check Drug Safety' }}
+      </button>
 
-    <button (click)="createPrescription()" [disabled]="isLoading()">
-      {{ isLoading() ? 'Saving...' : 'Create Prescription' }}
-    </button>
+      <button
+        type="button"
+        class="primary-btn"
+        (click)="createPrescription()"
+        [disabled]="isLoading() || !consultationId() || !patientId()"
+      >
+        {{ isLoading() ? 'Saving...' : 'Create Prescription' }}
+      </button>
+    </div>
+
+    <div
+      class="safety-box"
+      *ngIf="safetyStatus() !== 'idle'"
+      [class.success]="safetyStatus() === 'success'"
+      [class.warning]="safetyStatus() === 'warning'"
+      [class.error-box]="safetyStatus() === 'error'"
+    >
+      <h4>Drug Safety Result</h4>
+      <pre>{{ formatSafetyResult() }}</pre>
+    </div>
+
+    <p class="error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+    <p class="success-message" *ngIf="successMessage()">{{ successMessage() }}</p>
   </div>
 </div>

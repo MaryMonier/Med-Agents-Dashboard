@@ -1,15 +1,19 @@
-
 <div class="sidebar">
   <div class="sidebar-logo">
     <span class="logo-text">Med Agents</span>
-    <span class="logo-sub">your Ai assistant  </span>
+    <span class="logo-sub">your Ai assistant</span>
   </div>
 
   <div class="nav-section">
     <div class="nav-label">main</div>
-    <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+    <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
       <i class="ti ti-layout-dashboard"></i> Dashboard
     </a>
+
+      <a class="nav-item" routerLink="/dashboard/doctors" routerLinkActive="active">
+      <i class="ti ti-stethoscope"></i> Doctors
+    </a>
+
     <a class="nav-item" routerLink="/dashboard/patients" routerLinkActive="active">
       <i class="ti ti-users"></i> Patients
     </a>
@@ -32,14 +36,10 @@
   </div>
 
   <div class="nav-section">
-    <div class="nav-label">AI</div>
-    <a class="nav-item" routerLink="/dashboard/ai-chat" routerLinkActive="active">
-      <i class="ti ti-robot"></i> AI Chat
-    </a>
-    <a class="nav-item" routerLink="/dashboard/drug-safety" routerLinkActive="active">
-      <i class="ti ti-shield-check"></i> Drug Safety
-    </a>
+ 
   </div>
+
+
 
   <div class="sidebar-footer">
     <button class="logout-btn" (click)="logout()">

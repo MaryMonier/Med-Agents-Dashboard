@@ -12,6 +12,7 @@ export interface Consultations {
   suggestedSpecialist: string;
   status: 'pending' | 'completed';
   language: 'en' | 'ar';
+  followUpDate?: string;
   createdAt: string;
   updatedAt: string;
 }

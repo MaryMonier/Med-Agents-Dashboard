@@ -1,0 +1,143 @@
+<div class="history-page">
+
+  <div class="page-header">
+    <button class="btn-back" (click)="goBack()">← Back</button>
+    <h2>Patient History</h2>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (data()) {
+    <div class="patient-card">
+      <div class="patient-main">
+        <h3>{{ data()!.patient.name }}</h3>
+        <span class="badge" [class.male]="data()!.patient.gender === 'male'" [class.female]="data()!.patient.gender === 'female'">
+          {{ data()!.patient.gender }}
+        </span>
+        <span class="blood-type">{{ data()!.patient.bloodType }}</span>
+        <span class="age">{{ calculateAge(data()!.patient.dateOfBirth) }} years old</span>
+      </div>
+
+      <div class="patient-meta">
+        <div class="meta-block">
+          <span class="meta-label">Allergies</span>
+          <div class="tags">
+            @for (a of data()!.patient.allergies; track a) {
+              <span class="tag tag-danger">{{ a }}</span>
+            }
+            @if (!data()!.patient.allergies || data()!.patient.allergies!.length === 0) {
+              <span class="muted">None</span>
+            }
+          </div>
+        </div>
+
+        <div class="meta-block">
+          <span class="meta-label">Chronic Conditions</span>
+          <div class="tags">
+            @for (c of data()!.patient.chronicConditions; track c) {
+              <span class="tag tag-warning">{{ c }}</span>
+            }
+            @if (!data()!.patient.chronicConditions || data()!.patient.chronicConditions!.length === 0) {
+              <span class="muted">None</span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="section-title">Consultations ({{ data()!.history.length }})</h3>
+
+    @if (data()!.history.length === 0) {
+      <div class="empty">No consultations recorded yet.</div>
+    }
+
+    <div class="history-grid">
+      @for (item of data()!.history; track item.consultationId) {
+        <div class="consultation-card">
+
+          <div class="card-header">
+            <span class="date">{{ item.date | date:'medium' }}</span>
+            <span class="urgency-badge" [ngClass]="urgencyClass(item.urgencyLevel)">
+              {{ item.urgencyLevel }}
+            </span>
+          </div>
+
+          <div class="card-body">
+            <div class="field">
+              <span class="label">Symptoms</span>
+              <div class="tags">
+                @for (s of item.symptoms; track s) {
+                  <span class="tag">{{ s }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="label">Diagnosis</span>
+              <p>{{ item.diagnosis }}</p>
+            </div>
+
+            @if (item.suggestedSpecialist) {
+              <div class="field">
+                <span class="label">Suggested Specialist</span>
+                <p>{{ item.suggestedSpecialist }}</p>
+              </div>
+            }
+
+            @if (item.structuredNote) {
+              <div class="field">
+                <span class="label">Clinical Note</span>
+                <p class="note">{{ item.structuredNote }}</p>
+              </div>
+            }
+
+            @if (item.prescription) {
+              <div class="field prescription-block">
+                <span class="label">Prescription</span>
+
+                <ul class="med-list">
+                  @for (med of item.prescription.medications; track med.name) {
+                    <li>
+                      <strong>{{ med.name }}</strong>
+                      @if (med.dosage) { <span> — {{ med.dosage }}</span> }
+                      @if (med.frequency) { <span> ({{ med.frequency }})</span> }
+                    </li>
+                  }
+                </ul>
+
+                @if (item.prescription.interactions.length > 0) {
+                  <div class="warning-box">
+                    <strong>Interactions:</strong>
+                    <ul>
+                      @for (i of item.prescription.interactions; track i) {
+                        <li>{{ i }}</li>
+                      }
+                    </ul>
+                  </div>
+                }
+
+                @if (item.prescription.warnings.length > 0) {
+                  <div class="warning-box danger">
+                    <strong>Warnings:</strong>
+                    <ul>
+                      @for (w of item.prescription.warnings; track w) {
+                        <li>{{ w }}</li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

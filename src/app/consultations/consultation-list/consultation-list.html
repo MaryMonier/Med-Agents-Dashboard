@@ -3,75 +3,174 @@
   <!-- Header -->
   <div class="header">
     <h2>Consultations</h2>
-    <a mat-raised-button color="primary" routerLink="add">
-      <mat-icon>add</mat-icon> New Consultation
+
+    <a
+      mat-raised-button
+      color="primary"
+      routerLink="add"
+      class="new-btn"
+    >
+      <mat-icon>add</mat-icon>
+      <span class="btn-text">New Consultation</span>
     </a>
   </div>
 
   <!-- Search -->
   <mat-form-field appearance="outline" class="search-field">
     <mat-label>Search</mat-label>
-    <input matInput [(ngModel)]="searchQuery"
-           (ngModelChange)="onSearch()"
-           placeholder="Search consultations..."/>
+
+    <input
+      matInput
+      [value]="searchQuery()"
+      (input)="onSearch($any($event.target).value)"
+      placeholder="Search consultations..."
+    />
+
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 
   <!-- Table -->
-  <table mat-table [dataSource]="filteredConsultations" class="mat-elevation-z2">
+  <div class="table-wrapper">
+    <table
+      mat-table
+      [dataSource]="filteredConsultations()"
+      class="mat-elevation-z2"
+    >
 
-    <ng-container matColumnDef="patientId">
-      <th mat-header-cell *matHeaderCellDef>Patient</th>
-      <td mat-cell *matCellDef="let c">{{ c.patientId }}</td>
-    </ng-container>
+      <ng-container matColumnDef="patientName">
+        <th mat-header-cell *matHeaderCellDef>Patient</th>
 
-    <ng-container matColumnDef="symptoms">
-      <th mat-header-cell *matHeaderCellDef>Symptoms</th>
-      <td mat-cell *matCellDef="let c">{{ c.symptoms.join(', ') }}</td>
-    </ng-container>
+        <td mat-cell *matCellDef="let c">
+          {{ getPatientName(c.patientId) }}
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="urgencyLevel">
-      <th mat-header-cell *matHeaderCellDef>Urgency</th>
-      <td mat-cell *matCellDef="let c">
-        <mat-chip [color]="getUrgencyColor(c.urgencyLevel)" highlighted>
-          {{ c.urgencyLevel }}
-        </mat-chip>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="symptoms">
+        <th mat-header-cell *matHeaderCellDef>Symptoms</th>
 
-    <ng-container matColumnDef="suggestedSpecialist">
-      <th mat-header-cell *matHeaderCellDef>Specialist</th>
-      <td mat-cell *matCellDef="let c">{{ c.suggestedSpecialist }}</td>
-    </ng-container>
+        <td mat-cell *matCellDef="let c">
+          {{ (c.symptoms || []).join(', ') }}
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let c">{{ c.status }}</td>
-    </ng-container>
+      <ng-container matColumnDef="urgencyLevel">
+        <th mat-header-cell *matHeaderCellDef>Urgency</th>
 
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Actions</th>
-      <td mat-cell *matCellDef="let c">
-        <a mat-icon-button [routerLink]="['edit', c._id]">
-          <mat-icon>edit</mat-icon>
-        </a>
-        <button mat-icon-button color="warn" (click)="deleteConsultation(c._id)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
+        <td mat-cell *matCellDef="let c">
+          <span
+            class="urgency-badge"
+            [ngClass]="c.urgencyLevel"
+          >
+            {{ c.urgencyLevel }}
+          </span>
+        </td>
+      </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <ng-container matColumnDef="suggestedSpecialist">
+        <th mat-header-cell *matHeaderCellDef>Specialist</th>
 
-  </table>
+        <td mat-cell *matCellDef="let c">
+          {{ c.suggestedSpecialist || '—' }}
+        </td>
+      </ng-container>
 
-  <!-- Pagination -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+
+        <td mat-cell *matCellDef="let c">
+          <span
+            class="status-badge"
+            [ngClass]="c.status"
+          >
+            {{ c.status }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="followUpDate">
+        <th mat-header-cell *matHeaderCellDef>Follow-up</th>
+
+        <td mat-cell *matCellDef="let c">
+          {{
+            c.followUpDate
+              ? (c.followUpDate | date: 'mediumDate')
+              : '—'
+          }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+
+        <td mat-cell *matCellDef="let c">
+          <div class="action-buttons">
+
+            <a
+              mat-stroked-button
+              color="accent"
+              [routerLink]="['/prescriptions/new']"
+              [queryParams]="{
+                consultationId: getConsultationId(c),
+                patientId: getPatientId(c)
+              }"
+            >
+              <mat-icon>medical_services</mat-icon>
+              Prescription
+            </a>
+
+            <a
+              mat-stroked-button
+              color="primary"
+              [routerLink]="['edit', getConsultationId(c)]"
+            >
+              Edit
+            </a>
+
+            <button
+              mat-stroked-button
+              color="warn"
+              (click)="deleteConsultation(getConsultationId(c))"
+            >
+              Delete
+            </button>
+
+          </div>
+        </td>
+      </ng-container>
+
+      <tr
+        mat-header-row
+        *matHeaderRowDef="displayedColumns"
+      ></tr>
+
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+      ></tr>
+
+    </table>
+  </div>
+
+  @if (filteredConsultations().length === 0 && searchQuery()) {
+    <div class="empty-state">
+      <mat-icon>search_off</mat-icon>
+      <p>No matching consultations found</p>
+    </div>
+  }
+
+  @if (filteredConsultations().length === 0 && !searchQuery()) {
+    <div class="empty-state">
+      <mat-icon>medical_services</mat-icon>
+      <p>No consultations available</p>
+    </div>
+  }
+
   <mat-paginator
-    [length]="totalItems"
-    [pageSize]="pageSize"
+    [length]="totalItems()"
+    [pageSize]="pageSize()"
     [pageSizeOptions]="[5, 10, 25]"
-    (page)="onPageChange($event)">
+    (page)="onPageChange($event)"
+  >
   </mat-paginator>
 
 </div>
