@@ -1,0 +1,331 @@
+<!-- ══════════════════════════════════════════════════════════════
+     MED AGENTS — REPORTS PAGE
+     ══════════════════════════════════════════════════════════════ -->
+
+<!-- ── Page header ─────────────────────────────────────────────── -->
+<header class="rph">
+  <div>
+    <h1 class="rph__title">Medical Reports</h1>
+    <p  class="rph__sub">Generate, view, and export AI-powered clinical reports</p>
+  </div>
+  <div class="rph__actions">
+    <button class="btn btn--ghost btn--sm" (click)="loadList()">
+      <i class="ti ti-refresh"></i> Refresh
+    </button>
+  </div>
+</header>
+
+<!-- ── Stats bar ───────────────────────────────────────────────── -->
+<section class="stats-bar">
+  <div class="sbar-card sbar-card--blue">
+    <i class="ti ti-file-analytics sbar-card__icon"></i>
+    <div>
+      <div class="sbar-card__n">{{ totalReports }}</div>
+      <div class="sbar-card__l">Total Reports</div>
+    </div>
+  </div>
+  <div class="sbar-card sbar-card--green">
+    <i class="ti ti-calendar-check sbar-card__icon"></i>
+    <div>
+      <div class="sbar-card__n">{{ todayReports }}</div>
+      <div class="sbar-card__l">Generated Today</div>
+    </div>
+  </div>
+  <div class="sbar-card sbar-card--amber">
+    <i class="ti ti-clock-pause sbar-card__icon"></i>
+    <div>
+      <div class="sbar-card__n">{{ pendingReports }}</div>
+      <div class="sbar-card__l">Pending</div>
+    </div>
+  </div>
+  <div class="sbar-card sbar-card--red">
+    <i class="ti ti-shield-exclamation sbar-card__icon"></i>
+    <div>
+      <div class="sbar-card__n">{{ criticalReports }}</div>
+      <div class="sbar-card__l">Critical Cases</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Main layout ─────────────────────────────────────────────── -->
+<div class="rp-layout">
+
+  <!-- ── Left sidebar ─────────────────────────────────────────── -->
+  <aside class="rsidebar">
+
+    <!-- Search + filters -->
+    <div class="rsidebar__top">
+      <div class="search-box">
+        <i class="ti ti-search search-box__icon"></i>
+        <input class="search-box__input" type="text" placeholder="Search consultations…"
+          [(ngModel)]="searchQuery" (input)="onSearch()" />
+        <button class="search-box__clear" *ngIf="searchQuery" (click)="clearFilters()">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <select class="filter-select" [(ngModel)]="filterStatus" (change)="onFilterChange()">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Urgency</label>
+        <select class="filter-select" [(ngModel)]="filterUrgency" (change)="onFilterChange()">
+          <option value="">All levels</option>
+          <option value="low">Low</option>
+          <option value="medium">Moderate</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
+
+      <div class="filter-meta" *ngIf="!listLoading">
+        {{ filtered.length }} consultation{{ filtered.length !== 1 ? 's' : '' }}
+        <button class="btn-link" *ngIf="searchQuery || filterStatus || filterUrgency" (click)="clearFilters()">
+          Clear filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Consultation list -->
+    <div class="clist">
+
+      <!-- skeletons -->
+      <div class="clist__sk" *ngIf="listLoading">
+        <div class="ck-row" *ngFor="let _ of [1,2,3,4,5,6]">
+          <div class="sk sk--diag"></div>
+          <div class="sk sk--meta"></div>
+          <div class="sk-badges">
+            <div class="sk sk--badge"></div>
+            <div class="sk sk--badge"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- error -->
+      <div class="clist__empty" *ngIf="!listLoading && listError">
+        <i class="ti ti-wifi-off"></i>
+        <p>Failed to load consultations.<br>
+          <button class="btn-link" (click)="loadList()">Retry</button>
+        </p>
+      </div>
+
+      <!-- no results -->
+      <div class="clist__empty" *ngIf="!listLoading && !listError && filtered.length === 0">
+        <i class="ti ti-search-off"></i>
+        <p>No consultations match your filters.</p>
+        <button class="btn btn--ghost btn--sm" (click)="clearFilters()">Clear filters</button>
+      </div>
+
+      <!-- cards -->
+      <button
+        class="ccard"
+        *ngFor="let c of filtered; trackBy: trackById"
+        [class.ccard--active]="selected?._id === c._id"
+        (click)="select(c)">
+        <div class="ccard__top">
+          <span class="ccard__diag">{{ c.diagnosis || 'No diagnosis recorded' }}</span>
+          <span class="cscore" [style.color]="'#64748B'">{{ aiScore(c) }}%</span>
+        </div>
+        <div class="ccard__id">ID · {{ c._id | slice:0:10 }}…</div>
+        <div class="ccard__badges">
+          <span class="badge badge--u-{{c.urgencyLevel}}">{{ urgencyLabel(c.urgencyLevel) }}</span>
+          <span class="badge badge--s-{{c.status}}">{{ c.status | titlecase }}</span>
+        </div>
+        <div class="ccard__foot">
+          <i class="ti ti-clock"></i> {{ timeAgo(c.createdAt) }}
+          <span class="ccard__lang">{{ c.language === 'ar' ? '🇸🇦 AR' : '🇺🇸 EN' }}</span>
+        </div>
+      </button>
+
+    </div>
+  </aside>
+
+  <!-- ── Main area ─────────────────────────────────────────────── -->
+  <main class="rmain">
+
+    <!-- Empty state — nothing selected -->
+    <div class="rem-state" *ngIf="!selected">
+      <div class="rem-state__illo">
+        <i class="ti ti-file-text"></i>
+      </div>
+      <h2 class="rem-state__title">Select a consultation</h2>
+      <p  class="rem-state__sub">Choose a consultation from the list to generate an AI-powered medical report.</p>
+    </div>
+
+    <!-- Selected — report panel -->
+    <ng-container *ngIf="selected">
+
+      <!-- Report header card -->
+      <div class="rview-header">
+        <div class="rview-header__left">
+          <div class="rview-header__icon"><i class="ti ti-stethoscope"></i></div>
+          <div>
+            <h2 class="rview-header__title">{{ selected.diagnosis || 'Consultation' }}</h2>
+            <p  class="rview-header__meta">
+              ID: {{ selected._id | slice:0:12 }}…
+              · {{ fmtDate(selected.createdAt) }}
+              · {{ selected.language === 'ar' ? 'Arabic' : 'English' }}
+            </p>
+          </div>
+        </div>
+        <div class="rview-header__badges">
+          <span class="badge badge--u-{{selected.urgencyLevel}}">{{ urgencyLabel(selected.urgencyLevel) }}</span>
+          <span class="badge badge--s-{{selected.status}}">{{ selected.status | titlecase }}</span>
+        </div>
+      </div>
+
+      <!-- Action bar -->
+      <div class="action-bar">
+        <div class="lang-toggle">
+          <button class="lang-btn" [class.lang-btn--on]="language==='en'" (click)="language='en'">
+            🇺🇸 English
+          </button>
+          <button class="lang-btn" [class.lang-btn--on]="language==='ar'" (click)="language='ar'">
+            🇸🇦 Arabic
+          </button>
+        </div>
+
+        <div class="action-bar__right">
+          <button class="btn btn--primary" (click)="generate()" [disabled]="generating">
+            <span *ngIf="generating" class="spin spin--xs"></span>
+            <i *ngIf="!generating" class="ti ti-sparkles"></i>
+            {{ generating ? 'Generating…' : 'Generate Report' }}
+          </button>
+          <ng-container *ngIf="report">
+            <button class="btn btn--ghost" (click)="printReport()">
+              <i class="ti ti-printer"></i> Print
+            </button>
+            <button class="btn btn--ghost" (click)="downloadTxt()">
+              <i class="ti ti-download"></i> Download TXT
+            </button>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div class="alert alert--error" *ngIf="generateError">
+        <i class="ti ti-alert-circle"></i> {{ generateError }}
+      </div>
+
+      <!-- Generating skeleton -->
+      <div class="report-skeleton" *ngIf="generating">
+        <div class="rs-pulse">
+          <i class="ti ti-robot rs-pulse__icon"></i>
+          <p class="rs-pulse__text">AI is analyzing the consultation…</p>
+          <div class="rs-pulse__bar"></div>
+        </div>
+        <div class="rsk-block" *ngFor="let _ of [1,2,3,4]">
+          <div class="sk sk--section-title"></div>
+          <div class="sk sk--line"></div>
+          <div class="sk sk--line sk--line-sm"></div>
+          <div class="sk sk--line"></div>
+        </div>
+      </div>
+
+      <!-- Report document -->
+      <div class="rdoc" *ngIf="report && !generating" id="report-print-area">
+
+        <!-- doc header -->
+        <div class="rdoc__header">
+          <div class="rdoc__header-left">
+            <div class="rdoc__logo"><i class="ti ti-activity-heartbeat"></i></div>
+            <div>
+              <div class="rdoc__brand">MED AGENTS</div>
+              <div class="rdoc__brand-sub">AI Medical Report</div>
+            </div>
+          </div>
+          <div class="rdoc__header-right">
+            <div class="rdoc__meta-row"><span>Generated</span><strong>{{ generatedAt }}</strong></div>
+            <div class="rdoc__meta-row"><span>Consultation</span><strong>{{ selected._id | slice:0:12 }}…</strong></div>
+            <div class="rdoc__meta-row"><span>Language</span><strong>{{ language === 'ar' ? 'Arabic' : 'English' }}</strong></div>
+          </div>
+        </div>
+
+        <!-- AI confidence score -->
+        <div class="confidence-card" [style.--sc-color]="scoreColor" [style.--sc-bg]="scoreBg">
+          <div class="confidence-card__left">
+            <div class="confidence-card__label">AI Confidence Score</div>
+            <div class="confidence-card__score">{{ confidenceScore }}%</div>
+          </div>
+          <div class="confidence-card__bar-wrap">
+            <div class="confidence-card__bar">
+              <div class="confidence-card__fill" [style.width.%]="confidenceScore"></div>
+            </div>
+            <div class="confidence-card__hint">
+              {{ confidenceScore >= 90 ? 'High confidence — report is reliable.' :
+                 confidenceScore >= 75 ? 'Good confidence — review recommended.' :
+                 'Lower confidence — manual review advised.' }}
+            </div>
+          </div>
+          <i class="ti ti-chart-bar confidence-card__icon"></i>
+        </div>
+
+        <!-- Report sections -->
+        <div class="rsections">
+
+          <div class="rsec">
+            <div class="rsec__hd rsec__hd--blue">
+              <i class="ti ti-align-left"></i>
+              <span>Executive Summary</span>
+            </div>
+            <p class="rsec__body">{{ report.reportTitle }}</p>
+          </div>
+
+          <div class="rsec">
+            <div class="rsec__hd rsec__hd--teal">
+              <i class="ti ti-user-heart"></i>
+              <span>Patient Condition</span>
+            </div>
+            <p class="rsec__body">{{ report.patientCondition }}</p>
+          </div>
+
+          <div class="rsec">
+            <div class="rsec__hd rsec__hd--violet">
+              <i class="ti ti-microscope"></i>
+              <span>Clinical Findings</span>
+            </div>
+            <p class="rsec__body">{{ report.clinicalFindings }}</p>
+          </div>
+
+          <div class="rsec">
+            <div class="rsec__hd rsec__hd--green">
+              <i class="ti ti-pill"></i>
+              <span>Treatment Plan</span>
+            </div>
+            <p class="rsec__body">{{ report.treatmentPlan }}</p>
+          </div>
+
+          <div class="rsec">
+            <div class="rsec__hd rsec__hd--amber">
+              <i class="ti ti-list-check"></i>
+              <span>Recommendations</span>
+            </div>
+            <p class="rsec__body">{{ report.recommendations }}</p>
+          </div>
+
+          <div class="rsec">
+            <div class="rsec__hd rsec__hd--slate">
+              <i class="ti ti-calendar-event"></i>
+              <span>Follow-up Notes</span>
+            </div>
+            <p class="rsec__body">{{ report.followupNotes }}</p>
+          </div>
+
+        </div>
+
+        <!-- doc footer -->
+        <div class="rdoc__footer">
+          <span>Generated by MED AGENTS AI · {{ generatedAt }}</span>
+          <span>This report is AI-generated and should be reviewed by a licensed physician.</span>
+        </div>
+
+      </div>
+    </ng-container>
+
+  </main>
+</div>

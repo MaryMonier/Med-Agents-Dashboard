@@ -1,0 +1,65 @@
+<header class="page-header">
+  <div class="page-header__text">
+    <h1 class="page-title">Patients</h1>
+    <p class="page-subtitle">All registered patients</p>
+  </div>
+</header>
+
+<div class="card" style="padding:1rem; margin-bottom:1.5rem;">
+  <input
+    class="form-input"
+    type="text"
+    placeholder="Search by name, gender or blood type…"
+    [(ngModel)]="searchQuery"
+    (input)="onSearch()"
+  />
+</div>
+
+<div *ngIf="isLoading" style="text-align:center; padding:2rem;">
+  <span class="spinner"></span> Loading patients…
+</div>
+
+<div *ngIf="errorMessage && !isLoading" class="error-banner">
+  {{ errorMessage }}
+  <button class="btn-retry" (click)="loadPatients()">Retry</button>
+</div>
+
+<div class="card" *ngIf="!isLoading && !errorMessage">
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <th style="padding:.75rem 1rem; text-align:left; color:#64748b; font-size:.8rem;">Name</th>
+        <th style="padding:.75rem 1rem; text-align:left; color:#64748b; font-size:.8rem;">Age</th>
+        <th style="padding:.75rem 1rem; text-align:left; color:#64748b; font-size:.8rem;">Gender</th>
+        <th style="padding:.75rem 1rem; text-align:left; color:#64748b; font-size:.8rem;">Blood Type</th>
+        <th style="padding:.75rem 1rem; text-align:left; color:#64748b; font-size:.8rem;">Conditions</th>
+        <th style="padding:.75rem 1rem; text-align:left; color:#64748b; font-size:.8rem;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of filtered" style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:.75rem 1rem; font-weight:500;">{{ p.name }}</td>
+        <td style="padding:.75rem 1rem; color:#64748b;">{{ calcAge(p.dateOfBirth) }} yrs</td>
+        <td style="padding:.75rem 1rem; color:#64748b; text-transform:capitalize;">{{ p.gender }}</td>
+        <td style="padding:.75rem 1rem;">
+          <span class="badge badge--urgency-low">{{ p.bloodType }}</span>
+        </td>
+        <td style="padding:.75rem 1rem; color:#64748b; font-size:.85rem;">
+          {{ p.chronicConditions?.join(', ') || '—' }}
+        </td>
+        <td style="padding:.75rem 1rem;">
+          <button class="btn-secondary"
+            style="font-size:.8rem; padding:.35rem .75rem;"
+            (click)="deletePatient(p._id)">
+            Delete
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="filtered.length === 0">
+        <td colspan="6" style="padding:2rem; text-align:center; color:#94a3b8;">
+          No patients found.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
