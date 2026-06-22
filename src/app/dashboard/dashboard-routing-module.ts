@@ -1,14 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Layout } from './layout/layout';
-import { Home } from './home/home';
+import { HomeComponent } from './home/home';
 
 const routes: Routes = [
   {
     path: '',
     component: Layout,
     children: [
-      { path: '', component: Home },
+      { path: '', component: HomeComponent },
       {
         path: 'doctors',
         loadChildren: () =>
@@ -31,8 +31,8 @@ const routes: Routes = [
       },
       {
         path: 'reports',
-        loadChildren: () =>
-          import('../reports/reports-module').then(m => m.ReportsModule)
+        loadComponent: () =>
+          import('../reports/reports').then(m => m.ReportsComponent)
       },
       {
         path: 'followups',

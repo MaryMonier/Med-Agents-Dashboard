@@ -45,7 +45,7 @@
           <span class="badge badge--urgency-low">{{ p.bloodType }}</span>
         </td>
         <td style="padding:.75rem 1rem; color:#64748b; font-size:.85rem;">
-          {{ p.chronicConditions?.join(', ') || '—' }}
+{{ p.chronicConditions.join(', ') || '—' }}
         </td>
         <td style="padding:.75rem 1rem;">
           <button class="btn-secondary"
