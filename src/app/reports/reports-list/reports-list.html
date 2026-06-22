@@ -1,0 +1,69 @@
+<div class="reports-container">
+
+  <div class="reports-header">
+    <h2>Reports</h2>
+    <div class="lang-toggle">
+      <button [class.active]="language() === 'en'" (click)="language.set('en')">EN</button>
+      <button [class.active]="language() === 'ar'" (click)="language.set('ar')">AR</button>
+    </div>
+  </div>
+
+  <div class="select-section">
+    <label>Select a consultation to generate a report</label>
+
+    @if (isLoading()) {
+      <p class="loading-text">Loading consultations...</p>
+    } @else {
+      <select [(ngModel)]="selectedConsultationId" (ngModelChange)="selectedConsultationId.set($event)">
+        <option value="">— Select consultation —</option>
+        @for (c of consultations(); track c._id) {
+          <option [value]="c._id">
+            {{ c.diagnosis || 'No diagnosis' }} · {{ c.urgencyLevel }} · {{ c.createdAt | date:'shortDate' }}
+          </option>
+        }
+      </select>
+
+      <button
+        class="generate-btn"
+        [disabled]="!selectedConsultationId() || isGenerating()"
+        (click)="generateReport()">
+        {{ isGenerating() ? 'Generating...' : 'Generate Report' }}
+      </button>
+    }
+  </div>
+
+  @if (report()) {
+    <div class="report-card">
+      <div class="report-card-header">
+        <h3>{{ report().reportTitle }}</h3>
+        <button class="download-btn" (click)="downloadReport()">⬇ Download</button>
+      </div>
+
+      <div class="report-section">
+        <span class="report-label">Patient Condition</span>
+        <p>{{ report().patientCondition }}</p>
+      </div>
+
+      <div class="report-section">
+        <span class="report-label">Clinical Findings</span>
+        <p>{{ report().clinicalFindings }}</p>
+      </div>
+
+      <div class="report-section">
+        <span class="report-label">Treatment Plan</span>
+        <p>{{ report().treatmentPlan }}</p>
+      </div>
+
+      <div class="report-section">
+        <span class="report-label">Recommendations</span>
+        <p>{{ report().recommendations }}</p>
+      </div>
+
+      <div class="report-section">
+        <span class="report-label">Follow-up Notes</span>
+        <p>{{ report().followupNotes }}</p>
+      </div>
+    </div>
+  }
+
+</div>
