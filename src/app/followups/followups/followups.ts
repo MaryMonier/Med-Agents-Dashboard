@@ -18,6 +18,7 @@ export class Followups implements OnInit {
   filteredFollowups = signal<Followup[]>([]);
 
   searchTerm = signal('');
+  statusFilter = signal<'all' | 'pending' | 'confirmed' | 'cancelled'>('all');
   isLoading = signal(false);
   errorMessage = signal('');
 
@@ -34,7 +35,9 @@ export class Followups implements OnInit {
 
   // Stats
   totalFollowups = computed(() => this.allFollowups().length);
-  totalDone = computed(() => this.allFollowups().filter((f) => f.status === 'done').length);
+  totalConfirmed = computed(
+    () => this.allFollowups().filter((f) => f.status === 'confirmed').length,
+  );
   totalPending = computed(() => this.allFollowups().filter((f) => f.status === 'pending').length);
   totalCancelled = computed(
     () => this.allFollowups().filter((f) => f.status === 'cancelled').length,
@@ -70,15 +73,20 @@ export class Followups implements OnInit {
 
   applySearch(): void {
     const term = this.searchTerm().trim().toLowerCase();
+    const status = this.statusFilter();
     const all = this.allFollowups();
 
-    const filtered = term
+    let filtered = term
       ? all.filter((f) => {
           if (!f.patientId) return false;
           const patientId = (f.patientId as any)?._id;
           return patientId?.toLowerCase().includes(term);
         })
       : all;
+
+    if (status !== 'all') {
+      filtered = filtered.filter((f) => f.status === status);
+    }
 
     if (term && filtered.length === 0) {
       this.errorMessage.set('No follow-ups found for this patient ID');
@@ -88,6 +96,11 @@ export class Followups implements OnInit {
 
     this.filteredFollowups.set(filtered);
     this.pageIndex.set(0);
+  }
+
+  onStatusFilterChange(event: Event): void {
+    this.statusFilter.set((event.target as HTMLSelectElement).value as any);
+    this.applySearch();
   }
 
   goToPage(index: number): void {
@@ -102,27 +115,28 @@ export class Followups implements OnInit {
 
   clearSearch(): void {
     this.searchTerm.set('');
+    this.statusFilter.set('all');
     this.applySearch();
   }
 
   // ─── Toggle Status ──────────────────────────────────────────────────────
-  // لما تبقى done، الزرار يتعطل ومش هينفع ترجع pending تاني
+  // لما تبقى confirmed الزرار يتعطل ومش هينفع ترجع pending تاني
   toggleStatus(followup: Followup): void {
-    if (followup.status === 'done') return;
+    if (followup.status === 'confirmed') return;
 
     Swal.fire({
       title: 'Are you sure?',
-      text: 'Mark this follow-up as done?',
+      text: 'Mark this follow-up as confirmed?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3B5BDB',
       cancelButtonColor: '#e53e3e',
-      confirmButtonText: 'Yes, mark as done!',
+      confirmButtonText: 'Yes, mark as confirmed!',
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (!result.isConfirmed) return;
 
-      const newStatus: 'done' = 'done';
+      const newStatus: 'confirmed' = 'confirmed';
       const oldStatus = followup.status;
 
       // عدّل الـ UI فوراً (Optimistic Update) - signals بتحدث الشاشة فوراً
@@ -136,7 +150,7 @@ export class Followups implements OnInit {
       // بعت للـ API في الخلفية
       this.followupService.updateStatus(followup._id, newStatus).subscribe({
         next: () => {
-          Swal.fire('Done!', 'Follow-up marked as done.', 'success');
+          Swal.fire('confirmed!', 'Follow-up marked as confirmed.', 'success');
         },
         error: () => {
           this.allFollowups.update((list) =>
@@ -151,10 +165,49 @@ export class Followups implements OnInit {
     });
   }
 
-  // ─── Cancel Followup ────────────────────────────────────────────────────
+  isGenerating = signal<string | null>(null); // بيحفظ الـ id بتاع الفولو أب اللي شغال عليه
+
+  // ─── Start Followup ─────────────────────────────────────────────────────
+  // بيكال الـ agent ويجيب الـ instructions ويعملها patch على الفولو أب
+  startFollowup(followup: Followup): void {
+    if (followup.status !== 'pending') return;
+
+    this.isGenerating.set(followup._id);
+    this.errorMessage.set('');
+
+    const consultationId = (followup.consultationId as any)?._id;
+
+    this.followupService
+      .generateFollowupPlan(consultationId, followup.scheduledDate, followup.language)
+      .subscribe({
+        next: (res) => {
+          const instructions = res.data?.followupInstructions || '-';
+
+          this.followupService.updateInstructions(followup._id, instructions).subscribe({
+            next: () => {
+              this.allFollowups.update((list) =>
+                list.map((f) => (f._id === followup._id ? { ...f, instructions } : f)),
+              );
+              this.filteredFollowups.update((list) =>
+                list.map((f) => (f._id === followup._id ? { ...f, instructions } : f)),
+              );
+              this.isGenerating.set(null);
+            },
+            error: () => {
+              this.errorMessage.set('Failed to update follow-up instructions');
+              this.isGenerating.set(null);
+            },
+          });
+        },
+        error: () => {
+          this.errorMessage.set('Failed to generate follow-up instructions');
+          this.isGenerating.set(null);
+        },
+      });
+  }
   // بدل الحذف، بنغير الحالة لـ cancelled
   cancelFollowup(followup: Followup): void {
-    if (followup.status === 'done' || followup.status === 'cancelled') return;
+    if (followup.status === 'confirmed' || followup.status === 'cancelled') return;
 
     Swal.fire({
       title: 'Are you sure?',
