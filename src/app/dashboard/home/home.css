@@ -22,3 +22,117 @@
   font-weight: 500; 
   color: #1a1a1a; 
 }
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 10px;
+  border: 0.5px solid #e0e0e0;
+  padding: 1.5rem;
+}
+
+.chart-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.activity-card {
+  background: white;
+  border-radius: 10px;
+  border: 0.5px solid #e0e0e0;
+  padding: 1.5rem;
+}
+
+.activity-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 0.5px solid #f0f0f0;
+}
+
+.activity-item:last-child { border-bottom: none; }
+
+.activity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.activity-name {
+  font-size: 13px;
+  color: #333;
+  font-weight: 500;
+}
+
+.activity-date {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.badge.critical { background: #FEE2E2; color: #e53e3e; }
+.badge.medium { background: #FEF3E2; color: #B45309; }
+.badge.low { background: #E6F1FB; color: #185FA5; }
+.badge.done { background: #E6F4EA; color: #1D9E75; }
+.badge.pending { background: #FEF3E2; color: #B45309; }
+
+.empty { color: #aaa; font-size: 13px; text-align: center; padding: 20px; }
+
+.quick-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.action-btn.primary { background: #185FA5; color: white; }
+.action-btn.warning { background: #E67E22; color: white; }
+.action-btn.secondary { background: #1D9E75; color: white; }
+
+.activity-card.alert { border-left: 3px solid #E74C3C; }
+.activity-card.warning { border-left: 3px solid #E67E22; }
+
+.badge.doctor { background: #E6F1FB; color: #185FA5; }
+
+
+
+.badge.male { background: #E6F1FB; color: #185FA5; }
+.badge.female { background: #FAEEF7; color: #8B2E72; }

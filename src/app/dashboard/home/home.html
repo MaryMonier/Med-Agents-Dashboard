@@ -1,24 +1,120 @@
 <div class="home-container">
+
+  <!-- Stats Cards -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-label">Doctor</div>
+      <div class="stat-label">Doctors</div>
       <div class="stat-value">{{ totaldoctors() }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">patients</div>
+      <div class="stat-label">Patients</div>
       <div class="stat-value">{{ totalPatients() }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">consultations</div>
+      <div class="stat-label">Consultations</div>
       <div class="stat-value">{{ totalConsultation() }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">drug warnings</div>
+      <div class="stat-label">Drug Warnings</div>
       <div class="stat-value">{{ totalWarnings() }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">follow-ups</div>
+      <div class="stat-label">Follow-ups</div>
       <div class="stat-value">{{ totalFollowups() }}</div>
     </div>
   </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <a routerLink="/dashboard/doctors/add" class="action-btn primary">+ Add Doctor</a>
+    <a routerLink="/dashboard/consultations" class="action-btn warning">View Critical Cases</a>
+    <a routerLink="/dashboard/followups" class="action-btn secondary">View Pending Follow-ups</a>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3 class="chart-title">Overview</h3>
+      <canvas baseChart [data]="barChartData" [options]="barChartOptions" type="bar"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Distribution</h3>
+      <canvas baseChart [data]="pieChartData" [options]="pieChartOptions" type="pie"></canvas>
+    </div>
+  </div>
+
+  <!-- Alerts & Recent -->
+  <div class="activity-grid">
+
+    <!-- Critical Consultations -->
+    <div class="activity-card alert">
+      <h3 class="activity-title">🚨 Critical Consultations</h3>
+      @if (criticalConsultations().length === 0) {
+        <p class="empty">No critical consultations</p>
+      }
+      @for (c of criticalConsultations(); track c._id) {
+        <div class="activity-item">
+          <div class="activity-info">
+            <span class="activity-name">{{ c.symptoms?.join(', ') || 'N/A' }}</span>
+            <span class="activity-date">{{ c.createdAt | date:'mediumDate' }}</span>
+          </div>
+          <span class="badge critical">critical</span>
+        </div>
+      }
+    </div>
+
+    <!-- Pending Follow-ups -->
+    <div class="activity-card warning">
+      <h3 class="activity-title">⏳ Pending Follow-ups</h3>
+      @if (pendingFollowups().length === 0) {
+        <p class="empty">No pending follow-ups</p>
+      }
+      @for (f of pendingFollowups(); track f._id) {
+        <div class="activity-item">
+          <div class="activity-info">
+            <span class="activity-name">{{ f.instructions || 'Follow-up' }}</span>
+            <span class="activity-date">{{ f.scheduledDate | date:'mediumDate' }}</span>
+          </div>
+          <span class="badge pending">pending</span>
+        </div>
+      }
+    </div>
+
+    <!-- Recent Doctors -->
+    <div class="activity-card">
+      <h3 class="activity-title">👨‍⚕️ Recent Doctors</h3>
+      @if (recentDoctors().length === 0) {
+        <p class="empty">No doctors found</p>
+      }
+      @for (d of recentDoctors(); track d._id) {
+        <div class="activity-item">
+          <div class="activity-info">
+            <span class="activity-name">{{ d.name }}</span>
+            <span class="activity-date">{{ d.specialty || 'N/A' }}</span>
+          </div>
+          <span class="badge doctor">{{ d.language || 'en' }}</span>
+        </div>
+      }
+    </div>
+
+    
+
+  </div>
+</div><!-- Recent Patients -->
+<div class="activity-card">
+  <h3 class="activity-title">🧑‍🤝‍🧑 Recent Patients</h3>
+  @if (recentPatients().length === 0) {
+    <p class="empty">No patients found</p>
+  }
+  @for (p of recentPatients(); track p._id) {
+    <div class="activity-item">
+      <div class="activity-info">
+        <span class="activity-name">{{ p.name }}</span>
+        <span class="activity-date">{{ p.dateOfBirth | date:'mediumDate' }}</span>
+      </div>
+      <span class="badge" [class.male]="p.gender === 'male'" [class.female]="p.gender === 'female'">
+        {{ p.gender }}
+      </span>
+    </div>
+  }
 </div>
