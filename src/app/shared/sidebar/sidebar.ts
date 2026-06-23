@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, signal, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
-
 
 @Component({
   selector: 'app-sidebar',
@@ -11,12 +10,18 @@ import { AuthService } from '../../services/auth';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
-export class Sidebar  {
-
+export class Sidebar {
+  isOpen = signal(false);
 
   constructor(private authService: AuthService, private router: Router) {}
 
+  toggleMenu() {
+    this.isOpen.set(!this.isOpen());
+  }
 
+  closeMenu() {
+    this.isOpen.set(false);
+  }
 
   logout() {
     this.authService.logout();

@@ -12,10 +12,21 @@
   right: 0;
   z-index: 100;
 }
+
 .navbar-title { font-size: 15px; font-weight: 500; }
+
 .avatar {
   width: 32px; height: 32px; border-radius: 50%;
   background: #E6F1FB; color: #185FA5;
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 500;
+}
+
+/* ── Mobile: navbar moves to full width below mobile topbar ── */
+@media (max-width: 768px) {
+  .navbar {
+    left: 0;
+    /* Sit behind the sidebar's mobile-topbar which is z-index 300 */
+    display: none;
+  }
 }

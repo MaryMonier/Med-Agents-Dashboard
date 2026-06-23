@@ -42,12 +42,12 @@
       <tbody>
         @for (doctor of doctors(); track doctor._id) {
           <tr>
-            <td>{{ doctor.name }}</td>
-            <td>{{ doctor.email }}</td>
-            <td>{{ doctor.specialty || 'N/A' }}</td>
-            <td>{{ doctor.language || 'en' }}</td>
-            <td><span class="badge">{{ doctor.role }}</span></td>
-            <td>
+            <td data-label="Name">{{ doctor.name }}</td>
+            <td data-label="Email">{{ doctor.email }}</td>
+            <td data-label="Specialty">{{ doctor.specialty || 'N/A' }}</td>
+            <td data-label="Language">{{ doctor.language || 'en' }}</td>
+            <td data-label="Role"><span class="badge">{{ doctor.role }}</span></td>
+            <td data-label="Actions">
               <div class="actions">
                 <button class="btn-edit" (click)="goToEdit(doctor._id)">Edit</button>
                 <button class="btn-delete" (click)="deleteDoctor(doctor._id)">Delete</button>
