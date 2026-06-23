@@ -16,6 +16,10 @@ export class FollowupService {
     return this.http.get<FollowupResponse>(this.baseUrl);
   }
 
+  getFollowupById(id: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/${id}`);
+  }
+
   getFollowupsByPatient(patientId: string): Observable<FollowupResponse> {
     return this.http.get<FollowupResponse>(`${this.baseUrl}/patient/${patientId}`);
   }

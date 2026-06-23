@@ -5,7 +5,6 @@
 // })
 // export class Patient {}
 
-
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -13,7 +12,7 @@ import { Observable } from 'rxjs';
 export interface Patient {
   _id?: string;
   name: string;
-   nationalID: string;
+  nationalID: string;
   dateOfBirth: string;
   gender: 'male' | 'female';
   bloodType: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
@@ -24,7 +23,12 @@ export interface Patient {
 }
 
 export interface PrescriptionInfo {
-  medications: { name: string; dosage?: string; frequency?: string }[];
+  medications: {
+    name: string;
+    dose?: string;
+    frequency?: string;
+    duration?: string;
+  }[];
   interactions: string[];
   warnings: string[];
 }
@@ -37,6 +41,7 @@ export interface ConsultationHistory {
   urgencyLevel: string;
   suggestedSpecialist: string | null;
   structuredNote: string | null;
+  isFollowup?: boolean;
   prescription: PrescriptionInfo | null;
 }
 
@@ -51,21 +56,26 @@ export class PatientService {
 
   constructor(private http: HttpClient) {}
 
-
-getAll(search = '', page = 1, limit = 10): Observable<{
-  success: boolean;
-  data: Patient[];
-  pagination: { total: number; page: number; limit: number; totalPages: number } | null;
-}> {
-  let params = `?page=${page}&limit=${limit}`;
-  if (search) params += `&search=${search}`;
-  return this.http.get<any>(`${this.apiUrl}${params}`);
-}
+  getAll(
+    search = '',
+    page = 1,
+    limit = 10,
+  ): Observable<{
+    success: boolean;
+    data: Patient[];
+    pagination: { total: number; page: number; limit: number; totalPages: number } | null;
+  }> {
+    let params = `?page=${page}&limit=${limit}`;
+    if (search) params += `&search=${search}`;
+    return this.http.get<any>(`${this.apiUrl}${params}`);
+  }
   getById(id: string): Observable<{ success: boolean; data: Patient }> {
     return this.http.get<{ success: boolean; data: Patient }>(`${this.apiUrl}/${id}`);
   }
   getHistory(id: string): Observable<{ success: boolean; data: IPatientHistory }> {
-    return this.http.get<{ success: boolean; data: IPatientHistory }>(`${this.apiUrl}/${id}/history`);
+    return this.http.get<{ success: boolean; data: IPatientHistory }>(
+      `${this.apiUrl}/${id}/history`,
+    );
   }
   create(patient: Partial<Patient>): Observable<{ success: boolean; data: Patient }> {
     return this.http.post<{ success: boolean; data: Patient }>(this.apiUrl, patient);

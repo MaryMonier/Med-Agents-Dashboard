@@ -82,7 +82,13 @@
           <tr>
             <td data-label="Patient">{{ followup.patientId?.name || '—' }}</td>
             <td data-label="Doctor">{{ followup.consultationId?.doctorId?.name || '—' }}</td>
-            <td data-label="Instructions">{{ followup.instructions }}</td>
+            <td data-label="Instructions">
+              @if (followup.lastConsultationNote) {
+                <span class="note-preview">{{ followup.lastConsultationNote }}</span>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
             <td data-label="Scheduled Date">
               {{ followup.scheduledDate ? (followup.scheduledDate | date: 'mediumDate') : '—' }}
             </td>
@@ -108,10 +114,10 @@
               <div class="actions">
                 <button
                   class="btn-start"
-                  [disabled]="followup.status !== 'pending' || isGenerating() === followup._id"
+                  [disabled]="followup.status !== 'pending'"
                   (click)="startFollowup(followup)"
                 >
-                  {{ isGenerating() === followup._id ? 'Generating...' : 'Start Follow-up' }}
+                  Start Follow-up
                 </button>
                 <button
                   class="btn-confirmed"

@@ -5,25 +5,23 @@ const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./consultation-list/consultation-list')
-        .then(m => m.ConsultationListComponent)
+      import('./consultation-list/consultation-list').then((m) => m.ConsultationListComponent),
   },
   {
+    // بدل ما يروح لفورم الكونسلتيشن على طول، يختار مريض الأول
     path: 'add',
     loadComponent: () =>
-      import('./consultation-form/consultation-form')
-        .then(m => m.ConsultationFormComponent)
+      import('../patients/select-patient/select-patient').then((m) => m.SelectPatient),
   },
   {
     path: 'edit/:id',
     loadComponent: () =>
-      import('./consultation-form/consultation-form')
-        .then(m => m.ConsultationFormComponent)
-  }
+      import('./consultation-form/consultation-form').then((m) => m.ConsultationFormComponent),
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class ConsultationsRoutingModule {}

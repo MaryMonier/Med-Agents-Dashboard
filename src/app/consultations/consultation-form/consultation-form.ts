@@ -1,6 +1,12 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -18,22 +24,31 @@ import { ConsultationService } from '../../services/consultation';
   selector: 'app-consultation-form',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, RouterModule,
-    MatFormFieldModule, MatInputModule, MatButtonModule,
-    MatSelectModule, MatProgressSpinnerModule, MatIconModule,
-    MatAutocompleteModule, MatDatepickerModule, MatNativeDateModule
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatAutocompleteModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   templateUrl: './consultation-form.html',
-  styleUrl: './consultation-form.css'
+  styleUrl: './consultation-form.css',
 })
 export class ConsultationFormComponent implements OnInit {
-
   form!: FormGroup;
   isEditMode = false;
   consultationId: string | null = null;
 
   isLoading = signal(false);
   patients = signal<any[]>([]);
+  createdConsultationId = signal<string | null>(null);
+  createdPatientId = signal<string | null>(null);
 
   minDate: Date = new Date();
   maxDate: Date = new Date();
@@ -41,9 +56,7 @@ export class ConsultationFormComponent implements OnInit {
   filteredPatients = computed(() => {
     const search = (this.form?.get('patientName')?.value ?? '').toLowerCase();
     if (!search) return this.patients();
-    return this.patients().filter(p =>
-      p.name.toLowerCase().includes(search)
-    );
+    return this.patients().filter((p) => p.name.toLowerCase().includes(search));
   });
 
   constructor(
@@ -51,7 +64,7 @@ export class ConsultationFormComponent implements OnInit {
     private consultationService: ConsultationService,
     private router: Router,
     private route: ActivatedRoute,
-    private http: HttpClient
+    private http: HttpClient,
   ) {}
 
   ngOnInit(): void {
@@ -101,62 +114,60 @@ export class ConsultationFormComponent implements OnInit {
 
   initForm(): void {
     this.form = this.fb.group({
-      patientId:    ['', Validators.required],
-      patientName:  ['', Validators.required],
-      rawInput:     ['', [Validators.required, Validators.minLength(10)]],
-      symptoms:     ['', Validators.required],
-      diagnosis:    [''],
-      language:     ['en', Validators.required],
-      followUpDate: ['', [this.followUpDateValidator()]]
+      patientId: ['', Validators.required],
+      patientName: ['', Validators.required],
+      rawInput: ['', [Validators.required, Validators.minLength(10)]],
+      symptoms: ['', Validators.required],
+      diagnosis: [''],
+      language: ['en', Validators.required],
+      followUpDate: ['', [this.followUpDateValidator()]],
     });
   }
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     return new HttpHeaders({
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     });
   }
 
   loadPatients(): void {
-    this.http.get<any>('http://localhost:5000/api/patient', {
-      headers: this.getAuthHeaders()
-    }).subscribe({
-      next: (res) => {
-        this.patients.set(res.data || res);
-        if (this.consultationId) {
-          this.loadConsultation();
-        }
-      },
-      error: (err) => console.error('Failed to load patients', err)
-    });
+    this.http
+      .get<any>('http://localhost:5000/api/patient', {
+        headers: this.getAuthHeaders(),
+      })
+      .subscribe({
+        next: (res) => {
+          this.patients.set(res.data || res);
+          if (this.consultationId) {
+            this.loadConsultation();
+          }
+        },
+        error: (err) => console.error('Failed to load patients', err),
+      });
   }
 
   loadConsultation(): void {
     this.consultationService.getById(this.consultationId!).subscribe({
       next: (res) => {
-        const patient = this.patients().find(
-          p => p._id === res.data.patientId
-        );
+        const patient = this.patients().find((p) => p._id === res.data.patientId);
         this.form.patchValue({
           ...res.data,
           patientName: patient?.name ?? '',
           symptoms: Array.isArray(res.data.symptoms)
             ? res.data.symptoms.join(', ')
-            : res.data.symptoms ?? '',
-          followUpDate: res.data.followUpDate
-            ? new Date(res.data.followUpDate)
-            : null
+            : (res.data.symptoms ?? ''),
+          followUpDate: res.data.followUpDate ? new Date(res.data.followUpDate) : null,
         });
       },
-      error: (err) => console.error('Failed to load consultation', err)
+      error: (err) => console.error('Failed to load consultation', err),
     });
   }
 
   onPatientSelected(patient: any): void {
     this.form.patchValue({
       patientId: patient._id,
-      patientName: patient.name
+      patientName: patient.name,
     });
   }
 
@@ -178,7 +189,7 @@ export class ConsultationFormComponent implements OnInit {
         .filter((s: string) => s.length > 0),
       followUpDate: this.form.value.followUpDate
         ? new Date(this.form.value.followUpDate).toISOString()
-        : undefined
+        : undefined,
     };
 
     const request$ = this.isEditMode
@@ -186,13 +197,19 @@ export class ConsultationFormComponent implements OnInit {
       : this.consultationService.create(formValue);
 
     request$.subscribe({
-      next: () => {
+      next: (res) => {
         this.isLoading.set(false);
-        this.router.navigateByUrl('/consultations');
+        if (!this.isEditMode) {
+          // بعد الإنشاء، نحفظ الـ id عشان نعرض زرار Add Prescription
+          this.createdConsultationId.set(res?.data?._id || null);
+          this.createdPatientId.set(this.form.value.patientId || null);
+        } else {
+          this.router.navigateByUrl('/consultations');
+        }
       },
       error: () => {
         this.isLoading.set(false);
-      }
+      },
     });
   }
 }

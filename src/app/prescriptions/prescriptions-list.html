@@ -2,82 +2,119 @@
   <div class="header">
     <div>
       <h2>Prescriptions</h2>
-      <p>Search prescriptions by patient ID</p>
+      <p>All patient prescriptions</p>
     </div>
-
-    <a routerLink="/prescriptions/new" class="add-btn">+ Add Prescription</a>
   </div>
 
+  <!-- Search -->
   <div class="search-card">
-    <label>Patient ID</label>
+    <label>Search by Patient Name</label>
     <div class="search-row">
       <input
         type="text"
-        [ngModel]="patientId()"
-        (ngModelChange)="patientId.set($event)"
-        placeholder="Enter patient ID"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+        placeholder="Enter patient name"
       />
-
-      <button (click)="searchByPatient()" [disabled]="isLoading()">
-        {{ isLoading() ? 'Loading...' : 'Search' }}
-      </button>
+      <button (click)="applySearch()" [disabled]="isLoading()">Search</button>
+      <button class="clear-btn" (click)="clearSearch()">Clear</button>
     </div>
   </div>
 
-  <p class="error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+  @if (isLoading()) {
+    <div class="loading">Loading...</div>
+  }
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
 
-  <div class="table-card" *ngIf="prescriptions().length > 0">
-    <table>
-      <thead>
-        <tr>
-          <th>Medication</th>
-          <th>Dose</th>
-          <th>Frequency</th>
-          <th>Duration</th>
-          <th>Language</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+  @if (!isLoading() && pagedPrescriptions().length === 0 && !errorMessage()) {
+    <p class="empty">No prescriptions to display.</p>
+  }
 
-      <tbody>
-        <tr *ngFor="let prescription of prescriptions()">
-          <td>
-            <div *ngFor="let med of prescription.medications">
-              {{ med.name }}
-            </div>
-          </td>
+  @if (pagedPrescriptions().length > 0) {
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Type</th>
+            <th>Medications</th>
+            <th>Warnings</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (prescription of pagedPrescriptions(); track prescription._id) {
+            <tr>
+              <td>{{ prescription.patientId?.name || '—' }}</td>
+              <td>
+                <span
+                  [class]="
+                    prescription.consultationId?.followupId
+                      ? 'label-followup'
+                      : 'label-consultation'
+                  "
+                >
+                  {{ prescription.consultationId?.followupId ? 'Follow-up' : 'Consultation' }}
+                </span>
+              </td>
+              <td>
+                <div *ngFor="let med of prescription.medications">
+                  <strong>{{ med.name }}</strong>
+                  @if (med.dose) {
+                    <span> — {{ med.dose }}</span>
+                  }
+                  @if (med.frequency) {
+                    <span> ({{ med.frequency }})</span>
+                  }
+                </div>
+              </td>
+              <td>
+                @if (prescription.warnings?.length > 0) {
+                  <div class="warnings-cell">
+                    @for (w of prescription.warnings; track w) {
+                      <span class="warning-badge">⚠️ {{ w }}</span>
+                    }
+                  </div>
+                } @else {
+                  <span class="muted">None</span>
+                }
+              </td>
+              <td>
+                <button class="delete-btn" (click)="deletePrescription(prescription._id)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
 
-          <td>
-            <div *ngFor="let med of prescription.medications">
-              {{ med.dose }}
-            </div>
-          </td>
-
-          <td>
-            <div *ngFor="let med of prescription.medications">
-              {{ med.frequency }}
-            </div>
-          </td>
-
-          <td>
-            <div *ngFor="let med of prescription.medications">
-              {{ med.duration }}
-            </div>
-          </td>
-
-          <td>{{ prescription.language }}</td>
-
-          <td>
-            <button class="delete-btn" (click)="deletePrescription(prescription._id)">
-              Delete
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <p class="empty" *ngIf="!isLoading() && prescriptions().length === 0">
-    No prescriptions to display. Search by patient ID.
-  </p>
+      <!-- Pagination -->
+      <div class="pagination">
+        <div class="pagination-info">
+          Showing {{ startItem() }}–{{ endItem() }} of {{ totalItems() }}
+          &nbsp;|&nbsp;
+          <select class="page-size-select" (change)="onPageSizeChange($event)">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+          </select>
+          per page
+        </div>
+        <div class="pagination-controls">
+          <button (click)="goToPage(pageIndex() - 1)" [disabled]="pageIndex() === 0">
+            &#8592;
+          </button>
+          @for (p of pages(); track p) {
+            <button [class.active]="p === pageIndex()" (click)="goToPage(p)">{{ p + 1 }}</button>
+          }
+          <button (click)="goToPage(pageIndex() + 1)" [disabled]="pageIndex() >= totalPages() - 1">
+            &#8594;
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

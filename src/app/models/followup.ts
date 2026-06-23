@@ -6,12 +6,14 @@ export interface Followup {
       _id: string;
       name: string;
     };
+    structuredNote?: string;
   };
   patientId?: {
     _id: string;
     name: string;
   };
   instructions: string;
+  lastConsultationNote?: string; // من الباك عشان يظهر قبل Start Follow-up
   scheduledDate: string;
   reminderSent: boolean;
   status: 'pending' | 'confirmed' | 'cancelled';

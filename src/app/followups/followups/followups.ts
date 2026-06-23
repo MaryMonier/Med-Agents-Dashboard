@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FollowupService } from '../../services/followup';
 import { Followup } from '../../models/followup';
 import Swal from 'sweetalert2';
@@ -48,7 +48,10 @@ export class Followups implements OnInit {
   startItem = computed(() => this.pageIndex() * this.pageSize() + 1);
   endItem = computed(() => Math.min((this.pageIndex() + 1) * this.pageSize(), this.totalItems()));
 
-  constructor(private followupService: FollowupService) {}
+  constructor(
+    private followupService: FollowupService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.loadFollowups();
@@ -165,45 +168,25 @@ export class Followups implements OnInit {
     });
   }
 
-  isGenerating = signal<string | null>(null); // بيحفظ الـ id بتاع الفولو أب اللي شغال عليه
-
   // ─── Start Followup ─────────────────────────────────────────────────────
-  // بيكال الـ agent ويجيب الـ instructions ويعملها patch على الفولو أب
+  // بدل ما يكال الـ agent مباشرة، بيودي الدكتور لصفحة هيستوري المريض
+  // مع الـ followupId في الـ URL عشان يظهر فورم "Add Follow-up"
   startFollowup(followup: Followup): void {
     if (followup.status !== 'pending') return;
 
-    this.isGenerating.set(followup._id);
-    this.errorMessage.set('');
+    const patientId =
+      typeof followup.patientId === 'object'
+        ? (followup.patientId as any)?._id
+        : followup.patientId;
 
-    const consultationId = (followup.consultationId as any)?._id;
+    if (!patientId) {
+      this.errorMessage.set('Cannot find patient for this follow-up');
+      return;
+    }
 
-    this.followupService
-      .generateFollowupPlan(consultationId, followup.scheduledDate, followup.language)
-      .subscribe({
-        next: (res) => {
-          const instructions = res.data?.followupInstructions || '-';
-
-          this.followupService.updateInstructions(followup._id, instructions).subscribe({
-            next: () => {
-              this.allFollowups.update((list) =>
-                list.map((f) => (f._id === followup._id ? { ...f, instructions } : f)),
-              );
-              this.filteredFollowups.update((list) =>
-                list.map((f) => (f._id === followup._id ? { ...f, instructions } : f)),
-              );
-              this.isGenerating.set(null);
-            },
-            error: () => {
-              this.errorMessage.set('Failed to update follow-up instructions');
-              this.isGenerating.set(null);
-            },
-          });
-        },
-        error: () => {
-          this.errorMessage.set('Failed to generate follow-up instructions');
-          this.isGenerating.set(null);
-        },
-      });
+    this.router.navigate(['/dashboard/patients/history', patientId], {
+      queryParams: { followupId: followup._id },
+    });
   }
   // بدل الحذف، بنغير الحالة لـ cancelled
   cancelFollowup(followup: Followup): void {

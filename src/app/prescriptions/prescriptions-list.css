@@ -8,79 +8,233 @@
   align-items: center;
   margin-bottom: 24px;
 }
-
 .header h2 {
   margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
 }
-
 .header p {
   color: #666;
   margin-top: 6px;
-}
-
-.add-btn {
-  text-decoration: none;
-  background: #111827;
-  color: white;
-  padding: 10px 14px;
-  border-radius: 8px;
+  font-size: 14px;
 }
 
 .search-card,
 .table-card {
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #eee;
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 18px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.search-card label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
 }
 
 .search-row {
   display: flex;
   gap: 10px;
   margin-top: 8px;
+  flex-wrap: wrap;
 }
 
 input {
   flex: 1;
-  padding: 10px;
-  border: 1px solid #d1d5db;
+  min-width: 0;
+  padding: 9px 14px;
+  border: 1px solid #ddd;
   border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+input:focus {
+  border-color: #2152b3;
 }
 
 button {
-  padding: 10px 14px;
+  padding: 9px 18px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.search-row button {
-  background: #2563eb;
+.search-row button:first-of-type {
+  background: #2152b3;
   color: white;
 }
-
+.clear-btn {
+  background: #f0f0f0;
+  color: #555;
+}
 .delete-btn {
   background: #fee2e2;
   color: #991b1b;
+  padding: 5px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+.delete-btn:hover {
+  background: #fca5a5;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 14px;
 }
-
-th,
-td {
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
+th {
+  padding: 12px 16px;
   text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  background: #f9f9f9;
+  border-bottom: 2px solid #eee;
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+  vertical-align: top;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+tr:hover td {
+  background: #fafafa;
 }
 
+.label-consultation {
+  display: inline-block;
+  background: #f0fdf4;
+  color: #166534;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.label-followup {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.warnings-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.warning-badge {
+  font-size: 12px;
+  color: #991b1b;
+  background: #fee2e2;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.muted {
+  color: #aaa;
+  font-size: 13px;
+}
+
+/* ─── Pagination ─────────────────────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 0 4px;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 8px;
+}
+
+.pagination-info {
+  color: #888;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-size-select {
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pagination-controls button {
+  background: #f0f0f0;
+  color: #333;
+  padding: 6px 12px;
+  min-width: 34px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+.pagination-controls button:disabled {
+  opacity: 0.35;
+}
+.pagination-controls button.active {
+  background: #2152b3;
+  color: white;
+}
+
+/* ─── States ─────────────────────────────────────────────────────────────── */
+.loading {
+  color: #888;
+  padding: 20px;
+}
 .error {
   color: #dc2626;
+  font-size: 14px;
 }
-
 .empty {
   color: #666;
+  padding: 20px;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+  .search-row {
+    flex-direction: column;
+  }
+  .search-row button,
+  .clear-btn {
+    width: 100%;
+  }
+  .pagination {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pagination-controls {
+    width: 100%;
+    justify-content: center;
+  }
 }

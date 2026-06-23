@@ -1,0 +1,53 @@
+<div class="select-page">
+  <div class="page-header">
+    <button class="btn-back" (click)="goBack()">← Back</button>
+    <h2>Select Patient</h2>
+  </div>
+
+  <p class="hint">Search for a patient to start a new consultation</p>
+
+  <div class="search-card">
+    <div class="search-row">
+      <input
+        type="text"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+        (keyup.enter)="search()"
+        placeholder="Search by name or national ID..."
+      />
+      <button (click)="search()" [disabled]="isLoading()">
+        {{ isLoading() ? 'Searching...' : 'Search' }}
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (hasSearched() && !isLoading() && patients().length > 0) {
+    <div class="patients-grid">
+      @for (patient of patients(); track patient._id) {
+        <div class="patient-card" (click)="selectPatient(patient)">
+          <div class="patient-name">{{ patient.name }}</div>
+          <div class="patient-meta">
+            <span
+              class="badge"
+              [class.male]="patient.gender === 'male'"
+              [class.female]="patient.gender === 'female'"
+            >
+              {{ patient.gender }}
+            </span>
+            <span class="age">{{ calculateAge(patient.dateOfBirth) }} yrs</span>
+            <span class="blood-type">{{ patient.bloodType }}</span>
+          </div>
+          <div class="national-id">ID: {{ patient.nationalID }}</div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!hasSearched()) {
+    <div class="empty">Type a patient name above and press Search.</div>
+  }
+</div>

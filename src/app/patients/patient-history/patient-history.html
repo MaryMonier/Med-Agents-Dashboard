@@ -1,5 +1,4 @@
 <div class="history-page">
-
   <div class="page-header">
     <button class="btn-back" (click)="goBack()">← Back</button>
     <h2>Patient History</h2>
@@ -8,22 +7,25 @@
   @if (isLoading()) {
     <div class="loading">Loading...</div>
   }
-
   @if (errorMessage()) {
     <div class="error">{{ errorMessage() }}</div>
   }
 
   @if (data()) {
+    <!-- Patient Card -->
     <div class="patient-card">
       <div class="patient-main">
         <h3>{{ data()!.patient.name }}</h3>
-        <span class="badge" [class.male]="data()!.patient.gender === 'male'" [class.female]="data()!.patient.gender === 'female'">
+        <span
+          class="badge"
+          [class.male]="data()!.patient.gender === 'male'"
+          [class.female]="data()!.patient.gender === 'female'"
+        >
           {{ data()!.patient.gender }}
         </span>
         <span class="blood-type">{{ data()!.patient.bloodType }}</span>
         <span class="age">{{ calculateAge(data()!.patient.dateOfBirth) }} years old</span>
       </div>
-
       <div class="patient-meta">
         <div class="meta-block">
           <span class="meta-label">Allergies</span>
@@ -36,14 +38,15 @@
             }
           </div>
         </div>
-
         <div class="meta-block">
           <span class="meta-label">Chronic Conditions</span>
           <div class="tags">
             @for (c of data()!.patient.chronicConditions; track c) {
               <span class="tag tag-warning">{{ c }}</span>
             }
-            @if (!data()!.patient.chronicConditions || data()!.patient.chronicConditions!.length === 0) {
+            @if (
+              !data()!.patient.chronicConditions || data()!.patient.chronicConditions!.length === 0
+            ) {
               <span class="muted">None</span>
             }
           </div>
@@ -51,8 +54,8 @@
       </div>
     </div>
 
+    <!-- History -->
     <h3 class="section-title">Consultations ({{ data()!.history.length }})</h3>
-
     @if (data()!.history.length === 0) {
       <div class="empty">No consultations recorded yet.</div>
     }
@@ -60,14 +63,21 @@
     <div class="history-grid">
       @for (item of data()!.history; track item.consultationId) {
         <div class="consultation-card">
-
           <div class="card-header">
-            <span class="date">{{ item.date | date:'medium' }}</span>
-            <span class="urgency-badge" [ngClass]="urgencyClass(item.urgencyLevel)">
-              {{ item.urgencyLevel }}
-            </span>
+            <div class="card-header-left">
+              <span class="date">{{ item.date | date: 'medium' }}</span>
+              <!-- مشكلة ٨: label للكونسلتيشن العادية -->
+              @if (!item.isFollowup) {
+                <span class="consultation-label">Consultation</span>
+              }
+              @if (item.isFollowup) {
+                <span class="followup-label">Follow-up Visit</span>
+              }
+            </div>
+            <span class="urgency-badge" [ngClass]="urgencyClass(item.urgencyLevel)">{{
+              item.urgencyLevel
+            }}</span>
           </div>
-
           <div class="card-body">
             <div class="field">
               <span class="label">Symptoms</span>
@@ -77,40 +87,41 @@
                 }
               </div>
             </div>
-
             <div class="field">
               <span class="label">Diagnosis</span>
               <p>{{ item.diagnosis }}</p>
             </div>
-
             @if (item.suggestedSpecialist) {
               <div class="field">
                 <span class="label">Suggested Specialist</span>
                 <p>{{ item.suggestedSpecialist }}</p>
               </div>
             }
-
             @if (item.structuredNote) {
               <div class="field">
                 <span class="label">Clinical Note</span>
                 <p class="note">{{ item.structuredNote }}</p>
               </div>
             }
-
             @if (item.prescription) {
               <div class="field prescription-block">
                 <span class="label">Prescription</span>
-
                 <ul class="med-list">
                   @for (med of item.prescription.medications; track med.name) {
                     <li>
                       <strong>{{ med.name }}</strong>
-                      @if (med.dosage) { <span> — {{ med.dosage }}</span> }
-                      @if (med.frequency) { <span> ({{ med.frequency }})</span> }
+                      @if (med.dose) {
+                        <span> — {{ med.dose }}</span>
+                      }
+                      @if (med.frequency) {
+                        <span> ({{ med.frequency }})</span>
+                      }
+                      @if (med.duration) {
+                        <span class="duration-tag">{{ med.duration }}</span>
+                      }
                     </li>
                   }
                 </ul>
-
                 @if (item.prescription.interactions.length > 0) {
                   <div class="warning-box">
                     <strong>Interactions:</strong>
@@ -121,7 +132,6 @@
                     </ul>
                   </div>
                 }
-
                 @if (item.prescription.warnings.length > 0) {
                   <div class="warning-box danger">
                     <strong>Warnings:</strong>
@@ -138,6 +148,224 @@
         </div>
       }
     </div>
-  }
 
+    <!-- New Consultation / Follow-up Form -->
+    @if (showConsultationForm()) {
+      <div class="consultation-section">
+        <h3 class="section-title">{{ isFollowupMode() ? 'Add Follow-up' : 'New Consultation' }}</h3>
+
+        <!-- مشكلة ٩: Last Consultation Notes (instructions) -->
+        @if (isFollowupMode() && followupInstructions()) {
+          <div class="followup-instructions">
+            <span class="instructions-label">Last Consultation Notes</span>
+            <p>{{ followupInstructions() }}</p>
+          </div>
+        }
+
+        <div class="field-group full-width">
+          <label>Symptoms (comma separated)</label>
+          <input
+            type="text"
+            [ngModel]="symptoms()"
+            (ngModelChange)="symptoms.set($event)"
+            placeholder="e.g. fever, headache, cough"
+          />
+        </div>
+
+        <div class="field-group full-width">
+          <label>Diagnosis (optional)</label>
+          <input
+            type="text"
+            [ngModel]="diagnosis()"
+            (ngModelChange)="diagnosis.set($event)"
+            placeholder="e.g. Flu"
+          />
+        </div>
+
+        <!-- مشكلة ٤ و٥: Note فوق Diagnosis، واسمها Follow-up Note لو followup mode -->
+        <div class="field-group full-width">
+          <label>{{ isFollowupMode() ? 'Follow-up Note' : 'Consultation Note' }}</label>
+          <textarea
+            rows="3"
+            [ngModel]="rawInput()"
+            (ngModelChange)="rawInput.set($event)"
+            [placeholder]="
+              isFollowupMode()
+                ? 'Describe follow-up visit...'
+                : 'Describe the patient\'s condition...'
+            "
+          >
+          </textarea>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label>Language</label>
+            <select [ngModel]="language()" (ngModelChange)="language.set($event)">
+              <option value="en">English</option>
+              <option value="ar">Arabic</option>
+            </select>
+          </div>
+
+          <!-- مشكلة ٣: إخفاء Follow-up Date في followup mode -->
+          @if (!isFollowupMode()) {
+            <div class="field-group">
+              <label>Follow-up Date (optional)</label>
+              <input
+                type="date"
+                [ngModel]="followUpDate()"
+                (ngModelChange)="followUpDate.set($event)"
+              />
+            </div>
+          }
+        </div>
+
+        <div class="form-submit">
+          <!-- مشكلة ٦: اسم الزرار Confirm Follow-up في followup mode -->
+          <button
+            class="btn-create-consultation"
+            (click)="createConsultation()"
+            [disabled]="isCreatingConsultation()"
+          >
+            {{
+              isCreatingConsultation()
+                ? 'Saving...'
+                : isFollowupMode()
+                  ? 'Confirm Follow-up'
+                  : 'Create Consultation'
+            }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Prescription Form -->
+    @if (showPrescriptionForm() && consultationId()) {
+      <div class="prescription-section">
+        <h3 class="section-title">Add Prescription</h3>
+
+        @if (medications().length > 0) {
+          <div class="medications-list">
+            <h4>Medications Added</h4>
+            @for (med of medications(); track med.name; let i = $index) {
+              <div class="med-item">
+                <div class="med-info">
+                  <strong>{{ med.name }}</strong>
+                  <span>{{ med.dose }} · {{ med.frequency }} · {{ med.duration }}</span>
+                </div>
+                <button class="btn-remove" (click)="removeMedication(i)">✕</button>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="drug-search-box">
+          <label>Drug Name</label>
+          <div class="autocomplete-wrapper">
+            <input
+              type="text"
+              [ngModel]="drugQuery()"
+              (ngModelChange)="onDrugInput($event)"
+              (focus)="showSuggestions.set(true)"
+              (blur)="hideSuggestionsDelayed()"
+              placeholder="Start typing a drug name..."
+              autocomplete="off"
+            />
+            @if (isSuggesting()) {
+              <div class="suggest-loading">Searching...</div>
+            }
+            @if (showSuggestions() && drugSuggestions().length > 0) {
+              <div class="suggestions-dropdown">
+                @for (drug of drugSuggestions(); track drug.brandName) {
+                  <div class="suggestion-item" (mousedown)="selectDrug(drug)">
+                    <strong>{{
+                      drug.brandName !== 'N/A' ? drug.brandName : drug.genericName
+                    }}</strong>
+                    <span>{{ drug.genericName }} · {{ drug.route }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (isChecking()) {
+          <div class="checking">Checking interactions...</div>
+        }
+        @if (currentIssue()) {
+          <div class="safety-alert">⚠️ {{ currentIssue() }}</div>
+        }
+
+        <div class="med-fields">
+          <div class="field-row">
+            <div class="field-group">
+              <label>Dose</label>
+              <input
+                type="text"
+                [ngModel]="dose()"
+                (ngModelChange)="dose.set($event)"
+                placeholder="e.g. 500mg"
+              />
+            </div>
+            <div class="field-group">
+              <label>Frequency</label>
+              <input
+                type="text"
+                [ngModel]="frequency()"
+                (ngModelChange)="frequency.set($event)"
+                placeholder="e.g. twice daily"
+              />
+            </div>
+          </div>
+          <div class="field-row duration-row">
+            <div class="field-group">
+              <label>Duration</label>
+              <div class="duration-inputs">
+                <input
+                  type="number"
+                  min="1"
+                  [ngModel]="durationValue()"
+                  (ngModelChange)="durationValue.set($event)"
+                  placeholder="e.g. 7"
+                  [disabled]="isChronic()"
+                />
+                <select
+                  [ngModel]="durationUnit()"
+                  (ngModelChange)="durationUnit.set($event)"
+                  [disabled]="isChronic()"
+                >
+                  <option value="days">Days</option>
+                  <option value="weeks">Weeks</option>
+                  <option value="months">Months</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-group chronic-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [ngModel]="isChronic()"
+                  (ngModelChange)="isChronic.set($event)"
+                />
+                Chronic / Ongoing
+              </label>
+            </div>
+          </div>
+          <div class="med-actions">
+            <button class="btn-add-med" (click)="addMedication()">+ Add Medication</button>
+          </div>
+        </div>
+
+        <div class="form-submit">
+          <button
+            class="btn-submit"
+            (click)="submitPrescription()"
+            [disabled]="isSubmitting() || medications().length === 0"
+          >
+            {{ isSubmitting() ? 'Saving...' : 'Save Prescription' }}
+          </button>
+        </div>
+      </div>
+    }
+  }
 </div>

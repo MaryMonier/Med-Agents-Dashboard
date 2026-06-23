@@ -13,6 +13,7 @@ export interface Consultations {
   status: 'pending' | 'completed';
   language: 'en' | 'ar';
   followUpDate?: string;
+  followupId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -23,6 +24,7 @@ export interface CreateConsultationDto {
   diagnosis: string;
   rawInput: string;
   language: 'en' | 'ar';
+  followUpDate?: string;
 }
 
 export interface ConsultationResponse {
