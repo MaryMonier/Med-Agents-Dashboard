@@ -1,4 +1,18 @@
-<div class="sidebar">
+<!-- Mobile top bar (hamburger) -->
+<div class="mobile-topbar">
+  <span class="logo-text">Med Agents</span>
+  <button class="hamburger" (click)="toggleMenu()" [attr.aria-expanded]="isOpen()">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" [class.visible]="isOpen()" (click)="closeMenu()"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" [class.open]="isOpen()">
   <div class="sidebar-logo">
     <span class="logo-text">Med Agents</span>
     <span class="logo-sub">your Ai assistant</span>
@@ -6,40 +20,35 @@
 
   <div class="nav-section">
     <div class="nav-label">main</div>
-    <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+    <a class="nav-item" routerLink="/dashboard" routerLinkActive="active"
+      [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">
       <i class="ti ti-layout-dashboard"></i> Dashboard
     </a>
-
-      <a class="nav-item" routerLink="/dashboard/doctors" routerLinkActive="active">
+    <a class="nav-item" routerLink="/dashboard/doctors" routerLinkActive="active" (click)="closeMenu()">
       <i class="ti ti-stethoscope"></i> Doctors
     </a>
-
-    <a class="nav-item" routerLink="/dashboard/patients" routerLinkActive="active">
+    <a class="nav-item" routerLink="/dashboard/patients" routerLinkActive="active" (click)="closeMenu()">
       <i class="ti ti-users"></i> Patients
     </a>
-    <a class="nav-item" routerLink="/dashboard/consultations" routerLinkActive="active">
+    <a class="nav-item" routerLink="/dashboard/consultations" routerLinkActive="active" (click)="closeMenu()">
       <i class="ti ti-stethoscope"></i> Consultations
     </a>
   </div>
 
   <div class="nav-section">
     <div class="nav-label">medical</div>
-    <a class="nav-item" routerLink="/dashboard/prescriptions" routerLinkActive="active">
+    <a class="nav-item" routerLink="/dashboard/prescriptions" routerLinkActive="active" (click)="closeMenu()">
       <i class="ti ti-pill"></i> Prescriptions
     </a>
-    <a class="nav-item" routerLink="/dashboard/reports" routerLinkActive="active">
+    <a class="nav-item" routerLink="/dashboard/reports" routerLinkActive="active" (click)="closeMenu()">
       <i class="ti ti-file-text"></i> Reports
     </a>
-    <a class="nav-item" routerLink="/dashboard/followups" routerLinkActive="active">
+    <a class="nav-item" routerLink="/dashboard/followups" routerLinkActive="active" (click)="closeMenu()">
       <i class="ti ti-calendar"></i> Follow-ups
     </a>
   </div>
 
-  <div class="nav-section">
- 
-  </div>
-
-
+  <div class="nav-section"></div>
 
   <div class="sidebar-footer">
     <button class="logout-btn" (click)="logout()">

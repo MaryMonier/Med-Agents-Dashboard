@@ -13,3 +13,15 @@
 .page-content {
   padding: 80px 1.5rem 1.5rem;
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+
+  /* Account for fixed mobile topbar (56px) instead of desktop navbar */
+  .page-content {
+    padding: 72px 1rem 1rem;
+  }
+}
