@@ -24,32 +24,33 @@ export class Home implements OnInit {
     this.loadStats();
   }
 
-  loadStats() {
-    this.http.get<any>(`${this.apiUrl}/auth/doctors`).subscribe({
-      next: (res) => this.totaldoctors.set(res.data?.length || 0),
-      error: () => this.totaldoctors.set(0)
-    });
-    this.http.get<any>(`${this.apiUrl}/patients`).subscribe({
-      next: (res) => this.totalPatients.set(res.data?.length || 0),
-      error: () => this.totalPatients.set(0)
-    });
+ loadStats() {
+  this.http.get<any>(`${this.apiUrl}/auth/doctors`).subscribe({
+    next: (res) => this.totaldoctors.set(res.pagination?.total || res.count || res.data?.length || 0),
+    error: () => this.totaldoctors.set(0)
+  });
 
-    this.http.get<any>(`${this.apiUrl}/consultations`).subscribe({
-      next: (res) => this.totalConsultation.set(res.data?.length || 0),
-      error: () => this.totalConsultation.set(0)
-    });
+  this.http.get<any>(`${this.apiUrl}/patients`).subscribe({
+    next: (res) => this.totalPatients.set(res.pagination?.total || res.count || res.data?.length || 0),
+    error: () => this.totalPatients.set(0)
+  });
 
-    this.http.get<any>(`${this.apiUrl}/followups`).subscribe({
-      next: (res) => this.totalFollowups.set(res.count || res.data?.length || 0),
-      error: () => this.totalFollowups.set(0)
-    });
+  this.http.get<any>(`${this.apiUrl}/consultations`).subscribe({
+    next: (res) => this.totalConsultation.set(res.pagination?.total || res.count || res.data?.length || 0),
+    error: () => this.totalConsultation.set(0)
+  });
 
-    this.http.get<any>(`${this.apiUrl}/prescriptions`).subscribe({
-      next: (res) => {
-        const warnings = res.data?.filter((p: any) => p.warnings?.length > 0).length || 0;
-        this.totalWarnings.set(warnings);
-      },
-      error: () => this.totalWarnings.set(0)
-    });
-  }
+  this.http.get<any>(`${this.apiUrl}/followups`).subscribe({
+    next: (res) => this.totalFollowups.set(res.pagination?.total || res.count || res.data?.length || 0),
+    error: () => this.totalFollowups.set(0)
+  });
+
+  this.http.get<any>(`${this.apiUrl}/prescriptions`).subscribe({
+    next: (res) => {
+      const warnings = res.data?.filter((p: any) => p.warnings?.length > 0).length || 0;
+      this.totalWarnings.set(warnings);
+    },
+    error: () => this.totalWarnings.set(0)
+  });
+}
 }
