@@ -1,12 +1,11 @@
 <div class="page">
-  <div class="header">
+  <div class="page-header">
     <div>
       <h2>Prescriptions</h2>
       <p>All patient prescriptions</p>
     </div>
   </div>
 
-  <!-- Search -->
   <div class="search-card">
     <label>Search by Patient Name</label>
     <div class="search-row">
@@ -14,7 +13,8 @@
         type="text"
         [ngModel]="searchTerm()"
         (ngModelChange)="searchTerm.set($event)"
-        placeholder="Enter patient name"
+        (keyup.enter)="applySearch()"
+        placeholder="Enter patient name..."
       />
       <button (click)="applySearch()" [disabled]="isLoading()">Search</button>
       <button class="clear-btn" (click)="clearSearch()">Clear</button>
@@ -27,7 +27,6 @@
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
   }
-
   @if (!isLoading() && pagedPrescriptions().length === 0 && !errorMessage()) {
     <p class="empty">No prescriptions to display.</p>
   }
@@ -38,9 +37,9 @@
         <thead>
           <tr>
             <th>Patient</th>
+            <th>Doctor</th>
             <th>Type</th>
             <th>Medications</th>
-            <th>Warnings</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -48,6 +47,7 @@
           @for (prescription of pagedPrescriptions(); track prescription._id) {
             <tr>
               <td>{{ prescription.patientId?.name || '—' }}</td>
+              <td>{{ prescription.consultationId?.doctorId?.name || '—' }}</td>
               <td>
                 <span
                   [class]="
@@ -60,29 +60,24 @@
                 </span>
               </td>
               <td>
-                <div *ngFor="let med of prescription.medications">
-                  <strong>{{ med.name }}</strong>
-                  @if (med.dose) {
-                    <span> — {{ med.dose }}</span>
-                  }
-                  @if (med.frequency) {
-                    <span> ({{ med.frequency }})</span>
-                  }
-                </div>
-              </td>
-              <td>
-                @if (prescription.warnings?.length > 0) {
-                  <div class="warnings-cell">
-                    @for (w of prescription.warnings; track w) {
-                      <span class="warning-badge">⚠️ {{ w }}</span>
+                @for (med of prescription.medications; track med.name) {
+                  <div class="med-row">
+                    <strong>{{ med.name }}</strong>
+                    @if (med.dose) {
+                      <span class="detail-badge">{{ med.dose }}</span>
+                    }
+                    @if (med.frequency) {
+                      <span class="detail-badge">{{ med.frequency }}</span>
+                    }
+                    @if (med.duration) {
+                      <span class="detail-badge duration">{{ med.duration }}</span>
                     }
                   </div>
-                } @else {
-                  <span class="muted">None</span>
                 }
               </td>
-              <td>
-                <button class="delete-btn" (click)="deletePrescription(prescription._id)">
+              <td class="actions">
+                <button class="btn-edit" (click)="editPrescription(prescription)">Edit</button>
+                <button class="btn-delete" (click)="deletePrescription(prescription._id)">
                   Delete
                 </button>
               </td>
@@ -91,7 +86,6 @@
         </tbody>
       </table>
 
-      <!-- Pagination -->
       <div class="pagination">
         <div class="pagination-info">
           Showing {{ startItem() }}–{{ endItem() }} of {{ totalItems() }}

@@ -47,6 +47,7 @@ export class PatientHistory implements OnInit {
 
   // ─── Prescription Form ───────────────────────────────────────────────────
   medications = signal<Medication[]>([]);
+  editingPrescriptionId = signal<string | null>(null); // لو موجود → edit mode
 
   // ─── Drug Autocomplete ────────────────────────────────────────────────────
   drugQuery = signal('');
@@ -86,12 +87,17 @@ export class PatientHistory implements OnInit {
     this.route.queryParamMap.subscribe((params) => {
       const consultationId = params.get('consultationId') || '';
       const followupId = params.get('followupId') || '';
+      const prescriptionId = params.get('prescriptionId') || '';
       this.consultationId.set(consultationId);
       this.followupId.set(followupId);
 
-      // لو فيه followupId، نجيب الـ instructions من الباك عشان نعرضها
       if (followupId) {
         this.loadFollowupInstructions(followupId);
+      }
+
+      // لو جه من صفحة الـ prescriptions list بـ prescriptionId، حمّل الروشتة للتعديل
+      if (prescriptionId && consultationId) {
+        this.loadPrescriptionForEdit(prescriptionId);
       }
     });
 
@@ -118,6 +124,28 @@ export class PatientHistory implements OnInit {
           this.isSuggesting.set(false);
         },
       });
+  }
+
+  loadPrescriptionForEdit(prescriptionId: string): void {
+    this.prescriptionService.getPrescriptionById(prescriptionId).subscribe({
+      next: (res: any) => {
+        const prescription = res?.data;
+        if (!prescription) return;
+        this.medications.set(
+          prescription.medications.map((m: any) => ({
+            name: m.name,
+            dose: m.dose || m.dosage || '',
+            frequency: m.frequency || '',
+            duration: m.duration || '',
+          })),
+        );
+        this.editingPrescriptionId.set(prescriptionId);
+        setTimeout(() => {
+          document.querySelector('.prescription-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+      },
+      error: () => {},
+    });
   }
 
   loadFollowupInstructions(followupId: string): void {
@@ -259,7 +287,7 @@ export class PatientHistory implements OnInit {
       if (!prescription) continue;
 
       for (const med of prescription.medications) {
-        const durationText = (med.duration || med.dose || '').toString().toLowerCase();
+        const durationText = (med.duration || med.dosage || '').toString().toLowerCase();
         const isChronicText = durationText.includes('forever') || durationText.includes('chronic');
 
         if (isChronicText) {
@@ -311,7 +339,7 @@ export class PatientHistory implements OnInit {
       source: 'current',
     }));
 
-    // الأدوية الشغالة من الهيستوري (باستثناء الـ chronic اللي علمنا عليها يدوي بالفعل موجودة)
+    // الأدوية الشغالة من الهيستوري
     const historyMeds = this.getActiveDrugsFromHistory();
 
     const activeMedications = [...currentMeds, ...historyMeds];
@@ -319,13 +347,23 @@ export class PatientHistory implements OnInit {
     this.isChecking.set(true);
     this.currentIssue.set(null);
 
-    const allergies = this.data()?.patient?.allergies || [];
+    const allAllergies = this.data()?.patient?.allergies || [];
+
+    // الأدوية اللي الدكتور ضافها بالفعل في الروشتة بتتعامل كـ active drugs
+    // حتى لو بيتطابق اسمها مع حساسية — عشان الـ AI يشيك على التعارض معاهم
+    // من غير ما يكرر وارنينج الحساسية اللي الدكتور خد قراره بالفعل إنه يتجاهلها
+    const addedDrugNames = new Set(this.medications().map((m) => m.name.toLowerCase()));
+    const filteredAllergies = allAllergies.filter(
+      (allergy) =>
+        !Array.from(addedDrugNames).some(
+          (d) => d.includes(allergy.toLowerCase()) || allergy.toLowerCase().includes(d),
+        ),
+    );
+
     const dob = this.data()?.patient?.dateOfBirth;
     const patientAge = dob ? this.calculateAge(dob) : null;
     const patientGender = this.data()?.patient?.gender || null;
 
-    // بنبعت الاسم العلمي مع الاسم التجاري عشان فحص الحساسية يشتغل
-    // حتى لو الدكتور دوّس على اسم تجاري (Brand Name) غير اسم المادة الفعالة
     const drugLabel =
       newDrugGeneric && newDrugGeneric !== newDrugName
         ? `${newDrugName} (${newDrugGeneric})`
@@ -335,7 +373,7 @@ export class PatientHistory implements OnInit {
       .quickDrugCheck({
         newDrug: { name: drugLabel },
         activeMedications: activeMedications.map((m) => ({ name: m.name })),
-        allergies,
+        allergies: filteredAllergies,
         patientAge,
         patientGender,
         language: 'en',
@@ -398,6 +436,41 @@ export class PatientHistory implements OnInit {
     this.medications.update((list) => list.filter((_, i) => i !== index));
   }
 
+  // ─── Edit Prescription from History ──────────────────────────────────────
+  // لما الدكتور يدوس Edit في صفحة الـ prescriptions list
+  // أو من الهيستوري نفسه، يحمل الروشتة الموجودة في الفورم
+  editPrescriptionFromHistory(item: any): void {
+    if (!item.prescription) return;
+
+    // حمّل الأدوية الموجودة في الفورم
+    this.medications.set(
+      item.prescription.medications.map((m: any) => ({
+        name: m.name,
+        dose: m.dose || m.dosage || '',
+        frequency: m.frequency || '',
+        duration: m.duration || '',
+      })),
+    );
+
+    // احفظ الـ prescription id عشان نعمل update مش create
+    this.editingPrescriptionId.set(item.prescription._id || null);
+
+    // set الـ consultationId عشان فورم الـ prescription يظهر
+    if (!this.consultationId()) {
+      this.consultationId.set(item.consultationId);
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { consultationId: item.consultationId },
+        queryParamsHandling: 'merge',
+      });
+    }
+
+    // scroll للفورم
+    setTimeout(() => {
+      document.querySelector('.prescription-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }
+
   // ─── Submit Prescription ──────────────────────────────────────────────────
   submitPrescription(): void {
     if (!this.medications().length) {
@@ -411,40 +484,52 @@ export class PatientHistory implements OnInit {
     }
 
     this.isSubmitting.set(true);
+    const isEdit = !!this.editingPrescriptionId();
 
-    this.prescriptionService
-      .createPrescription({
-        consultationId: this.consultationId(),
-        patientId: this.patientId(),
-        language: 'en',
-        medications: this.medications(),
-      })
-      .subscribe({
-        next: () => {
-          this.isSubmitting.set(false);
-          this.medications.set([]);
+    const request$ = isEdit
+      ? this.prescriptionService.updatePrescription(this.editingPrescriptionId()!, {
+          medications: this.medications(),
+          language: 'en',
+        } as any)
+      : this.prescriptionService.createPrescription({
+          consultationId: this.consultationId(),
+          patientId: this.patientId(),
+          language: 'en',
+          medications: this.medications(),
+        });
 
-          // نفضي الـ consultationId من الـ signal والـ URL
-          // عشان فورم الـ "New Consultation" يظهر تاني بدل فورم الروشتة
-          this.consultationId.set('');
-          this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: {},
-          });
+    request$.subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.medications.set([]);
+        this.editingPrescriptionId.set(null);
 
-          // نصفر فورم الكونسلتيشن كمان عشان يبتدي فاضي
-          this.symptoms.set('');
-          this.diagnosis.set('');
-          this.rawInput.set('');
-          this.followUpDate.set('');
+        this.consultationId.set('');
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {},
+        });
 
-          Swal.fire('Success!', 'Prescription created successfully.', 'success');
-          this.loadHistory();
-        },
-        error: () => {
-          this.isSubmitting.set(false);
-          Swal.fire('Error', 'Failed to create prescription.', 'error');
-        },
-      });
+        this.symptoms.set('');
+        this.diagnosis.set('');
+        this.rawInput.set('');
+        this.followUpDate.set('');
+
+        Swal.fire(
+          'Success!',
+          isEdit ? 'Prescription updated successfully.' : 'Prescription created successfully.',
+          'success',
+        );
+        this.loadHistory();
+      },
+      error: () => {
+        this.isSubmitting.set(false);
+        Swal.fire(
+          'Error',
+          isEdit ? 'Failed to update prescription.' : 'Failed to create prescription.',
+          'error',
+        );
+      },
+    });
   }
 }

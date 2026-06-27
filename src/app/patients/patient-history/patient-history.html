@@ -105,7 +105,12 @@
             }
             @if (item.prescription) {
               <div class="field prescription-block">
-                <span class="label">Prescription</span>
+                <div class="prescription-block-header">
+                  <span class="label">Prescription</span>
+                  <button class="btn-edit-small" (click)="editPrescriptionFromHistory(item)">
+                    Edit
+                  </button>
+                </div>
                 <ul class="med-list">
                   @for (med of item.prescription.medications; track med.name) {
                     <li>
@@ -122,26 +127,6 @@
                     </li>
                   }
                 </ul>
-                @if (item.prescription.interactions.length > 0) {
-                  <div class="warning-box">
-                    <strong>Interactions:</strong>
-                    <ul>
-                      @for (i of item.prescription.interactions; track i) {
-                        <li>{{ i }}</li>
-                      }
-                    </ul>
-                  </div>
-                }
-                @if (item.prescription.warnings.length > 0) {
-                  <div class="warning-box danger">
-                    <strong>Warnings:</strong>
-                    <ul>
-                      @for (w of item.prescription.warnings; track w) {
-                        <li>{{ w }}</li>
-                      }
-                    </ul>
-                  </div>
-                }
               </div>
             }
           </div>
@@ -242,7 +227,9 @@
     <!-- Prescription Form -->
     @if (showPrescriptionForm() && consultationId()) {
       <div class="prescription-section">
-        <h3 class="section-title">Add Prescription</h3>
+        <h3 class="section-title">
+          {{ editingPrescriptionId() ? 'Edit Prescription' : 'Add Prescription' }}
+        </h3>
 
         @if (medications().length > 0) {
           <div class="medications-list">
@@ -362,7 +349,13 @@
             (click)="submitPrescription()"
             [disabled]="isSubmitting() || medications().length === 0"
           >
-            {{ isSubmitting() ? 'Saving...' : 'Save Prescription' }}
+            {{
+              isSubmitting()
+                ? 'Saving...'
+                : editingPrescriptionId()
+                  ? 'Update Prescription'
+                  : 'Save Prescription'
+            }}
           </button>
         </div>
       </div>

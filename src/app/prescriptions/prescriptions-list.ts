@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { PrescriptionService } from '../services/prescription';
 import Swal from 'sweetalert2';
 
@@ -35,7 +36,10 @@ export class PrescriptionsList implements OnInit {
   startItem = computed(() => this.pageIndex() * this.pageSize() + 1);
   endItem = computed(() => Math.min((this.pageIndex() + 1) * this.pageSize(), this.totalItems()));
 
-  constructor(private prescriptionService: PrescriptionService) {}
+  constructor(
+    private prescriptionService: PrescriptionService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.loadAll();
@@ -92,6 +96,23 @@ export class PrescriptionsList implements OnInit {
     this.pageIndex.set(0);
   }
 
+  // ─── Edit: يودي لصفحة الهيستوري مع الـ consultationId ──────────────────
+  editPrescription(prescription: any): void {
+    const patientId = prescription.patientId?._id || prescription.patientId;
+    const consultationId = prescription.consultationId?._id || prescription.consultationId;
+    const prescriptionId = prescription._id;
+
+    if (!patientId || !consultationId) {
+      Swal.fire('Error', 'Cannot find patient or consultation for this prescription.', 'error');
+      return;
+    }
+
+    this.router.navigate(['/dashboard/patients/history', patientId], {
+      queryParams: { consultationId, prescriptionId },
+    });
+  }
+
+  // ─── Delete ──────────────────────────────────────────────────────────────
   async deletePrescription(id: string): Promise<void> {
     const result = await Swal.fire({
       title: 'Are you sure?',
@@ -109,6 +130,13 @@ export class PrescriptionsList implements OnInit {
     const deleted = this.allPrescriptions().find((p) => p._id === id);
     this.allPrescriptions.update((list) => list.filter((p) => p._id !== id));
     this.filteredPrescriptions.update((list) => list.filter((p) => p._id !== id));
+
+    // مشكلة ١: لو الصفحة الحالية بقت فاضية بعد الحذف، رجّع لأول صفحة
+    const newTotal = this.filteredPrescriptions().length;
+    const maxPage = Math.ceil(newTotal / this.pageSize()) - 1;
+    if (this.pageIndex() > maxPage) {
+      this.pageIndex.set(Math.max(0, maxPage));
+    }
 
     this.prescriptionService.deletePrescription(id).subscribe({
       next: () => {
