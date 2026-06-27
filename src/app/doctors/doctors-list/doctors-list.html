@@ -42,7 +42,7 @@
       <tbody>
         @for (doctor of doctors(); track doctor._id) {
           <tr>
-            <td>{{ doctor.name }}</td>
+            <td><a class="doctor-name-link" (click)="goToDetail(doctor._id)">{{ doctor.name }}</a></td>
             <td>{{ doctor.email }}</td>
             <td>{{ doctor.specialty || 'N/A' }}</td>
             <td>{{ doctor.language || 'en' }}</td>

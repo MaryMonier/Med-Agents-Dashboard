@@ -55,6 +55,10 @@ export class DoctorsList implements OnInit {
     this.router.navigate(['/dashboard/doctors/add']);
   }
 
+  goToDetail(id: string) {
+    this.router.navigate(['/dashboard/doctors', id]);
+  }
+
   goToEdit(id: string) {
     this.router.navigate(['/dashboard/doctors/edit', id]);
   }

@@ -22,6 +22,17 @@ export interface Patient {
   createdAt?: string;
 }
 
+export interface DoctorInfo {
+  _id: string;
+  name: string;
+  specialty?: string;
+  email?: string;
+}
+
+export interface PatientWithDoctor extends Omit<Patient, 'createdBy'> {
+  createdBy?: DoctorInfo | string;
+}
+
 export interface PrescriptionInfo {
   medications: {
     name: string;
@@ -46,7 +57,7 @@ export interface ConsultationHistory {
 }
 
 export interface IPatientHistory {
-  patient: Patient;
+  patient: PatientWithDoctor;
   history: ConsultationHistory[];
 }
 
@@ -71,6 +82,19 @@ export class PatientService {
   }
   getById(id: string): Observable<{ success: boolean; data: Patient }> {
     return this.http.get<{ success: boolean; data: Patient }>(`${this.apiUrl}/${id}`);
+  }
+  getByDoctorId(
+    doctorId: string,
+    page = 1,
+    limit = 50,
+  ): Observable<{
+    success: boolean;
+    data: Patient[];
+    pagination: { total: number; page: number; limit: number; totalPages: number } | null;
+  }> {
+    return this.http.get<any>(
+      `${this.apiUrl}/by-doctor/${doctorId}?page=${page}&limit=${limit}`,
+    );
   }
   getHistory(id: string): Observable<{ success: boolean; data: IPatientHistory }> {
     return this.http.get<{ success: boolean; data: IPatientHistory }>(

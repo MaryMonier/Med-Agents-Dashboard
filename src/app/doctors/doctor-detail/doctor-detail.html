@@ -1,0 +1,86 @@
+<div class="patients-page">
+
+  <div class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="goBack()">← Back</button>
+      <h2>Doctor Profile</h2>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Loading doctor...</div>
+  }
+
+  @if (errorMessage() && !isLoading()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (!isLoading() && doctor()) {
+    <div class="doctor-profile-card">
+      <div class="doctor-avatar">
+        {{ doctor().name?.charAt(0) || 'D' }}
+      </div>
+      <div class="doctor-info">
+        <h3>{{ doctor().name }}</h3>
+        <p class="doctor-email">{{ doctor().email }}</p>
+        <div class="doctor-meta">
+          <span class="meta-pill">{{ doctor().specialty || 'N/A' }}</span>
+          <span class="meta-pill">{{ doctor().language === 'ar' ? 'Arabic' : 'English' }}</span>
+          <span class="badge">{{ doctor().role }}</span>
+        </div>
+      </div>
+      <div class="doctor-stats">
+        <div class="doctor-stat">
+          <div class="doctor-stat-value">{{ totalPatients() }}</div>
+          <div class="doctor-stat-label">Patients</div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="section-title">Patients</div>
+
+  @if (isLoadingPatients()) {
+    <div class="loading">Loading patients...</div>
+  }
+
+  @if (!isLoadingPatients() && patients().length === 0) {
+    <div class="empty">No patients found for this doctor.</div>
+  }
+
+  @if (!isLoadingPatients() && patients().length > 0) {
+    <div class="table-wrapper">
+      <table class="patients-table">
+        <thead>
+          <tr>
+            <th data-label="Name">Name</th>
+            <th data-label="National ID">National ID</th>
+            <th data-label="Age">Age</th>
+            <th data-label="Gender">Gender</th>
+            <th data-label="Actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (patient of patients(); track patient._id) {
+            <tr>
+              <td data-label="Name">{{ patient.name }}</td>
+              <td data-label="National ID">{{ patient.nationalID }}</td>
+              <td data-label="Age">{{ calculateAge(patient.dateOfBirth) }}</td>
+              <td data-label="Gender">
+                <span class="badge" [class.male]="patient.gender === 'male'" [class.female]="patient.gender === 'female'">
+                  {{ patient.gender }}
+                </span>
+              </td>
+              <td data-label="Actions">
+                <div class="actions">
+                  <button class="btn-history" (click)="goToPatientHistory(patient._id!)">History</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

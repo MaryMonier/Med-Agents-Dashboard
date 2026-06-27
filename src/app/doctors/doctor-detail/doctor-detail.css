@@ -1,0 +1,253 @@
+.patients-page {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.page-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.btn-back {
+  padding: 8px 16px;
+  background: #f0f0f0;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-back:hover { background: #e0e0e0; }
+
+/* ── Doctor profile card ── */
+.doctor-profile-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.doctor-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #3B5BDB;
+  color: #fff;
+  font-size: 26px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.doctor-info {
+  flex: 1;
+  min-width: 180px;
+}
+
+.doctor-info h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.doctor-email {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.doctor-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.meta-pill {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #EDEBFB;
+  color: #5F3DC4;
+}
+
+.doctor-stats {
+  display: flex;
+  gap: 24px;
+  padding-left: 20px;
+  border-left: 1px solid #f0f0f0;
+}
+
+.doctor-stat {
+  text-align: center;
+}
+
+.doctor-stat-value {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.doctor-stat-label {
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+}
+
+/* ── Table (matches patients-list styling) ── */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.patients-table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.patients-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #888;
+  background: #f9f9f9;
+  border-bottom: 1px solid #eee;
+}
+
+.patients-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.patients-table tr:last-child td { border-bottom: none; }
+.patients-table tr:hover td { background: #fafafa; }
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge.male { background: #E6F1FB; color: #185FA5; }
+.badge.female { background: #FAEEF7; color: #8B2E72; }
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-history {
+  padding: 5px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #3B5BDB;
+  color: #3B5BDB;
+  background: transparent;
+  cursor: pointer;
+}
+
+.btn-history:hover { background: #E6F1FB; }
+
+.loading { color: #888; padding: 20px; }
+.error { color: #e53e3e; padding: 20px; }
+.empty { color: #aaa; padding: 40px; text-align: center; }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .patients-page { padding: 16px; }
+  .page-header h2 { font-size: 18px; }
+}
+
+@media (max-width: 480px) {
+  .patients-page { padding: 12px; }
+  .doctor-profile-card { flex-direction: column; align-items: flex-start; }
+  .doctor-stats { border-left: none; padding-left: 0; border-top: 1px solid #f0f0f0; padding-top: 14px; width: 100%; }
+}
+
+@media (max-width: 600px) {
+  .table-wrapper {
+    overflow-x: visible;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .patients-table {
+    min-width: 0;
+  }
+
+  .patients-table thead { display: none; }
+
+  .patients-table tr {
+    display: block;
+    margin-bottom: 12px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 12px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  }
+
+  .patients-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f5f5f5;
+    padding: 8px 4px;
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .patients-table td:last-child { border-bottom: none; }
+
+  .patients-table td::before {
+    content: attr(data-label);
+    font-weight: 500;
+    color: #888;
+    font-size: 12px;
+  }
+
+  .actions {
+    justify-content: flex-end;
+  }
+}

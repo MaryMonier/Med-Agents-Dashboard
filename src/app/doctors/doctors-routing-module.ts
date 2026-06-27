@@ -6,6 +6,7 @@ const routes: Routes = [
   { path: '', component: DoctorsList },
   { path: 'add', loadComponent: () => import('./doctors-form/doctors-form').then(m => m.DoctorsForm) },
   { path: 'edit/:id', loadComponent: () => import('./doctors-form/doctors-form').then(m => m.DoctorsForm) },
+  { path: ':id', loadComponent: () => import('./doctor-detail/doctor-detail').then(m => m.DoctorDetail) },
 ];
 
 @NgModule({
