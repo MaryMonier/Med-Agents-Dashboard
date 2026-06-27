@@ -1,24 +1,269 @@
 <div class="home-container">
+
+  <!-- Stats -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-label">Doctor</div>
-      <div class="stat-value">{{ totaldoctors() }}</div>
+      <div class="stat-icon icon-blue">
+        <i class="material-icons">people</i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ totalDoctors() }}</div>
+        <div class="stat-label">Doctors</div>
+      </div>
     </div>
+
     <div class="stat-card">
-      <div class="stat-label">patients</div>
-      <div class="stat-value">{{ totalPatients() }}</div>
+      <div class="stat-icon icon-green">
+        <i class="material-icons">person</i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ totalPatients() }}</div>
+        <div class="stat-label">Patients</div>
+      </div>
     </div>
+
     <div class="stat-card">
-      <div class="stat-label">consultations</div>
-      <div class="stat-value">{{ totalConsultation() }}</div>
+      <div class="stat-icon icon-purple">
+        <i class="material-icons">medical_services</i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ totalConsultations() }}</div>
+        <div class="stat-label">Consultations</div>
+      </div>
     </div>
+
     <div class="stat-card">
-      <div class="stat-label">drug warnings</div>
-      <div class="stat-value">{{ totalWarnings() }}</div>
+      <div class="stat-icon icon-orange">
+        <i class="material-icons">calendar_today</i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ totalFollowups() }}</div>
+        <div class="stat-label">Follow-ups</div>
+      </div>
     </div>
+
     <div class="stat-card">
-      <div class="stat-label">follow-ups</div>
-      <div class="stat-value">{{ totalFollowups() }}</div>
+      <div class="stat-icon icon-red">
+        <i class="material-icons">warning</i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ totalWarnings() }}</div>
+        <div class="stat-label">Drug Warnings</div>
+      </div>
     </div>
   </div>
+
+  <!-- Charts Row -->
+  <div class="charts-row">
+
+    <!-- Donut Chart -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-title">Consultations by Urgency</span>
+      </div>
+      <div class="donut-wrap">
+        <div class="donut" [style.background]="getDonutStyle()">
+          <div class="donut-hole">
+            <div class="donut-total">{{ urgencyStats().critical + urgencyStats().medium + urgencyStats().low + urgencyStats().unknown }}</div>
+            <div class="donut-label">total</div>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="legend-item">
+            <span class="legend-dot" style="background:#C92A2A"></span>
+            <span class="legend-text">Critical</span>
+            <span class="legend-val">{{ urgencyStats().critical }}</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style="background:#E67700"></span>
+            <span class="legend-text">Medium</span>
+            <span class="legend-val">{{ urgencyStats().medium }}</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style="background:#2F9E44"></span>
+            <span class="legend-text">Low</span>
+            <span class="legend-val">{{ urgencyStats().low }}</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style="background:#CED4DA"></span>
+            <span class="legend-text">Unknown</span>
+            <span class="legend-val">{{ urgencyStats().unknown }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-title">Consultations — Last 6 Months</span>
+      </div>
+      <div class="bar-chart">
+       @for (m of monthlyStats(); track m.month) {
+  <div class="bar-col">
+    <div class="bar-track">
+      <div class="bar-fill"
+           [style.height]="getBarHeight(m.count)">
+        <span class="bar-tooltip">{{ m.count }}</span>
+      </div>
+    </div>
+    <div class="bar-label">{{ m.month }}</div>
+  </div>
+}
+      </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-title">Recent Activity</span>
+      </div>
+      <div class="activity-feed-body">
+        @if (activityFeed().length === 0) {
+          <div class="empty-state">No activity yet</div>
+        }
+        @for (item of activityFeed(); track $index) {
+          <div class="activity-item">
+            <div class="activity-icon" [style.background]="item.color + '18'" [style.color]="item.color">
+              <i class="material-icons">{{ item.icon }}</i>
+            </div>
+            <div class="activity-info">
+              <div class="activity-text">{{ item.text }}</div>
+              <div class="activity-time">{{ item.time }}</div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Section -->
+  <div class="bottom-grid">
+
+    <!-- Left Column -->
+    <div style="display:flex; flex-direction:column; gap:24px;">
+
+      <!-- Recent Consultations -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Recent Consultations</span>
+          <a routerLink="/dashboard/consultations" class="card-link">View all</a>
+        </div>
+        @if (recentConsultations().length === 0) {
+          <div class="empty-state">No consultations yet</div>
+        }
+        @for (c of recentConsultations(); track c._id) {
+          <div class="list-item">
+            <div class="list-item-left">
+              <div class="list-item-title">{{ getPatientName(c.patientId) }}</div>
+              <div class="list-item-sub">{{ c.diagnosis || 'No diagnosis' }}</div>
+            </div>
+            <div class="list-item-right">
+              <span class="urgency-badge" [class]="getUrgencyClass(c.urgencyLevel)">
+                {{ c.urgencyLevel || 'unknown' }}
+              </span>
+              <div class="list-item-date">{{ c.createdAt | date:'MMM d' }}</div>
+            </div>
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <!-- Right Column -->
+    <div class="right-col">
+
+      <!-- Quick Actions -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Quick Actions</span>
+        </div>
+        <div class="quick-actions">
+          <a routerLink="/dashboard/patients/add" class="action-btn">
+            <i class="material-icons">person_add</i>
+            Add Patient
+          </a>
+          <a routerLink="/dashboard/consultations/add" class="action-btn">
+            <i class="material-icons">add_circle</i>
+            New Consultation
+          </a>
+          <a routerLink="/dashboard/reports" class="action-btn">
+            <i class="material-icons">description</i>
+            Generate Report
+          </a>
+          <a routerLink="/dashboard/prescriptions" class="action-btn">
+            <i class="material-icons">medication</i>
+            Prescriptions
+          </a>
+        </div>
+      </div>
+
+      <!-- Pending Follow-ups -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Pending Follow-ups</span>
+          <a routerLink="/dashboard/followups" class="card-link">View all</a>
+        </div>
+        @if (upcomingFollowups().length === 0) {
+          <div class="empty-state">No pending follow-ups</div>
+        }
+        @for (f of upcomingFollowups(); track f._id) {
+          <div class="list-item">
+            <div class="list-item-left">
+              <div class="list-item-title">{{ getPatientName(f.patientId) }}</div>
+              <div class="list-item-sub">
+                {{ f.scheduledDate ? (f.scheduledDate | date:'MMM d, y') : 'No date set' }}
+              </div>
+            </div>
+            <span class="status-badge pending">pending</span>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Full-width Bottom Row: Top Doctors + Age Distribution -->
+  <div class="full-bottom-row">
+
+    <!-- Top Doctors -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🏆 Top Doctors by Patients</span>
+      </div>
+      @if (topDoctors().length === 0) {
+        <div class="empty-state">No data available</div>
+      }
+      @for (d of topDoctors(); track d._id; let i = $index) {
+        <div class="list-item">
+          <div class="list-item-left">
+            <div class="list-item-title">{{ i + 1 }}. {{ d.name }}</div>
+            <div class="list-item-sub">{{ d.specialty || 'N/A' }}</div>
+          </div>
+          <span class="status-badge pending">{{ d.patientCount }} patients</span>
+        </div>
+      }
+    </div>
+
+    <!-- Age Distribution -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">👥 Patient Age Distribution</span>
+      </div>
+      @for (g of ageGroups(); track g.label) {
+        <div class="age-group-item">
+          <div class="age-group-header">
+            <span class="age-label">{{ g.label }}</span>
+            <span class="age-count">{{ g.count }} ({{ g.percent }}%)</span>
+          </div>
+          <div class="age-bar-bg">
+            <div [style.width.%]="g.percent" class="age-bar-fill"></div>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+
 </div>
