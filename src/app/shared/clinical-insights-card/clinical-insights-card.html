@@ -1,0 +1,49 @@
+<div class="ci-card">
+  <div class="ci-header">
+    <span class="ci-title">⚡ Clinical Insights</span>
+    <span class="ci-beta">BETA</span>
+  </div>
+
+  <div class="ci-body">
+    @if (!result && !isGenerating) {
+      <div class="ci-state">
+        <div class="ci-icon">🧠</div>
+        <p class="ci-state-title">Agent Ready</p>
+        <p class="ci-state-subtitle">
+          Fill out the consultation form to receive automated diagnosis suggestions and drug safety warnings.
+        </p>
+      </div>
+    }
+
+    @if (isGenerating) {
+      <div class="ci-state">
+        <div class="ci-icon ci-icon-pulse">🧠</div>
+        <p class="ci-state-title">Analyzing...</p>
+        <p class="ci-state-subtitle">The AI agent is reviewing the clinical data.</p>
+      </div>
+    }
+
+    @if (result && !isGenerating) {
+      <div class="ci-result">
+        <div class="ci-urgency-box" [ngClass]="urgencyClass(result.urgencyLevel)">
+          <p class="ci-label">Urgency Level</p>
+          <p class="ci-urgency-value">{{ result.urgencyLevel }}</p>
+        </div>
+
+        @if (result.suggestedSpecialist) {
+          <div class="ci-box">
+            <p class="ci-label">Suggested Specialist</p>
+            <p class="ci-text">{{ result.suggestedSpecialist }}</p>
+          </div>
+        }
+
+        @if (result.structuredNote) {
+          <div class="ci-box">
+            <p class="ci-label">Structured Note</p>
+            <p class="ci-text ci-note">{{ result.structuredNote }}</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

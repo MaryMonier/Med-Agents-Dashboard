@@ -37,6 +37,19 @@ export class ConsultationService {
     );
   }
 
+  getAIRecommendation(data: {
+    rawInput: string;
+    symptoms: string[];
+    diagnosis?: string;
+    language: string;
+  }): Observable<{ success: boolean; data: any }> {
+    return this.http.post<{ success: boolean; data: any }>(
+      `${this.apiUrl}/ai-recommendation`,
+      data,
+      { headers: this.getHeaders() },
+    );
+  }
+
   create(data: CreateConsultationDto): Observable<{ success: boolean; data: Consultations }> {
     return this.http.post<{ success: boolean; data: Consultations }>(
       this.apiUrl,

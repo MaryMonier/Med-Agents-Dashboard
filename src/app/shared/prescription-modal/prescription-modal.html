@@ -1,0 +1,217 @@
+@if (isOpen) {
+  <div class="pm-overlay" (click)="close()">
+    <div class="pm-panel" (click)="$event.stopPropagation()">
+      <div class="pm-header">
+        <div>
+          <h2>{{ existingPrescription ? 'Edit Prescription' : 'Add Prescription' }}</h2>
+          @if (patient) {
+            <p class="pm-patient-line">
+              {{ patient.name }}
+              @if (patientAge !== null) {
+                <span> · Age {{ patientAge }}</span>
+              }
+              @if (patient.allergies?.length) {
+                <span> · Allergies: {{ patient.allergies.join(', ') }}</span>
+              }
+            </p>
+          }
+        </div>
+        <button type="button" class="pm-close-btn" (click)="close()" aria-label="Close">✕</button>
+      </div>
+
+      <div class="pm-body">
+        <div class="pm-medications-col">
+          @for (med of medications(); track med._key; let i = $index) {
+            <div class="pm-med-row">
+              <div class="pm-med-row-header">
+                <span>Medication {{ i + 1 }}</span>
+                @if (medications().length > 1) {
+                  <button type="button" class="pm-remove-btn" (click)="removeMedicationRow(i)">
+                    ✕ Remove
+                  </button>
+                }
+              </div>
+
+              <!-- Drug name + FDA autocomplete -->
+              <div class="pm-field pm-autocomplete-wrapper">
+                <label>Medication Name</label>
+                <input
+                  type="text"
+                  [ngModel]="med.name"
+                  (ngModelChange)="onNameInput(i, $event)"
+                  (focus)="onNameFocus(med._key)"
+                  (blur)="onNameBlur(med._key)"
+                  placeholder="Start typing a drug name..."
+                  autocomplete="off"
+                />
+                @if (med.activeIngredient) {
+                  <p class="pm-active-ingredient">
+                    Active ingredient: <span>{{ med.activeIngredient }}</span>
+                  </p>
+                }
+                @if (showSuggestionsByKey[med._key] && (searchingByKey[med._key] || (suggestionsByKey[med._key]?.length ?? 0) > 0)) {
+                  <ul class="pm-suggestions">
+                    @if (searchingByKey[med._key]) {
+                      <li class="pm-suggestion-loading">Searching FDA database...</li>
+                    }
+                    @for (drug of suggestionsByKey[med._key]; track drug.displayName) {
+                      <li (mousedown)="selectSuggestion(i, drug)">
+                        <strong>{{ drug.displayName }}</strong>
+                        @if (drug.genericName !== 'N/A' && drug.genericName.toLowerCase() !== drug.displayName.toLowerCase()) {
+                          <span class="pm-suggestion-meta"> ({{ drug.genericName }})</span>
+                        }
+                        @if (drug.route !== 'N/A') {
+                          <span class="pm-suggestion-meta"> · {{ drug.route }}</span>
+                        }
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+
+              <!-- Dosage amount + unit -->
+              <div class="pm-field-row">
+                <div class="pm-field">
+                  <label>Dosage Amount</label>
+                  <input
+                    type="number"
+                    min="0"
+                    [ngModel]="med.dosageAmount"
+                    (ngModelChange)="updateMedication(i, { dosageAmount: $event })"
+                    placeholder="e.g. 500"
+                  />
+                </div>
+                <div class="pm-field">
+                  <label>Unit</label>
+                  <select
+                    [ngModel]="med.dosageUnit"
+                    (ngModelChange)="updateMedication(i, { dosageUnit: $event })"
+                  >
+                    <option value="mcg">mcg</option>
+                    <option value="mg">mg</option>
+                    <option value="g">g</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Frequency count + period -->
+              <div class="pm-field-row">
+                <div class="pm-field">
+                  <label>Times Taken</label>
+                  <input
+                    type="number"
+                    min="1"
+                    [ngModel]="med.frequencyCount"
+                    (ngModelChange)="updateMedication(i, { frequencyCount: $event })"
+                    placeholder="e.g. 2"
+                  />
+                </div>
+                <div class="pm-field">
+                  <label>Frequency</label>
+                  <select
+                    [ngModel]="med.frequencyPeriod"
+                    (ngModelChange)="updateMedication(i, { frequencyPeriod: $event })"
+                  >
+                    <option value="per day">per day</option>
+                    <option value="per week">per week</option>
+                    <option value="per month">per month</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Chronic checkbox -->
+              <label class="pm-checkbox-label">
+                <input
+                  type="checkbox"
+                  [ngModel]="med.isChronic"
+                  (ngModelChange)="updateMedication(i, { isChronic: $event })"
+                />
+                <span>Chronic medication <small>(taken for life)</small></span>
+              </label>
+
+              <!-- Duration value + unit -->
+              <div class="pm-field-row">
+                <div class="pm-field">
+                  <label>Duration</label>
+                  <input
+                    type="number"
+                    min="1"
+                    [disabled]="med.isChronic"
+                    [ngModel]="med.isChronic ? '' : med.durationValue"
+                    (ngModelChange)="updateMedication(i, { durationValue: $event })"
+                    [placeholder]="med.isChronic ? 'Lifelong' : 'e.g. 7'"
+                  />
+                </div>
+                <div class="pm-field">
+                  <label>Duration Unit</label>
+                  <select
+                    [disabled]="med.isChronic"
+                    [ngModel]="med.durationUnit"
+                    (ngModelChange)="updateMedication(i, { durationUnit: $event })"
+                  >
+                    <option value="days">days</option>
+                    <option value="weeks">weeks</option>
+                    <option value="months">months</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          }
+
+          <button type="button" class="pm-add-med-btn" (click)="addMedicationRow()">
+            + Add another medication
+          </button>
+        </div>
+
+        <!-- Safety panel -->
+        <div class="pm-safety-col">
+          <div class="pm-safety-card">
+            <div class="pm-safety-card-header">🛡️ Safety Screening</div>
+            <div class="pm-safety-card-body">
+              @if (checkingSafety()) {
+                <div class="pm-safety-state">
+                  <div class="pm-safety-icon">🧠</div>
+                  <p class="pm-safety-title">Checking safety...</p>
+                  <p class="pm-safety-subtitle">
+                    Reviewing allergies, interactions and active medications.
+                  </p>
+                </div>
+              } @else if (!checkedMedications() || checkedMedications()!.length === 0) {
+                <div class="pm-safety-state">
+                  <div class="pm-safety-icon">🛡️</div>
+                  <p class="pm-safety-title">Safety Screening</p>
+                  <p class="pm-safety-subtitle">
+                    Add a medication name to see allergy, interaction and active-medication checks.
+                  </p>
+                </div>
+              } @else {
+                <div class="pm-safety-list">
+                  @for (med of checkedMedications(); track med.name) {
+                    @if (med.quickCheckMessage) {
+                      <div class="pm-safety-warning">
+                        <p class="pm-safety-warning-title">⚠ {{ med.name }}</p>
+                        <p class="pm-safety-warning-text">{{ med.quickCheckMessage }}</p>
+                      </div>
+                    } @else {
+                      <div class="pm-safety-ok">
+                        <span>✓</span>
+                        <span>{{ med.name }} — no issues detected</span>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pm-footer">
+        <button type="button" class="pm-cancel-btn" (click)="close()">Cancel</button>
+        <button type="button" class="pm-save-btn" [disabled]="isSaving()" (click)="save()">
+          {{ isSaving() ? 'Saving...' : (existingPrescription ? 'Update Prescription' : 'Save Prescription') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

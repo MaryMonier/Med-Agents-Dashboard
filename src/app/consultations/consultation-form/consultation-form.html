@@ -1,109 +1,139 @@
 <div class="form-container">
-  <div class="form-card">
-    <div class="form-header">
-      <h2>{{ isEditMode ? 'Edit Consultation' : 'New Consultation' }}</h2>
+  <div class="form-layout">
+    <div class="form-card">
+      <div class="form-header">
+        <h2>{{ isEditMode ? 'Edit Consultation' : 'New Consultation' }}</h2>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="full-width span-2">
+            <mat-label>Patient</mat-label>
+            <input
+              matInput
+              formControlName="patientName"
+              [matAutocomplete]="auto"
+              (input)="onPatientInputChange()"
+              placeholder="Type patient name..."
+            />
+            <mat-autocomplete
+              #auto="matAutocomplete"
+              (optionSelected)="onPatientSelected($event.option.value)"
+            >
+              @for (patient of filteredPatients(); track patient._id) {
+                <mat-option [value]="patient">{{ patient.name }}</mat-option>
+              }
+            </mat-autocomplete>
+            @if (form.get('patientId')?.hasError('required') && form.get('patientName')?.dirty) {
+              <mat-error>Please select a patient from the list</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width span-2">
+            <mat-label>Doctor's Notes</mat-label>
+            <textarea matInput formControlName="rawInput" rows="4"></textarea>
+            @if (form.get('rawInput')?.hasError('required')) {
+              <mat-error>Notes are required</mat-error>
+            }
+            @if (form.get('rawInput')?.hasError('minlength')) {
+              <mat-error>Minimum 10 characters</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width span-2">
+            <mat-label>Symptoms (comma separated)</mat-label>
+            <input matInput formControlName="symptoms" placeholder="headache, fever, cough" />
+            @if (form.get('symptoms')?.hasError('required')) {
+              <mat-error>Symptoms are required</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Step 1: Get AI Recommendation -->
+          @if (!isEditMode) {
+            <div class="ai-trigger-row span-2">
+              <button
+                mat-stroked-button
+                color="primary"
+                type="button"
+                [disabled]="isGeneratingAi()"
+                (click)="getAiRecommendation()"
+              >
+                @if (isGeneratingAi()) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                }
+                🧠 Get AI Recommendation
+              </button>
+              @if (!isSaved()) {
+                <span class="ai-trigger-hint">Get the AI recommendation before saving the record.</span>
+              }
+            </div>
+          }
+
+          <div class="diagnosis-row span-2">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Diagnosis</mat-label>
+              <input matInput formControlName="diagnosis" placeholder="Enter final diagnosis..." />
+            </mat-form-field>
+
+            <mat-checkbox formControlName="isChronic" class="chronic-checkbox">
+              Chronic Disease
+            </mat-checkbox>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Language</mat-label>
+            <mat-select formControlName="language">
+              <mat-option value="en">English</mat-option>
+              <mat-option value="ar">Arabic</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width span-2">
+            <mat-label>Follow-up Date (optional)</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="followUpDate"
+              [min]="minDate"
+              [max]="maxDate"
+              placeholder="Select follow-up date"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="picker"> </mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            @if (form.get('followUpDate')?.hasError('pastDate')) {
+              <mat-error>Follow-up date cannot be today or in the past</mat-error>
+            }
+            @if (form.get('followUpDate')?.hasError('maxDate')) {
+              <mat-error>Follow-up date cannot exceed 6 months from today</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-stroked-button type="button" routerLink="/consultations">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="isLoading()">
+            @if (isLoading()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            }
+            {{ isLoading() ? 'Saving...' : (isEditMode ? 'Update' : 'Save Record') }}
+          </button>
+        </div>
+      </form>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div class="form-grid">
-        <mat-form-field appearance="outline" class="full-width span-2">
-          <mat-label>Patient</mat-label>
-          <input
-            matInput
-            formControlName="patientName"
-            [matAutocomplete]="auto"
-            (input)="onPatientInputChange()"
-            placeholder="Type patient name..."
-          />
-          <mat-autocomplete
-            #auto="matAutocomplete"
-            (optionSelected)="onPatientSelected($event.option.value)"
-          >
-            @for (patient of filteredPatients(); track patient._id) {
-              <mat-option [value]="patient">{{ patient.name }}</mat-option>
-            }
-          </mat-autocomplete>
-          @if (form.get('patientId')?.hasError('required') && form.get('patientName')?.dirty) {
-            <mat-error>Please select a patient from the list</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width span-2">
-          <mat-label>Doctor's Notes</mat-label>
-          <textarea matInput formControlName="rawInput" rows="4"></textarea>
-          @if (form.get('rawInput')?.hasError('required')) {
-            <mat-error>Notes are required</mat-error>
-          }
-          @if (form.get('rawInput')?.hasError('minlength')) {
-            <mat-error>Minimum 10 characters</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width span-2">
-          <mat-label>Symptoms (comma separated)</mat-label>
-          <input matInput formControlName="symptoms" placeholder="headache, fever, cough" />
-          @if (form.get('symptoms')?.hasError('required')) {
-            <mat-error>Symptoms are required</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Diagnosis (optional)</mat-label>
-          <input matInput formControlName="diagnosis" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Language</mat-label>
-          <mat-select formControlName="language">
-            <mat-option value="en">English</mat-option>
-            <mat-option value="ar">Arabic</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width span-2">
-          <mat-label>Follow-up Date (optional)</mat-label>
-          <input
-            matInput
-            [matDatepicker]="picker"
-            formControlName="followUpDate"
-            [min]="minDate"
-            [max]="maxDate"
-            placeholder="Select follow-up date"
-          />
-          <mat-datepicker-toggle matIconSuffix [for]="picker"> </mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-          @if (form.get('followUpDate')?.hasError('pastDate')) {
-            <mat-error>Follow-up date cannot be today or in the past</mat-error>
-          }
-          @if (form.get('followUpDate')?.hasError('maxDate')) {
-            <mat-error>Follow-up date cannot exceed 6 months from today</mat-error>
-          }
-        </mat-form-field>
-      </div>
-
-      <div class="form-actions">
-        <button mat-stroked-button type="button" routerLink="/consultations">Cancel</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="isLoading()">
-          @if (isLoading()) {
-            <mat-spinner diameter="20"></mat-spinner>
-          }
-          {{ isEditMode ? 'Update' : 'Create' }}
-        </button>
-      </div>
-    </form>
-
-    @if (createdConsultationId()) {
-      <div class="prescription-prompt">
-        <p>Consultation created successfully!</p>
-        <a
-          mat-raised-button
-          color="accent"
-          [routerLink]="['/dashboard/patients/history', createdPatientId()]"
-          [queryParams]="{ consultationId: createdConsultationId() }"
-        >
-          Add Prescription →
-        </a>
-      </div>
-    }
+    <!-- Right sidebar: Clinical Insights -->
+    <div class="form-sidebar">
+      <app-clinical-insights-card [result]="aiResult()" [isGenerating]="isGeneratingAi()" />
+    </div>
   </div>
 </div>
+
+<app-prescription-modal
+  [isOpen]="showPrescriptionModal()"
+  [consultationId]="savedConsultationId()"
+  [patient]="selectedPatient()"
+  [language]="form.get('language')?.value || 'en'"
+  [existingPrescription]="existingPrescription()"
+  (closed)="closePrescriptionModal()"
+  (saved)="onPrescriptionSaved()"
+/>

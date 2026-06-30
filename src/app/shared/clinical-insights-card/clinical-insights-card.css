@@ -1,0 +1,144 @@
+.ci-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.ci-header {
+  background: #eff6ff;
+  border-bottom: 1px solid #dbeafe;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ci-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #1e40af;
+}
+
+.ci-beta {
+  background: #1976d2;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.ci-body {
+  padding: 20px;
+}
+
+.ci-state {
+  text-align: center;
+  padding: 24px 8px;
+}
+
+.ci-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  font-size: 22px;
+}
+
+.ci-icon-pulse {
+  animation: ci-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ci-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.ci-state-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #1f2937;
+  margin: 0 0 6px;
+}
+
+.ci-state-subtitle {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.ci-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ci-urgency-box,
+.ci-box {
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.ci-box {
+  background: #f9fafb;
+}
+
+.ci-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 0 4px;
+  color: #6b7280;
+}
+
+.ci-urgency-value {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: capitalize;
+  margin: 0;
+}
+
+.ci-text {
+  font-size: 13px;
+  color: #374151;
+  margin: 0;
+}
+
+.ci-note {
+  line-height: 1.6;
+}
+
+.ci-urgency-low {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+.ci-urgency-low .ci-urgency-value { color: #15803d; }
+.ci-urgency-low .ci-label { color: #16a34a; }
+
+.ci-urgency-medium {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+}
+.ci-urgency-medium .ci-urgency-value { color: #c2410c; }
+.ci-urgency-medium .ci-label { color: #ea580c; }
+
+.ci-urgency-critical {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+.ci-urgency-critical .ci-urgency-value { color: #b91c1c; }
+.ci-urgency-critical .ci-label { color: #dc2626; }
+
+.ci-urgency-unknown {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+.ci-urgency-unknown .ci-urgency-value { color: #4b5563; }
+.ci-urgency-unknown .ci-label { color: #6b7280; }

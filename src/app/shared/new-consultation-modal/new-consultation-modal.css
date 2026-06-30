@@ -1,0 +1,251 @@
+.ncm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.ncm-panel {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 880px;
+  max-height: 92vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.ncm-header {
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  z-index: 1;
+}
+
+.ncm-header h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+.ncm-patient-line {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.ncm-close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.ncm-close-btn:hover {
+  color: #374151;
+}
+
+.ncm-followup-note {
+  margin: 16px 24px 0;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #1e40af;
+}
+
+.ncm-body {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  padding: 20px 24px;
+}
+
+@media (max-width: 720px) {
+  .ncm-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ncm-form-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.ncm-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.ncm-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 4px;
+}
+
+.ncm-field input,
+.ncm-field select,
+.ncm-field textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 9px 10px;
+  font-size: 14px;
+  background: #ffffff;
+  font-family: inherit;
+}
+
+.ncm-field input:focus,
+.ncm-field select:focus,
+.ncm-field textarea:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
+}
+
+.ncm-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ncm-ai-trigger-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.ncm-ai-btn {
+  background: #ffffff;
+  border: 1px solid #1976d2;
+  color: #1976d2;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ncm-ai-btn:hover {
+  background: #eff6ff;
+}
+
+.ncm-ai-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ncm-ai-hint {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.ncm-diagnosis-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.ncm-diagnosis-field {
+  flex: 1;
+  margin-bottom: 14px;
+}
+
+.ncm-chronic-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  cursor: pointer;
+  margin-bottom: 23px;
+  user-select: none;
+}
+
+.ncm-chronic-checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: #1976d2;
+}
+
+@media (max-width: 480px) {
+  .ncm-diagnosis-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ncm-chronic-checkbox {
+    margin-bottom: 14px;
+  }
+}
+
+.ncm-sidebar-col {
+  min-width: 0;
+}
+
+.ncm-footer {
+  position: sticky;
+  bottom: 0;
+  background: #ffffff;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+}
+
+.ncm-cancel-btn {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ncm-cancel-btn:hover {
+  background: #f9fafb;
+}
+
+.ncm-save-btn {
+  background: #1976d2;
+  border: none;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ncm-save-btn:hover {
+  background: #1565c0;
+}
+
+.ncm-save-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

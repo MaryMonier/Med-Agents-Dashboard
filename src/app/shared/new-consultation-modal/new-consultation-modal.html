@@ -1,0 +1,106 @@
+@if (isOpen) {
+  <div class="ncm-overlay" (click)="close()">
+    <div class="ncm-panel" (click)="$event.stopPropagation()">
+      <div class="ncm-header">
+        <div>
+          <h2>{{ followupId ? 'Complete Follow-up' : 'New Consultation' }}</h2>
+          <p class="ncm-patient-line">{{ patientName }}</p>
+        </div>
+        <button type="button" class="ncm-close-btn" (click)="close()" aria-label="Close">✕</button>
+      </div>
+
+      @if (followupId && followupInstructions) {
+        <div class="ncm-followup-note">
+          <strong>Previous instructions:</strong> {{ followupInstructions }}
+        </div>
+      }
+
+      <div class="ncm-body">
+        <div class="ncm-form-col">
+          <div class="ncm-field">
+            <label>Doctor's Notes</label>
+            <textarea
+              rows="4"
+              [ngModel]="rawInput()"
+              (ngModelChange)="rawInput.set($event); onFieldChanged()"
+              placeholder="Write the clinical notes for this visit..."
+            ></textarea>
+          </div>
+
+          <div class="ncm-field">
+            <label>Symptoms (comma separated)</label>
+            <input
+              type="text"
+              [ngModel]="symptoms()"
+              (ngModelChange)="symptoms.set($event); onFieldChanged()"
+              placeholder="headache, fever, cough"
+            />
+          </div>
+
+          <div class="ncm-ai-trigger-row">
+            <button
+              type="button"
+              class="ncm-ai-btn"
+              [disabled]="isGeneratingAi()"
+              (click)="getAiRecommendation()"
+            >
+              🧠 {{ isGeneratingAi() ? 'Analyzing...' : 'Get AI Recommendation' }}
+            </button>
+            @if (!isSaved()) {
+              <span class="ncm-ai-hint">Get the AI recommendation before saving the record.</span>
+            }
+          </div>
+
+          <div class="ncm-diagnosis-row">
+            <div class="ncm-field ncm-diagnosis-field">
+              <label>Diagnosis</label>
+              <input
+                type="text"
+                [ngModel]="diagnosis()"
+                (ngModelChange)="diagnosis.set($event); onFieldChanged()"
+                placeholder="Enter final diagnosis..."
+              />
+            </div>
+            <label class="ncm-chronic-checkbox">
+              <input
+                type="checkbox"
+                [ngModel]="isChronic()"
+                (ngModelChange)="isChronic.set($event)"
+              />
+              <span>Chronic Disease</span>
+            </label>
+          </div>
+
+          <div class="ncm-field-row">
+            <div class="ncm-field">
+              <label>Language</label>
+              <select [ngModel]="language()" (ngModelChange)="language.set($event)">
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+              </select>
+            </div>
+            <div class="ncm-field">
+              <label>Follow-up Date (optional)</label>
+              <input
+                type="date"
+                [ngModel]="followUpDate()"
+                (ngModelChange)="followUpDate.set($event)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="ncm-sidebar-col">
+          <app-clinical-insights-card [result]="aiResult()" [isGenerating]="isGeneratingAi()" />
+        </div>
+      </div>
+
+      <div class="ncm-footer">
+        <button type="button" class="ncm-cancel-btn" (click)="close()">Cancel</button>
+        <button type="button" class="ncm-save-btn" [disabled]="isSaving()" (click)="saveRecord()">
+          {{ isSaving() ? 'Saving...' : 'Save Record' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

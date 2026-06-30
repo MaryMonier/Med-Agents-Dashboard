@@ -1,0 +1,385 @@
+.pm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.pm-panel {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 920px;
+  max-height: 92vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.pm-header {
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  z-index: 1;
+}
+
+.pm-header h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+.pm-patient-line {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pm-close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.pm-close-btn:hover {
+  color: #374151;
+}
+
+.pm-body {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  padding: 20px 24px;
+}
+
+@media (max-width: 720px) {
+  .pm-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pm-medications-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pm-med-row {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+  background: #f9fafb;
+  position: relative;
+}
+
+.pm-med-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1976d2;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pm-remove-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pm-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.pm-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 4px;
+}
+
+.pm-field input,
+.pm-field select {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.pm-field input:focus,
+.pm-field select:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
+}
+
+.pm-field input:disabled,
+.pm-field select:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.pm-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.pm-autocomplete-wrapper {
+  position: relative;
+}
+
+.pm-active-ingredient {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.pm-active-ingredient span {
+  color: #4b5563;
+}
+
+.pm-suggestions {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-top: 4px;
+  max-height: 190px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  padding: 0;
+}
+
+.pm-suggestions li {
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.pm-suggestions li:last-child {
+  border-bottom: none;
+}
+
+.pm-suggestions li:hover {
+  background: #eff6ff;
+}
+
+.pm-suggestion-loading {
+  color: #9ca3af;
+  cursor: default;
+}
+
+.pm-suggestion-meta {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.pm-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pm-checkbox-label input {
+  width: 16px;
+  height: 16px;
+  accent-color: #1976d2;
+}
+
+.pm-checkbox-label small {
+  color: #9ca3af;
+}
+
+.pm-add-med-btn {
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+}
+
+.pm-add-med-btn:hover {
+  text-decoration: underline;
+}
+
+/* ─── Safety column ──────────────────────────────────────────────────── */
+
+.pm-safety-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pm-safety-card-header {
+  background: #eff6ff;
+  border-bottom: 1px solid #dbeafe;
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #1e40af;
+}
+
+.pm-safety-card-body {
+  padding: 16px;
+}
+
+.pm-safety-state {
+  text-align: center;
+  padding: 24px 8px;
+}
+
+.pm-safety-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  font-size: 22px;
+}
+
+.pm-safety-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #1f2937;
+  margin: 0 0 6px;
+}
+
+.pm-safety-subtitle {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.pm-safety-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pm-safety-ok {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #15803d;
+}
+
+.pm-safety-warning {
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.pm-safety-warning-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #b45309;
+  margin: 0 0 4px;
+}
+
+.pm-safety-warning-text {
+  font-size: 13px;
+  color: #92400e;
+  margin: 0;
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────── */
+
+.pm-footer {
+  position: sticky;
+  bottom: 0;
+  background: #ffffff;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+}
+
+.pm-cancel-btn {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pm-cancel-btn:hover {
+  background: #f9fafb;
+}
+
+.pm-save-btn {
+  background: #1976d2;
+  border: none;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pm-save-btn:hover {
+  background: #1565c0;
+}
+
+.pm-save-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
