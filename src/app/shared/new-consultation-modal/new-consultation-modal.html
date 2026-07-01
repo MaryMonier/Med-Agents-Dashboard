@@ -15,6 +15,7 @@
         </div>
       }
 
+      <!-- ديف 1: الملاحظات + الأعراض + Get AI Recommendation -->
       <div class="ncm-body">
         <div class="ncm-form-col">
           <div class="ncm-field">
@@ -46,18 +47,28 @@
             >
               🧠 {{ isGeneratingAi() ? 'Analyzing...' : 'Get AI Recommendation' }}
             </button>
-            @if (!isSaved()) {
-              <span class="ncm-ai-hint">Get the AI recommendation before saving the record.</span>
+            @if (!aiResult()) {
+              <span class="ncm-ai-hint">Get the AI recommendation to continue.</span>
             }
           </div>
+        </div>
 
+        <div class="ncm-sidebar-col">
+          <app-clinical-insights-card [result]="aiResult()" [isGenerating]="isGeneratingAi()" />
+        </div>
+      </div>
+
+      <!-- ديف 2: التشخيص + الحالة المزمنة + اللغة + تاريخ الفولو أب، بيظهر بس
+           بعد ما نتيجة الـ AI توصل -->
+      @if (aiResult()) {
+        <div class="ncm-diagnosis-section">
           <div class="ncm-diagnosis-row">
             <div class="ncm-field ncm-diagnosis-field">
               <label>Diagnosis</label>
               <input
                 type="text"
                 [ngModel]="diagnosis()"
-                (ngModelChange)="diagnosis.set($event); onFieldChanged()"
+                (ngModelChange)="diagnosis.set($event)"
                 placeholder="Enter final diagnosis..."
               />
             </div>
@@ -89,17 +100,23 @@
             </div>
           </div>
         </div>
-
-        <div class="ncm-sidebar-col">
-          <app-clinical-insights-card [result]="aiResult()" [isGenerating]="isGeneratingAi()" />
-        </div>
-      </div>
+      }
 
       <div class="ncm-footer">
         <button type="button" class="ncm-cancel-btn" (click)="close()">Cancel</button>
-        <button type="button" class="ncm-save-btn" [disabled]="isSaving()" (click)="saveRecord()">
-          {{ isSaving() ? 'Saving...' : 'Save Record' }}
-        </button>
+        @if (aiResult()) {
+          <button type="button" class="ncm-save-btn" [disabled]="isSaving()" (click)="saveRecord()">
+            {{
+              isSaving()
+                ? followupId
+                  ? 'Completing...'
+                  : 'Saving...'
+                : followupId
+                  ? 'Complete Follow-up'
+                  : 'Save Record'
+            }}
+          </button>
+        }
       </div>
     </div>
   </div>

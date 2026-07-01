@@ -216,7 +216,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.btn-confirmed {
+.btn-details {
   padding: 6px 12px;
   font-size: 12px;
   border-radius: 6px;
@@ -227,10 +227,29 @@ button:disabled {
   width: 100%;
   text-align: center;
 }
-.btn-confirmed:hover {
+.btn-details:hover {
   background: #dcfce7;
 }
-.btn-confirmed:disabled {
+.btn-details:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-edit {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #b45309;
+  color: #b45309;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+}
+.btn-edit:hover {
+  background: #fef3e2;
+}
+.btn-edit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -461,7 +480,8 @@ button:disabled {
   }
 
   .btn-start,
-  .btn-confirmed,
+  .btn-details,
+  .btn-edit,
   .btn-cancel {
     padding: 10px;
     font-size: 13px;

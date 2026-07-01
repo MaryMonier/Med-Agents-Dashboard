@@ -122,52 +122,6 @@ export class Followups implements OnInit {
     this.applySearch();
   }
 
-  // ─── Toggle Status ──────────────────────────────────────────────────────
-  // لما تبقى confirmed الزرار يتعطل ومش هينفع ترجع pending تاني
-  toggleStatus(followup: Followup): void {
-    if (followup.status === 'confirmed') return;
-
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'Mark this follow-up as confirmed?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3B5BDB',
-      cancelButtonColor: '#e53e3e',
-      confirmButtonText: 'Yes, mark as confirmed!',
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (!result.isConfirmed) return;
-
-      const newStatus: 'confirmed' = 'confirmed';
-      const oldStatus = followup.status;
-
-      // عدّل الـ UI فوراً (Optimistic Update) - signals بتحدث الشاشة فوراً
-      this.allFollowups.update((list) =>
-        list.map((f) => (f._id === followup._id ? { ...f, status: newStatus } : f)),
-      );
-      this.filteredFollowups.update((list) =>
-        list.map((f) => (f._id === followup._id ? { ...f, status: newStatus } : f)),
-      );
-
-      // بعت للـ API في الخلفية
-      this.followupService.updateStatus(followup._id, newStatus).subscribe({
-        next: () => {
-          Swal.fire('confirmed!', 'Follow-up marked as confirmed.', 'success');
-        },
-        error: () => {
-          this.allFollowups.update((list) =>
-            list.map((f) => (f._id === followup._id ? { ...f, status: oldStatus } : f)),
-          );
-          this.filteredFollowups.update((list) =>
-            list.map((f) => (f._id === followup._id ? { ...f, status: oldStatus } : f)),
-          );
-          Swal.fire('Error!', 'Failed to update status.', 'error');
-        },
-      });
-    });
-  }
-
   // ─── Start Followup ─────────────────────────────────────────────────────
   // بدل ما يكال الـ agent مباشرة، بيودي الدكتور لصفحة هيستوري المريض
   // مع الـ followupId في الـ URL عشان يظهر فورم "Add Follow-up"
@@ -184,10 +138,32 @@ export class Followups implements OnInit {
       return;
     }
 
-    this.router.navigate(['/dashboard/patients/history', patientId], {
+    this.router.navigate(['/dashboard/patients/visit', patientId], {
       queryParams: { followupId: followup._id },
     });
   }
+  // ─── Followup Details ───────────────────────────────────────────────────
+  // متاحة بس للفولو أب اللي خلصت (confirmed) عشان نعرض تفاصيل الزيارة بتاعتها
+  viewDetails(followup: Followup): void {
+    if (followup.status !== 'confirmed') return;
+    this.router.navigate(['/dashboard/followups', followup._id]);
+  }
+
+  // ─── Edit Followup ──────────────────────────────────────────────────────
+  // متاحة بس للفولو أب اللي خلصت (confirmed)، بتفتح فورم تعديل الكونسلتيشن
+  // اللي اتعملت لما الدكتور كمّل الفولو أب ده
+  editFollowup(followup: Followup): void {
+    if (followup.status !== 'confirmed') return;
+
+    const consultationId = followup.consultationId?._id;
+    if (!consultationId) {
+      this.errorMessage.set('Cannot find the consultation for this follow-up');
+      return;
+    }
+
+    this.router.navigate(['/dashboard/consultations/edit', consultationId]);
+  }
+
   // بدل الحذف، بنغير الحالة لـ cancelled
   cancelFollowup(followup: Followup): void {
     if (followup.status === 'confirmed' || followup.status === 'cancelled') return;

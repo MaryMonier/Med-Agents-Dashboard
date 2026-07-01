@@ -109,9 +109,6 @@
               <div class="field prescription-block">
                 <div class="prescription-block-header">
                   <span class="label">Prescription</span>
-                  <button class="btn-edit-small" (click)="editPrescriptionFromHistory(item)">
-                    Edit
-                  </button>
                 </div>
                 <ul class="med-list">
                   @for (med of item.prescription.medications; track med.name) {
@@ -137,23 +134,3 @@
     </div>
   }
 </div>
-
-<app-new-consultation-modal
-  [isOpen]="showConsultationModal()"
-  [patientId]="patientId()"
-  [patientName]="patientName()"
-  [followupId]="activeFollowupId()"
-  [followupInstructions]="activeFollowupInstructions()"
-  (closed)="closeConsultationModal()"
-  (saved)="onConsultationSaved($event)"
-/>
-
-<app-prescription-modal
-  [isOpen]="showPrescriptionModal()"
-  [consultationId]="prescriptionConsultationId()"
-  [patient]="patientForModal()"
-  language="en"
-  [existingPrescription]="existingPrescription()"
-  (closed)="closePrescriptionModal()"
-  (saved)="onPrescriptionSaved()"
-/>

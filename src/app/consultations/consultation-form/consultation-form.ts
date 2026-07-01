@@ -150,9 +150,10 @@ export class ConsultationFormComponent implements OnInit {
       followUpDate: ['', [this.followUpDateValidator()]],
     });
 
-    // أي تعديل في البيانات الأساسية بعد الحصول على رأي الـ AI يبطّل الراي القديم،
-    // عشان الدكتور يضطر يطلب رأي جديد قبل الحفظ (يحافظ على نفس دورة الرياكت)
-    ['rawInput', 'symptoms', 'diagnosis'].forEach((field) => {
+    // أي تعديل في الملاحظات أو الأعراض بعد الحصول على رأي الـ AI يبطّله، عشان
+    // الدكتور يضطر يطلب رأي جديد قبل الحفظ. الدياجنوزيز نفسها مش من مدخلات
+    // الـ AI المباشرة (بيتكتب بعد الرأي عادة) فمبيبطلش الحفظ لما يتغير
+    ['rawInput', 'symptoms'].forEach((field) => {
       this.form.get(field)?.valueChanges.subscribe(() => {
         if (!this.isEditMode) {
           this.isSaved.set(false);
@@ -242,9 +243,10 @@ export class ConsultationFormComponent implements OnInit {
         .filter((s: string) => s.length > 0),
     };
 
-    // أول كول ممكن يفشل لظروف بيئة عابرة (أول اتصال بعد تشغيل السيرفر)،
-    // فبنعمل محاولة واحدة هادية تلقائية قبل ما نضايق الدكتور بإيرور
-    const attempt = (isRetry: boolean) => {
+    // أول كول ممكن يفشل لظروف بيئة عابرة، فبنعمل كذا محاولة هادية تلقائية
+    // قبل ما نضايق الدكتور بإيرور (بدل ما هو يدوس الزرار يدوي كذا مرة)
+    const MAX_ATTEMPTS = 3;
+    const attempt = (attemptNumber: number) => {
       this.consultationService.getAIRecommendation(payload).subscribe({
         next: (res: any) => {
           this.isGeneratingAi.set(false);
@@ -252,8 +254,8 @@ export class ConsultationFormComponent implements OnInit {
           this.isSaved.set(true);
         },
         error: () => {
-          if (!isRetry) {
-            setTimeout(() => attempt(true), 1200);
+          if (attemptNumber < MAX_ATTEMPTS) {
+            setTimeout(() => attempt(attemptNumber + 1), 1000 * attemptNumber);
           } else {
             this.isGeneratingAi.set(false);
             Swal.fire('Error', 'Failed to get AI recommendation', 'error');
@@ -262,14 +264,14 @@ export class ConsultationFormComponent implements OnInit {
       });
     };
 
-    attempt(false);
+    attempt(1);
   }
 
   // ─── Step 2: Save Record (then open the prescription modal) ────────────
   onSubmit(): void {
     if (this.form.invalid) return;
 
-    if (!this.isEditMode && !this.isSaved()) {
+    if (!this.isEditMode && !this.aiResult()) {
       Swal.fire(
         'AI Recommendation required',
         'Please get the AI recommendation before saving the record.',

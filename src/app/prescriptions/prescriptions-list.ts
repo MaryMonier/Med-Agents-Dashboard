@@ -107,7 +107,7 @@ export class PrescriptionsList implements OnInit {
       return;
     }
 
-    this.router.navigate(['/dashboard/patients/history', patientId], {
+    this.router.navigate(['/dashboard/patients/visit', patientId], {
       queryParams: { consultationId, prescriptionId },
     });
   }

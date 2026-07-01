@@ -1,29 +1,20 @@
 .ncm-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  z-index: 1000;
+  /* بقت جزء عادي من تدفق الصفحة، مش overlay ثابت فوق الشاشة */
+  padding: 0;
+  margin-bottom: 24px;
 }
 
 .ncm-panel {
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid #eef0f4;
+  box-shadow: 0 4px 18px rgba(20, 30, 60, 0.06);
   width: 100%;
-  max-width: 880px;
-  max-height: 92vh;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
 .ncm-header {
-  position: sticky;
-  top: 0;
   background: #ffffff;
   display: flex;
   align-items: flex-start;
@@ -31,7 +22,7 @@
   gap: 16px;
   padding: 20px 24px;
   border-bottom: 1px solid #e0e0e0;
-  z-index: 1;
+  border-radius: 12px 12px 0 0;
 }
 
 .ncm-header h2 {
@@ -160,10 +151,29 @@
   color: #9ca3af;
 }
 
+.ncm-diagnosis-section {
+  padding: 4px 24px 20px;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 4px;
+  animation: ncm-fade-in 0.2s ease-out;
+}
+
+@keyframes ncm-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .ncm-diagnosis-row {
   display: flex;
   align-items: flex-end;
   gap: 16px;
+  padding-top: 16px;
 }
 
 .ncm-diagnosis-field {
@@ -205,8 +215,6 @@
 }
 
 .ncm-footer {
-  position: sticky;
-  bottom: 0;
   background: #ffffff;
   border-top: 1px solid #e0e0e0;
   display: flex;
@@ -214,6 +222,7 @@
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px;
+  border-radius: 0 0 12px 12px;
 }
 
 .ncm-cancel-btn {

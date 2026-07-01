@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
   Consultations,
   CreateConsultationDto,
-  ConsultationResponse
+  ConsultationResponse,
 } from '../models/consultations';
 
 @Injectable({ providedIn: 'root' })
@@ -13,35 +13,32 @@ export class ConsultationService {
 
   constructor(private http: HttpClient) {}
 
- 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     return new HttpHeaders({
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     });
   }
 
   getAll(search?: string): Observable<ConsultationResponse> {
     let params = new HttpParams();
     if (search) params = params.set('search', search);
-    return this.http.get<ConsultationResponse>(this.apiUrl, {
+    return this.http.get<ConsultationResponse>(`${this.apiUrl}/doctor`, {
       params,
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
     });
   }
 
   getById(id: string): Observable<{ success: boolean; data: Consultations }> {
-    return this.http.get<{ success: boolean; data: Consultations }>(
-      `${this.apiUrl}/${id}`,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<{ success: boolean; data: Consultations }>(`${this.apiUrl}/${id}`, {
+      headers: this.getHeaders(),
+    });
   }
   getByDoctorId(doctorId: string): Observable<ConsultationResponse> {
-  return this.http.get<ConsultationResponse>(
-    `${this.apiUrl}/by-doctor/${doctorId}`,
-    { headers: this.getHeaders() }
-  );
-}
+    return this.http.get<ConsultationResponse>(`${this.apiUrl}/by-doctor/${doctorId}`, {
+      headers: this.getHeaders(),
+    });
+  }
 
   getAIRecommendation(data: {
     rawInput: string;
@@ -57,25 +54,23 @@ export class ConsultationService {
   }
 
   create(data: CreateConsultationDto): Observable<{ success: boolean; data: Consultations }> {
-    return this.http.post<{ success: boolean; data: Consultations }>(
-      this.apiUrl,
-      data,
-      { headers: this.getHeaders() }
-    );
+    return this.http.post<{ success: boolean; data: Consultations }>(this.apiUrl, data, {
+      headers: this.getHeaders(),
+    });
   }
 
-  update(id: string, data: Partial<Consultations>): Observable<{ success: boolean; data: Consultations }> {
-    return this.http.put<{ success: boolean; data: Consultations }>(
-      `${this.apiUrl}/${id}`,
-      data,
-      { headers: this.getHeaders() }
-    );
+  update(
+    id: string,
+    data: Partial<Consultations>,
+  ): Observable<{ success: boolean; data: Consultations }> {
+    return this.http.put<{ success: boolean; data: Consultations }>(`${this.apiUrl}/${id}`, data, {
+      headers: this.getHeaders(),
+    });
   }
 
   delete(id: string): Observable<{ success: boolean; message: string }> {
-    return this.http.delete<{ success: boolean; message: string }>(
-      `${this.apiUrl}/${id}`,
-      { headers: this.getHeaders() }
-    );
+    return this.http.delete<{ success: boolean; message: string }>(`${this.apiUrl}/${id}`, {
+      headers: this.getHeaders(),
+    });
   }
 }

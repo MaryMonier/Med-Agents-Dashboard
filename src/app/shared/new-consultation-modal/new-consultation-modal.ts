@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -93,7 +101,10 @@ export class NewConsultationModalComponent implements OnChanges {
         .filter((s: string) => s.length > 0),
     };
 
-    const attempt = (isRetry: boolean) => {
+    // أول كول ممكن يفشل لظروف بيئة عابرة، فبنعمل كذا محاولة هادية تلقائية
+    // قبل ما نضايق الدكتور بإيرور (بدل ما هو يدوس الزرار يدوي كذا مرة)
+    const MAX_ATTEMPTS = 3;
+    const attempt = (attemptNumber: number) => {
       this.consultationService.getAIRecommendation(payload).subscribe({
         next: (res: { data: any }) => {
           this.isGeneratingAi.set(false);
@@ -101,8 +112,8 @@ export class NewConsultationModalComponent implements OnChanges {
           this.isSaved.set(true);
         },
         error: () => {
-          if (!isRetry) {
-            setTimeout(() => attempt(true), 1200);
+          if (attemptNumber < MAX_ATTEMPTS) {
+            setTimeout(() => attempt(attemptNumber + 1), 1000 * attemptNumber);
           } else {
             this.isGeneratingAi.set(false);
             Swal.fire('Error', 'Failed to get AI recommendation', 'error');
@@ -111,11 +122,11 @@ export class NewConsultationModalComponent implements OnChanges {
       });
     };
 
-    attempt(false);
+    attempt(1);
   }
 
   saveRecord(): void {
-    if (!this.isSaved()) {
+    if (!this.aiResult()) {
       Swal.fire(
         'AI Recommendation required',
         'Please get the AI recommendation before saving the record.',
@@ -156,10 +167,12 @@ export class NewConsultationModalComponent implements OnChanges {
         const newConsultationId = res?.data?._id;
 
         Swal.fire({
-          title: 'Saved Successfully',
+          title: this.followupId ? 'Follow-up Completed' : 'Saved Successfully',
           text: this.isChronic()
             ? 'Consultation saved and diagnosis added to patient chronic diseases history.'
-            : 'Consultation record saved successfully.',
+            : this.followupId
+              ? 'Follow-up completed and consultation record saved. Now add the prescription.'
+              : 'Consultation record saved successfully.',
           icon: 'success',
           timer: 1800,
           showConfirmButton: false,

@@ -120,11 +120,18 @@
                   Start Follow-up
                 </button>
                 <button
-                  class="btn-confirmed"
-                  [disabled]="followup.status !== 'pending'"
-                  (click)="toggleStatus(followup)"
+                  class="btn-details"
+                  [disabled]="followup.status !== 'confirmed'"
+                  (click)="viewDetails(followup)"
                 >
-                  confirm
+                  Follow-up Details
+                </button>
+                <button
+                  class="btn-edit"
+                  [disabled]="followup.status !== 'confirmed'"
+                  (click)="editFollowup(followup)"
+                >
+                  Edit
                 </button>
                 <button
                   class="btn-cancel"

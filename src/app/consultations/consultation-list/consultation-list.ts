@@ -119,7 +119,7 @@ export class ConsultationListComponent implements OnInit {
   deleteConsultation(id: string): void {
     Swal.fire({
       title: 'Are you sure?',
-      text: 'This consultation will be deleted permanently.',
+      text: 'This consultation, and its related follow-up and prescription, will be deleted permanently.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',

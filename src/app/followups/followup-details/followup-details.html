@@ -1,0 +1,93 @@
+<div class="fd-page">
+  <div class="fd-header">
+    <div class="fd-header-text">
+      <h2>Follow-up Details</h2>
+      <p>Completed follow-up visit record and prescription summary.</p>
+    </div>
+    <button class="fd-back-btn" (click)="goBack()">
+      <span class="fd-back-arrow">&#8592;</span> Back To Follow-ups
+    </button>
+  </div>
+
+  @if (!isLoading() && followup()) {
+    <div class="fd-edit-row">
+      <button class="fd-edit-btn" (click)="editFollowup()">Edit Follow-up</button>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="fd-loading">Loading...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="fd-error">{{ errorMessage() }}</div>
+  }
+
+  @if (!isLoading() && followup()) {
+    <div class="fd-card">
+      <div class="fd-row">
+        <span class="fd-label">Patient</span>
+        <span class="fd-value">{{ patientName() }}</span>
+      </div>
+
+      <div class="fd-row">
+        <span class="fd-label">Doctor</span>
+        <span class="fd-value">{{ doctorName() }}</span>
+      </div>
+
+      <div class="fd-row">
+        <span class="fd-label">Doctor's Notes</span>
+        <span class="fd-value">{{ doctorNotes() }}</span>
+      </div>
+
+      <div class="fd-row">
+        <span class="fd-label">Symptoms</span>
+        <span class="fd-value">{{ symptoms() }}</span>
+      </div>
+
+      <div class="fd-row">
+        <span class="fd-label">Diagnosis</span>
+        <span class="fd-value fd-strong">{{ diagnosis() }}</span>
+      </div>
+
+      <div class="fd-row">
+        <span class="fd-label">Prescription</span>
+        <span class="fd-value">
+          @if (medications().length === 0) {
+            No active medications issued.
+          } @else {
+            <ul class="fd-med-list">
+              @for (med of medications(); track med.name) {
+                <li>
+                  <strong>{{ med.name }}</strong>
+                  — {{ med.dose || (med.dosageAmount + ' ' + med.dosageUnit) }},
+                  {{ med.frequency || (med.frequencyCount + 'x ' + med.frequencyPeriod) }}
+                  @if (!med.isChronic && med.duration) {
+                    , for {{ med.duration }}
+                  }
+                  @if (med.isChronic) {
+                    (chronic)
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </span>
+      </div>
+
+      <div class="fd-row">
+        <span class="fd-label">Follow-up Date</span>
+        <span class="fd-value fd-strong">
+          {{ scheduledDate() ? (scheduledDate() | date: 'EEE, MMM d, y') : '—' }}
+        </span>
+      </div>
+
+      <div class="fd-row fd-row-last">
+        <span class="fd-label">Status</span>
+        <span class="fd-value">
+          <span [class]="'fd-badge fd-badge-' + status()">{{ status() }}</span>
+        </span>
+      </div>
+    </div>
+  }
+</div>

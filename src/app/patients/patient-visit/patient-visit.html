@@ -1,0 +1,48 @@
+<div class="pv-page">
+  <div class="pv-page-header">
+    <button class="btn-back" (click)="goBack()">← Back</button>
+    <h2>{{ pageTitle() }}</h2>
+    @if (patientName()) {
+      <span class="pv-patient-chip">{{ patientName() }}</span>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Loading...</div>
+  }
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  <!-- ديف 1: الأعراض والتشخيص + Get AI Recommendation (ديف الـ AI بيظهر جواها) -->
+  @if (showConsultationSection()) {
+    <div class="pv-step">
+      <div class="pv-step-badge">1</div>
+      <app-new-consultation-modal
+        [isOpen]="true"
+        [patientId]="patientId()"
+        [patientName]="patientName()"
+        [followupId]="followupId()"
+        [followupInstructions]="followupInstructions()"
+        (closed)="goBack()"
+        (saved)="onConsultationSaved($event)"
+      />
+    </div>
+  }
+
+  <!-- ديف 2: الروشتة، بتظهر بعد ما يتحفظ الكونسلتيشن (أو مباشرة لو جاي يعدّل روشتة) -->
+  @if (showPrescriptionSection()) {
+    <div class="pv-step">
+      <div class="pv-step-badge">{{ showConsultationSection() ? '2' : '1' }}</div>
+      <app-prescription-modal
+        [isOpen]="true"
+        [consultationId]="activeConsultationId()"
+        [patient]="patientForModal()"
+        language="en"
+        [existingPrescription]="existingPrescription()"
+        (closed)="goBack()"
+        (saved)="onPrescriptionSaved()"
+      />
+    </div>
+  }
+</div>

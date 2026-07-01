@@ -693,16 +693,3 @@
   align-items: center;
   margin-bottom: 6px;
 }
-
-.btn-edit-small {
-  padding: 3px 10px;
-  font-size: 11px;
-  border-radius: 6px;
-  border: 1px solid #2152b3;
-  color: #2152b3;
-  background: transparent;
-  cursor: pointer;
-}
-.btn-edit-small:hover {
-  background: #e8eeff;
-}
