@@ -1,69 +1,243 @@
-<div class="reports-container">
+<div class="reports-page">
+  <div class="reports-wrapper">
 
-  <div class="reports-header">
-    <h2>Reports</h2>
-    <div class="lang-toggle">
-      <button [class.active]="language() === 'en'" (click)="language.set('en')">EN</button>
-      <button [class.active]="language() === 'ar'" (click)="language.set('ar')">AR</button>
+    <div class="reports-header">
+      <h2 class="reports-title">⚡ AI Clinical Report Generator</h2>
+      <p class="reports-subtitle">Generate structured clinical summaries, monthly trends, or specific consultation reports.</p>
     </div>
-  </div>
 
-  <div class="select-section">
-    <label>Select a consultation to generate a report</label>
+    <div class="reports-card">
+      <form [formGroup]="reportForm" (ngSubmit)="generateReport()" class="reports-form">
 
-    @if (isLoading()) {
-      <p class="loading-text">Loading consultations...</p>
-    } @else {
-      <select [(ngModel)]="selectedConsultationId" (ngModelChange)="selectedConsultationId.set($event)">
-        <option value="">— Select consultation —</option>
-        @for (c of consultations(); track c._id) {
-          <option [value]="c._id">
-            {{ c.diagnosis || 'No diagnosis' }} · {{ c.urgencyLevel }} · {{ c.createdAt | date:'shortDate' }}
-          </option>
+        <div class="form-field">
+          <label class="form-label" for="patientSearch">Select Patient <span style="color: #ef4444;">*</span></label>
+          <div class="input-wrap">
+            <input
+              id="patientSearch"
+              type="text"
+              formControlName="patientSearch"
+              class="text-input"
+              [class.input-invalid]="f['patientSearch'].touched && f['patientSearch'].invalid"
+              placeholder="Type patient name to search..."
+              autocomplete="off"
+              (focus)="onPatientSearchFocus()"
+              (blur)="onPatientSearchBlur()"
+            />
+
+            @if (isSearchingPatients()) {
+              <div class="input-status">
+                <div class="spinner"></div>
+              </div>
+            }
+          </div>
+
+          @if (showPatientDropdown() && patientResults.length > 0) {
+            <div class="dropdown-panel">
+              <ul class="dropdown-list">
+                @for (patient of patientResults; track patient.id) {
+                  <li>
+                    <button type="button" class="dropdown-item" (mousedown)="selectPatient(patient)">
+                      <span class="dropdown-item-name">{{ patient.name }}</span>
+                      @if (patient.mrn || patient.dob) {
+                        <span class="dropdown-item-meta">
+                          MRN: {{ patient.mrn || 'N/A' }} | DOB: {{ formatConsultationDate(patient.dob) || 'N/A' }}
+                        </span>
+                      }
+                    </button>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (f['patientSearch'].touched && f['patientSearch'].hasError('required')) {
+            <p class="field-error">Patient selection is required.</p>
+          }
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Report Scope <span style="color: #ef4444;">*</span></label>
+          <div class="scope-options">
+            @for (option of scopeOptions; track option.value) {
+              <label
+                class="scope-option"
+                [class.scope-option-active]="reportForm.get('scope')?.value === option.value"
+              >
+                <input
+                  type="radio"
+                  [value]="option.value"
+                  formControlName="scope"
+                  class="scope-radio"
+                />
+                {{ option.label }}
+              </label>
+            }
+          </div>
+        </div>
+
+        @if (isYearScope || isMonthScope) {
+          <div class="month-year-row animate-fade-in">
+            <div class="form-field">
+              <label class="form-label" for="year">Year <span style="color: #ef4444;">*</span></label>
+              <select id="year" formControlName="year" class="select-input">
+                @for (y of yearOptions; track y) {
+                  <option [value]="y">{{ y }}</option>
+                }
+              </select>
+            </div>
+
+            @if (isMonthScope) {
+              <div class="form-field">
+                <label class="form-label" for="month">Month <span style="color: #ef4444;">*</span></label>
+                <select id="month" formControlName="month" class="select-input">
+                  @for (m of monthOptions; track m.value) {
+                    <option [value]="m.value">{{ m.label }}</option>
+                  }
+                </select>
+              </div>
+            }
+          </div>
         }
-      </select>
 
-      <button
-        class="generate-btn"
-        [disabled]="!selectedConsultationId() || isGenerating()"
-        (click)="generateReport()">
-        {{ isGenerating() ? 'Generating...' : 'Generate Report' }}
-      </button>
-    }
-  </div>
+        @if (isSpecificConsultation) {
+          <div class="consultation-panel">
+            <label class="form-label">Select Consultation <span style="color: #ef4444;">*</span></label>
 
-  @if (report()) {
-    <div class="report-card">
-      <div class="report-card-header">
-        <h3>{{ report().reportTitle }}</h3>
-        <button class="download-btn" (click)="downloadReport()">⬇ Download</button>
-      </div>
+            @if (!selectedPatient) {
+              <p class="field-warning">⚠️ Please select a patient first to load their consultations.</p>
+            } @else if (isLoadingConsultations()) {
+              <div class="loading-row">
+                <div class="spinner"></div>
+                <span>Loading patient history...</span>
+              </div>
+            } @else if (consultationsError) {
+              <p class="field-error">❌ {{ consultationsError }}</p>
+            } @else if (consultations.length === 0) {
+              <p class="field-hint">ℹ️ No consultations found for this patient.</p>
+            } @else {
+              <ul class="consultation-list">
+                @for (c of consultations; track c.id) {
+                  <li>
+                    <button
+                      type="button"
+                      class="consultation-item"
+                      [class.consultation-item-active]="reportForm.get('consultationId')?.value === c.id"
+                      (click)="selectConsultation(c)"
+                    >
+                      <span class="consultation-diagnosis" [title]="c.diagnosis || 'No Diagnosis Recorded'">
+                        {{ c.diagnosis || 'No diagnosis recorded' }}
+                      </span>
+                      <span class="consultation-date">{{ formatConsultationDate(c.date) }}</span>
+                    </button>
+                  </li>
+                }
+              </ul>
+              @if (f['consultationId'].touched && f['consultationId'].hasError('required')) {
+                <p class="field-error">You must select a specific consultation.</p>
+              }
+            }
+          </div>
+        }
 
-      <div class="report-section">
-        <span class="report-label">Patient Condition</span>
-        <p>{{ report().patientCondition }}</p>
-      </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="resetForm()" [disabled]="isGeneratingReport()">
+            Reset
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="reportForm.invalid || isGeneratingReport()">
+            @if (isGeneratingReport()) {
+              <div class="spinner spinner-on-dark" style="margin-right: 0.5rem; display: inline-block;"></div>
+              <span>Generating...</span>
+            } @else {
+              <span>Generate Report</span>
+            }
+          </button>
+        </div>
 
-      <div class="report-section">
-        <span class="report-label">Clinical Findings</span>
-        <p>{{ report().clinicalFindings }}</p>
-      </div>
-
-      <div class="report-section">
-        <span class="report-label">Treatment Plan</span>
-        <p>{{ report().treatmentPlan }}</p>
-      </div>
-
-      <div class="report-section">
-        <span class="report-label">Recommendations</span>
-        <p>{{ report().recommendations }}</p>
-      </div>
-
-      <div class="report-section">
-        <span class="report-label">Follow-up Notes</span>
-        <p>{{ report().followupNotes }}</p>
-      </div>
+        @if (generateError) {
+          <div class="result-error-card">
+            <p class="field-error" style="margin: 0;">❌ {{ generateError }}</p>
+          </div>
+        }
+      </form>
     </div>
-  }
 
+    @if (generatedReport) {
+      <div class="result-card">
+        <div class="result-header">
+          <div>
+            <h3 class="result-title">🩺 {{ generatedReport.scopeLabel }}</h3>
+            <p class="result-subtitle">{{ generatedReport.rangeLabel }}</p>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="printReport()">
+            🖨️ Print Report
+          </button>
+        </div>
+
+        <div class="result-patient-info">
+          <span><strong>Patient:</strong> {{ generatedReport.patientName }}</span>
+          <span><strong>MRN:</strong> {{ generatedReport.mrn || 'N/A' }}</span>
+          <span><strong>DOB:</strong> {{ formatConsultationDate(generatedReport.dob) || 'N/A' }}</span>
+        </div>
+
+        @if (generatedReport.entries.length === 0) {
+          <p class="dropdown-empty result-empty">No clinical entries found for the selected timeline.</p>
+        } @else {
+          <ul class="report-entries">
+            @for (entry of generatedReport.entries; track entry.id) {
+              <li class="report-entry">
+                <div class="report-entry-header">
+                  <span class="report-entry-date">📅 {{ formatConsultationDate(entry.date) }}</span>
+                  <span class="report-entry-urgency" [class]="'urgency-' + entry.urgencyLevel">
+                    {{ entry.urgencyLevel }}
+                  </span>
+                </div>
+
+                <h4 class="report-entry-diagnosis">{{ entry.diagnosis }}</h4>
+
+                @if (entry.symptoms && entry.symptoms.length > 0) {
+                  <p class="report-entry-symptoms">
+                    <strong>Symptoms:</strong> {{ entry.symptoms.join(', ') }}
+                  </p>
+                }
+
+                @if (entry.structuredNote) {
+                  <p class="report-entry-line">
+                    <strong>Notes:</strong> {{ entry.structuredNote }}
+                  </p>
+                }
+
+                @if (entry.suggestedSpecialist) {
+                  <p class="report-entry-line">
+                    <strong>Referral:</strong> {{ entry.suggestedSpecialist }}
+                  </p>
+                }
+
+                @if (entry.prescription && entry.prescription.medications.length) {
+                  <div class="report-entry-prescription">
+                    <strong>💊 Prescribed Medications:</strong>
+                    <ul>
+                      @for (med of entry.prescription.medications; track $index) {
+                        <li>
+                          {{ med.name }} — {{ med.dosage }} ({{ med.frequency }})
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+
+                @if (entry.isFollowup) {
+                  <span class="report-entry-followup">Follow-up Visit</span>
+                }
+              </li>
+            }
+          </ul>
+        }
+
+        <div class="result-meta" style="margin-top: 1.5rem; text-align: center;">
+          Generated at: {{ generatedReport.generatedAt | date:'medium' }}
+        </div>
+      </div>
+    }
+
+  </div>
 </div>
