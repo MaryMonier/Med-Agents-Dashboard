@@ -77,8 +77,7 @@
                 </a>
                 <button
                   class="btn-delete"
-                  disabled
-                  title="Deleting consultations is restricted"
+                  (click)="deleteConsultation(getConsultationId(c))"
                 >
                   Delete
                 </button>

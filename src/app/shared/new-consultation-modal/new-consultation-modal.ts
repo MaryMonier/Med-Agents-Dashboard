@@ -45,6 +45,12 @@ export class NewConsultationModalComponent implements OnChanges {
   @Input() patientName = '';
   @Input() followupId: string | null = null; // لو موجودة، يبقى ده "Complete Follow-up"
   @Input() followupInstructions = '';
+  // ملخص الكونسلتيشن الأصلية اللي جدولت الفولو أب دي (أعراض/تشخيص/ملاحظات)
+  @Input() followupConsultationSummary: {
+    rawInput?: string;
+    symptoms?: string[];
+    diagnosis?: string;
+  } | null = null;
   @Input() existingConsultation: any = null; // لو موجودة، يبقى ده "Edit" مش "Create"
 
   @Output() closed = new EventEmitter<void>();
@@ -114,8 +120,15 @@ export class NewConsultationModalComponent implements OnChanges {
   }
 
   onFieldChanged(): void {
-    // أي تعديل في الملاحظات أو الأعراض بعد الحصول على رأي الـ AI يبطّله، عشان
-    // الدكتور يضطر يطلب رأي جديد قبل الحفظ
+    // أي تعديل في الملاحظات أو الأعراض بعد الحصول على رأي الـ AI (سواء
+    // اتجاب من زرار Get AI Recommendation أو كان متعبّي من كونسلتيشن موجودة
+    // في وضع التعديل) يبطّله فعليًا — بنمسحه خالص بدل ما نسيبه قاعد بصمت،
+    // عشان مايتحفظش تشخيص/ملخص AI قديم بيخص نص مختلف عن اللي اتعدل دلوقتي.
+    // الحفظ برضو مش هيتمنع لو مالحقتش تدوس الزرار تاني — هيرجع للنص اللي
+    // كتبته كـ fallback (زي ما هو متفق عليه)، بس مش هيفضل فيه رأي AI مضلل
+    if (this.aiResult()) {
+      this.aiResult.set(null);
+    }
     this.isSaved.set(false);
   }
 
@@ -151,12 +164,21 @@ export class NewConsultationModalComponent implements OnChanges {
           this.aiResult.set(res.data);
           this.isSaved.set(true);
         },
-        error: () => {
-          if (attemptNumber < MAX_ATTEMPTS) {
+        error: (err: any) => {
+          // لو السبب rate limit (429)، إعادة المحاولة خلال ثواني مش هتنفع —
+          // بنوقف على طول ونوري رسالة واضحة بدل ما نضايق بمحاولات فاشلة
+          const isRateLimit = err?.status === 429 || err?.error?.isRateLimit;
+          if (!isRateLimit && attemptNumber < MAX_ATTEMPTS) {
             setTimeout(() => attempt(attemptNumber + 1), 1000 * attemptNumber);
           } else {
             this.isGeneratingAi.set(false);
-            Swal.fire('Error', 'Failed to get AI recommendation', 'error');
+            Swal.fire(
+              isRateLimit ? 'AI Assistant Limit Reached' : 'Error',
+              isRateLimit
+                ? "You've reached your plan's daily limit for AI-powered recommendations. Please upgrade your subscription to continue using this feature."
+                : 'Failed to get AI recommendation',
+              'error',
+            );
           }
         },
       });
@@ -166,12 +188,8 @@ export class NewConsultationModalComponent implements OnChanges {
   }
 
   saveRecord(): void {
-    if (!this.aiResult()) {
-      Swal.fire(
-        'AI Recommendation required',
-        'Please get the AI recommendation before saving the record.',
-        'warning',
-      );
+    if (!this.rawInput().trim()) {
+      Swal.fire('Missing data', "Please fill in the doctor's notes before saving.", 'warning');
       return;
     }
 
@@ -249,6 +267,12 @@ export class NewConsultationModalComponent implements OnChanges {
       language: this.language(),
       isChronic: this.isChronic(),
       symptoms: symptomsArray,
+      // القيم دي اتجابت من خطوة Get AI Recommendation قبل كده، فبنبعتها مع
+      // الحفظ عشان الباك مايحتاجش يعمل نداء AI تاني وقت الحفظ نفسه (يعني
+      // الحفظ بيشتغل عادي حتى لو مفيش توكينز أصلاً وقت الضغط على الزرار)
+      structuredNote: ai?.structuredNote,
+      suggestedSpecialist: ai?.suggestedSpecialist,
+      urgencyLevel: ai?.urgencyLevel,
     };
 
     if (this.followUpDate()) {

@@ -19,9 +19,33 @@
         <button type="button" class="ncm-close-btn" (click)="close()" aria-label="Close">✕</button>
       </div>
 
-      @if (followupId && followupInstructions) {
+      @if (followupId && (followupConsultationSummary || followupInstructions)) {
         <div class="ncm-followup-note">
-          <strong>Previous instructions:</strong> {{ followupInstructions }}
+          <div class="ncm-followup-note-title">Previous visit context</div>
+          @if (followupConsultationSummary?.rawInput) {
+            <div class="ncm-followup-note-row">
+              <span class="ncm-followup-note-label">Doctor's Notes:</span>
+              {{ followupConsultationSummary?.rawInput }}
+            </div>
+          }
+          @if (followupConsultationSummary?.symptoms?.length) {
+            <div class="ncm-followup-note-row">
+              <span class="ncm-followup-note-label">Symptoms:</span>
+              {{ followupConsultationSummary?.symptoms?.join(', ') }}
+            </div>
+          }
+          @if (followupConsultationSummary?.diagnosis) {
+            <div class="ncm-followup-note-row">
+              <span class="ncm-followup-note-label">Diagnosis:</span>
+              {{ followupConsultationSummary?.diagnosis }}
+            </div>
+          }
+          @if (followupInstructions && followupInstructions !== '-') {
+            <div class="ncm-followup-note-row">
+              <span class="ncm-followup-note-label">Follow-up Instructions:</span>
+              {{ followupInstructions }}
+            </div>
+          }
         </div>
       }
 
@@ -58,7 +82,7 @@
               🧠 {{ isGeneratingAi() ? 'Analyzing...' : 'Get AI Recommendation' }}
             </button>
             @if (!aiResult()) {
-              <span class="ncm-ai-hint">Get the AI recommendation to continue.</span>
+              <span class="ncm-ai-hint">Optional — helps with diagnosis suggestions, but you can save without it.</span>
             }
           </div>
         </div>
@@ -68,69 +92,66 @@
         </div>
       </div>
 
-      <!-- ديف 2: التشخيص + الحالة المزمنة + اللغة + تاريخ الفولو أب، بيظهر بس
-           بعد ما نتيجة الـ AI توصل -->
-      @if (aiResult()) {
-        <div class="ncm-diagnosis-section">
-          <div class="ncm-diagnosis-row">
-            <div class="ncm-field ncm-diagnosis-field">
-              <label>Diagnosis</label>
-              <input
-                type="text"
-                [ngModel]="diagnosis()"
-                (ngModelChange)="diagnosis.set($event)"
-                placeholder="Enter final diagnosis..."
-              />
-            </div>
-            <label class="ncm-chronic-checkbox">
-              <input
-                type="checkbox"
-                [ngModel]="isChronic()"
-                (ngModelChange)="isChronic.set($event)"
-              />
-              <span>Chronic Disease</span>
-            </label>
+      <!-- ديف 2: التشخيص + الحالة المزمنة + اللغة + تاريخ الفولو أب — دايمًا
+           ظاهر، مش مرتبط بنجاح الـ AI Recommendation، عشان الحفظ يفضل شغال
+           حتى لو مفيش توكينز أو الـ AI مش متاح -->
+      <div class="ncm-diagnosis-section">
+        <div class="ncm-diagnosis-row">
+          <div class="ncm-field ncm-diagnosis-field">
+            <label>Diagnosis</label>
+            <input
+              type="text"
+              [ngModel]="diagnosis()"
+              (ngModelChange)="diagnosis.set($event)"
+              placeholder="Enter final diagnosis..."
+            />
           </div>
+          <label class="ncm-chronic-checkbox">
+            <input
+              type="checkbox"
+              [ngModel]="isChronic()"
+              (ngModelChange)="isChronic.set($event)"
+            />
+            <span>Chronic Disease</span>
+          </label>
+        </div>
 
-          <div class="ncm-field-row">
-            <div class="ncm-field">
-              <label>Language</label>
-              <select [ngModel]="language()" (ngModelChange)="language.set($event)">
-                <option value="en">English</option>
-                <option value="ar">Arabic</option>
-              </select>
-            </div>
-            <div class="ncm-field">
-              <label>Follow-up Date (optional)</label>
-              <input
-                type="date"
-                [ngModel]="followUpDate()"
-                (ngModelChange)="followUpDate.set($event)"
-              />
-            </div>
+        <div class="ncm-field-row">
+          <div class="ncm-field">
+            <label>Language</label>
+            <select [ngModel]="language()" (ngModelChange)="language.set($event)">
+              <option value="en">English</option>
+              <option value="ar">Arabic</option>
+            </select>
+          </div>
+          <div class="ncm-field">
+            <label>Follow-up Date (optional)</label>
+            <input
+              type="date"
+              [ngModel]="followUpDate()"
+              (ngModelChange)="followUpDate.set($event)"
+            />
           </div>
         </div>
-      }
+      </div>
 
       <div class="ncm-footer">
         <button type="button" class="ncm-cancel-btn" (click)="close()">Cancel</button>
-        @if (aiResult()) {
-          <button type="button" class="ncm-save-btn" [disabled]="isSaving()" (click)="saveRecord()">
-            {{
-              isSaving()
-                ? isEditMode
-                  ? 'Saving Changes...'
-                  : followupId
-                    ? 'Completing...'
-                    : 'Saving...'
-                : isEditMode
-                  ? 'Save Changes'
-                  : followupId
-                    ? 'Complete Follow-up'
-                    : 'Save Record'
-            }}
-          </button>
-        }
+        <button type="button" class="ncm-save-btn" [disabled]="isSaving()" (click)="saveRecord()">
+          {{
+            isSaving()
+              ? isEditMode
+                ? 'Saving Changes...'
+                : followupId
+                  ? 'Completing...'
+                  : 'Saving...'
+              : isEditMode
+                ? 'Save Changes'
+                : followupId
+                  ? 'Complete Follow-up'
+                  : 'Save Record'
+          }}
+        </button>
       </div>
     </div>
   </div>

@@ -41,6 +41,13 @@ export class PatientVisit implements OnInit {
 
   followupId = signal<string | null>(null);
   followupInstructions = signal('');
+  // ملخص الكونسلتيشن الأصلية اللي جدولت الفولو أب دي (أعراض/تشخيص/ملاحظات)
+  // عشان الدكتور يشوف السياق وهو بيكمل الفولو أب
+  followupConsultationSummary = signal<{
+    rawInput?: string;
+    symptoms?: string[];
+    diagnosis?: string;
+  } | null>(null);
 
   // وضع التعديل: لو معبية، الفورم بيتملى بيها والحفظ بيبقى Update مش Create
   existingConsultation = signal<any>(null);
@@ -108,6 +115,17 @@ export class PatientVisit implements OnInit {
         next: (res: any) => {
           const f = res?.data;
           this.followupInstructions.set(f?.instructions || '');
+
+          // الكونسلتيشن الأصلية اللي جدولت الفولو أب دي (السياق اللي محتاجه
+          // الدكتور وهو بيكمل الزيارة)
+          const originConsultation = f?.consultationId;
+          if (originConsultation && typeof originConsultation === 'object') {
+            this.followupConsultationSummary.set({
+              rawInput: originConsultation.rawInput,
+              symptoms: originConsultation.symptoms,
+              diagnosis: originConsultation.diagnosis,
+            });
+          }
 
           const completionId =
             typeof f?.completionConsultationId === 'object'

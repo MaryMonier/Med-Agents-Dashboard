@@ -109,10 +109,9 @@ export class ConsultationListComponent implements OnInit {
   }
 
   deleteConsultation(id: string): void {
-    // Note: The Delete button is disabled in the UI, but we keep the logic intact
     Swal.fire({
       title: 'Are you sure?',
-      text: 'This consultation, and its related follow-up and prescription, will be deleted permanently.',
+      text: 'This consultation, and any follow-up visits and prescriptions linked to it (including the whole follow-up chain), will be deleted permanently.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',

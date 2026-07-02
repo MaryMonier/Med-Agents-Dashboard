@@ -240,12 +240,16 @@ tr:hover td {
   padding: 5px 12px;
   font-size: 12px;
   border-radius: 6px;
-  border: 1px solid #d1d5db;
-  color: #9ca3af;
-  background: #f3f4f6;
-  cursor: not-allowed;
+  border: 1px solid #e53e3e;
+  color: #e53e3e;
+  background: transparent;
+  cursor: pointer;
   display: inline-block;
   line-height: 1.5;
+}
+
+.btn-delete:hover {
+  background: #fee2e2;
 }
 
 .pagination {
