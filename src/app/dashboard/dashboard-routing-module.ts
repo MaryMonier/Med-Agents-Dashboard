@@ -21,6 +21,12 @@ const routes: Routes = [
           import('../patients/patients-module').then(m => m.PatientsModule)
       },
       {
+  path: 'subscriptions',
+  loadComponent: () =>
+    import('../subscriptions/subscriptions-list/subscriptions-list')
+      .then(m => m.SubscriptionsList)
+},
+      {
         path: 'consultations',
         loadChildren: () =>
           import('../consultations/consultations-module').then(m => m.ConsultationsModule)
