@@ -43,7 +43,7 @@
         @for (msg of messages(); track msg._id) {
         <tr (click)="toggleExpand(msg._id)" class="clickable-row">
           <td data-label="Name">{{ msg.name }}</td>
-          <td data-label="Email"><a href="mailto:"{{ msg.email }}>{{ msg.email }}</a></td>
+          <td data-label="Email"><a href="mailto:{{ msg.email }}">{{ msg.email }}</a></td>
           <td data-label="Message" class="message-cell">
             {{ expandedId() === msg._id ? msg.message : preview(msg.message) }}
           </td>
