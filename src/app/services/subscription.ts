@@ -10,17 +10,20 @@ export class SubscriptionService {
 
   private api = 'http://localhost:5000/api/subscription';
 
-  getDoctorsSubscriptions(): Observable<any> {
-    return this.http.get(`${this.api}/doctors`);
+  getDoctorsSubscriptions(
+    search = '',
+    page = 1,
+    limit = 10
+  ): Observable<any> {
+    let params = `?page=${page}&limit=${limit}`;
+    if (search) params += `&search=${search}`;
+    return this.http.get(`${this.api}/doctors${params}`);
   }
 
   renewSubscription(
     doctorId: string,
-    data: {months: number }
+    data: { plan: string; months: number }
   ): Observable<any> {
-    return this.http.patch(
-      `${this.api}/${doctorId}/renew`,
-      data
-    );
+    return this.http.patch(`${this.api}/${doctorId}/renew`, data);
   }
 }
