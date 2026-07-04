@@ -1,0 +1,108 @@
+<div class="payments-page">
+
+  <div class="page-header">
+    <h2>Payments</h2>
+  </div>
+
+  <div class="search-wrap">
+    <p>Search by doctor name or email</p>
+    <div class="search-row">
+      <input
+        type="text"
+        placeholder="Search payments..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearchChange($event)" />
+
+      <select [ngModel]="statusFilter()" (ngModelChange)="onStatusChange($event)">
+        <option value="">All Status</option>
+        <option value="success">Success</option>
+        <option value="pending">Pending</option>
+        <option value="failed">Failed</option>
+      </select>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (!isLoading() && payments().length === 0) {
+    <div class="empty">No payments found.</div>
+  }
+
+  @if (!isLoading() && payments().length > 0) {
+    <div class="table-wrapper">
+      <table class="payments-table">
+        <thead>
+          <tr>
+            <th data-label="Doctor">Doctor</th>
+            <th data-label="Email">Email</th>
+            <th data-label="Plan">Plan</th>
+            <th data-label="Duration">Duration</th>
+            <th data-label="Amount">Amount</th>
+            <th data-label="Status">Status</th>
+            <th data-label="Date">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payment of payments(); track payment._id) {
+            <tr>
+              <td data-label="Doctor">{{ payment.doctor?.name || '—' }}</td>
+              <td data-label="Email">{{ payment.doctor?.email || '—' }}</td>
+
+              <td data-label="Plan">
+                <span class="plan-badge"
+                  [class.plan-basic]="payment.plan==='Basic'"
+                  [class.plan-pro]="payment.plan==='Pro'">
+                  {{ payment.plan }}
+                </span>
+              </td>
+
+              <td data-label="Duration">
+                {{ payment.months }} {{ payment.months === 1 ? 'month' : 'months' }}
+              </td>
+
+              <td data-label="Amount">{{ toEGP(payment.amountCents) }} EGP</td>
+
+              <td data-label="Status">
+                <span class="status-badge"
+                  [class.status-success]="payment.status==='success'"
+                  [class.status-pending]="payment.status==='pending'"
+                  [class.status-failed]="payment.status==='failed'">
+                  {{ payment.status }}
+                </span>
+              </td>
+
+              <td data-label="Date">{{ payment.createdAt | date:'medium' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button class="page-btn" (click)="prevPage()" [disabled]="currentPage() === 1">
+        ← Prev
+      </button>
+
+      @for (page of [].constructor(totalPages()); track $index) {
+        <button class="page-btn"
+          [class.active]="currentPage() === $index + 1"
+          (click)="goToPage($index + 1)">
+          {{ $index + 1 }}
+        </button>
+      }
+
+      <button class="page-btn" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+        Next →
+      </button>
+
+      <span class="page-info">
+        Page {{ currentPage() }} of {{ totalPages() }} — {{ totalPayments() }} payments
+      </span>
+    </div>
+  }
+
+</div>

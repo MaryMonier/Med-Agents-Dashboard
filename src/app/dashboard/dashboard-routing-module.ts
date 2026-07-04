@@ -21,6 +21,12 @@ const routes: Routes = [
           import('../patients/patients-module').then(m => m.PatientsModule)
       },
       {
+  path: 'subscriptions',
+  loadComponent: () =>
+    import('../subscriptions/subscriptions-list/subscriptions-list')
+      .then(m => m.SubscriptionsList)
+},
+      {
         path: 'consultations',
         loadChildren: () =>
           import('../consultations/consultations-module').then(m => m.ConsultationsModule)
@@ -40,6 +46,12 @@ const routes: Routes = [
         loadChildren: () =>
           import('../followups/followups-module').then(m => m.FollowupsModule)
       },
+         {
+  path: 'payments',
+  loadComponent: () =>
+    import('../payments/payments')
+      .then(m => m.PaymentsList)
+},
          {
   path: 'contact-messages',
   loadComponent: () =>

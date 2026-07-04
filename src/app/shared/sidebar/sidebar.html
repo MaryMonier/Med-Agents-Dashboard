@@ -39,14 +39,24 @@
     <a class="nav-item" routerLink="/dashboard/followups" routerLinkActive="active" (click)="isOpen.set(false)">
       <i class="ti ti-calendar"></i> Follow-ups
     </a>
+    <a class="nav-item" routerLink="/dashboard/subscriptions" routerLinkActive="active" (click)="isOpen.set(false)">
+  <i class="ti ti-credit-card"></i> Subscriptions
+</a>
+   <a
+  class="nav-item"
+  routerLink="/dashboard/payments"
+  routerLinkActive="active"
+  (click)="isOpen.set(false)"
+>
+  <i class="ti ti-receipt"></i> Payments
+</a>
+
         <a
   class="nav-item"
   routerLink="/dashboard/contact-messages"
   routerLinkActive="active"
   (click)="isOpen.set(false)"
->
-  <i class="ti ti-mail"></i> Contact Messages
-</a>
+><i class="ti ti-mail"></i> Contact Messages</a>
   </div>
 
   <div class="sidebar-footer">

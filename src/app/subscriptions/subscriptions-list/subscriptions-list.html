@@ -1,0 +1,119 @@
+<div class="subs-page">
+
+  <div class="page-header">
+    <h2>Doctors Subscriptions</h2>
+  </div>
+
+  <div class="search-wrap">
+    <p>Search by doctor name, email or specialty</p>
+    <div class="search-row">
+      <input
+        type="text"
+        placeholder="Search doctors..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearchChange($event)" />
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (!isLoading() && doctors().length === 0) {
+    <div class="empty">No doctors found.</div>
+  }
+
+  @if (!isLoading() && doctors().length > 0) {
+    <div class="table-wrapper">
+      <table class="subs-table">
+        <thead>
+          <tr>
+            <th data-label="Doctor">Doctor</th>
+            <th data-label="Email">Email</th>
+            <th data-label="Specialty">Specialty</th>
+            <th data-label="Status">Status</th>
+            <th data-label="Plan">Plan</th>
+            <th data-label="Days Left">Days Left</th>
+            <th data-label="Expire Date">Expire Date</th>
+            <th data-label="Renew">Renew</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (doctor of doctors(); track doctor._id) {
+            <tr>
+              <td data-label="Doctor">{{ doctor.name }}</td>
+              <td data-label="Email">{{ doctor.email }}</td>
+              <td data-label="Specialty">{{ doctor.specialty }}</td>
+
+              <td data-label="Status">
+                <span class="status-badge"
+                  [class.status-active]="doctor.subscription.status==='active'"
+                  [class.status-trial]="doctor.subscription.status==='trial'"
+                  [class.status-expired]="doctor.subscription.status==='expired'">
+                  {{ doctor.subscription.status }}
+                </span>
+              </td>
+
+              <td data-label="Plan">
+                <span class="plan-badge"
+                  [class.plan-basic]="doctor.subscription.plan==='Basic'"
+                  [class.plan-pro]="doctor.subscription.plan==='Pro'"
+                  [class.plan-trial]="doctor.subscription.plan==='Trial'">
+                  {{ doctor.subscription.plan }}
+                </span>
+              </td>
+
+              <td data-label="Days Left">
+                <span
+                  [class.days-good]="doctor.daysLeft>7"
+                  [class.days-warning]="doctor.daysLeft<=7 && doctor.daysLeft>3"
+                  [class.days-danger]="doctor.daysLeft<=3">
+                  {{ doctor.daysLeft }}
+                </span>
+              </td>
+
+              <td data-label="Expire Date">
+                @if (doctor.subscription.status === 'trial') {
+                  {{ doctor.subscription.trialEnd | date:'mediumDate' }}
+                } @else {
+                  {{ doctor.subscription.subscriptionEnd | date:'mediumDate' }}
+                }
+              </td>
+
+              <td data-label="Renew">
+                <button class="btn-edit" (click)="renewSubscription(doctor)">
+                  Renew
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button class="page-btn" (click)="prevPage()" [disabled]="currentPage() === 1">
+        ← Prev
+      </button>
+
+      @for (page of [].constructor(totalPages()); track $index) {
+        <button class="page-btn"
+          [class.active]="currentPage() === $index + 1"
+          (click)="goToPage($index + 1)">
+          {{ $index + 1 }}
+        </button>
+      }
+
+      <button class="page-btn" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+        Next →
+      </button>
+
+      <span class="page-info">
+        Page {{ currentPage() }} of {{ totalPages() }} — {{ totalDoctors() }} doctors
+      </span>
+    </div>
+  }
+
+</div>
