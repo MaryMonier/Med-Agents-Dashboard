@@ -47,6 +47,12 @@ const routes: Routes = [
           import('../followups/followups-module').then(m => m.FollowupsModule)
       },
          {
+  path: 'payments',
+  loadComponent: () =>
+    import('../payments/payments')
+      .then(m => m.PaymentsList)
+},
+         {
   path: 'contact-messages',
   loadComponent: () =>
     import('../contact/contact')
