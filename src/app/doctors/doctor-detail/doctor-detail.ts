@@ -7,6 +7,7 @@ import { ConsultationService } from '../../services/consultation';
 import { ConsultationWithPatient } from '../../models/consultations';
 import { FollowupService } from '../../services/followup';
 import { Followup } from '../../models/followup';
+import { environment } from '../../../environments/environment';
 
 type TabKey = 'patients' | 'consultations' | 'followups';
 
@@ -130,7 +131,7 @@ export class DoctorDetail implements OnInit {
     return days;
   });
 
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private http: HttpClient,

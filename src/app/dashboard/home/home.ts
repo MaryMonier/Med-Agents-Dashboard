@@ -4,6 +4,7 @@ import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ConsultationService } from '../../services/consultation';
 import { FollowupService } from '../../services/followup';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-home',
@@ -31,7 +32,7 @@ export class Home implements OnInit, OnDestroy {
   monthlyStats = signal<{ month: string; count: number }[]>([]);
   activityFeed = signal<{ icon: string; text: string; time: string; color: string }[]>([]);
 
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = environment.apiUrl;
   private refreshInterval: any;
 
   constructor(

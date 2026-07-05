@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -8,7 +9,7 @@ import { Observable } from 'rxjs';
 export class PaymentService {
   private http = inject(HttpClient);
 
-  private api = 'http://localhost:5000/api/payment';
+  private api = `${environment.apiUrl}/payment`;
 
   getAllPayments(
     search = '',

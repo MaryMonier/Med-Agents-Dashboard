@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { FollowupResponse } from '../models/followup';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FollowupService {
-  private baseUrl = 'http://localhost:5000/api/followups';
-  private agentUrl = 'http://localhost:5000/api/followup-agent';
+  private baseUrl = `${environment.apiUrl}/followups`;
+  private agentUrl = `${environment.apiUrl}/followup-agent`;
 
   constructor(private http: HttpClient) {}
 
