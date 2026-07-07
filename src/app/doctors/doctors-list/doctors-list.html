@@ -28,35 +28,37 @@
   }
 
   @if (!isLoading() && doctors().length > 0) {
-    <table class="patients-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Specialty</th>
-          <th>Language</th>
-          <th>Role</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (doctor of doctors(); track doctor._id) {
+    <div class="table-wrapper">
+      <table class="patients-table">
+        <thead>
           <tr>
-            <td><a class="doctor-name-link" (click)="goToDetail(doctor._id)">{{ doctor.name }}</a></td>
-            <td>{{ doctor.email }}</td>
-            <td>{{ doctor.specialty || 'N/A' }}</td>
-            <td>{{ doctor.language || 'en' }}</td>
-            <td><span class="badge">{{ doctor.role }}</span></td>
-            <td>
-              <div class="actions">
-                <button class="btn-edit" (click)="goToEdit(doctor._id)">Edit</button>
-                <button class="btn-delete" (click)="deleteDoctor(doctor._id)">Delete</button>
-              </div>
-            </td>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Specialty</th>
+            <th>Language</th>
+            <th>Role</th>
+            <th>Actions</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (doctor of doctors(); track doctor._id) {
+            <tr>
+              <td data-label="Name"><a class="doctor-name-link" (click)="goToDetail(doctor._id)">{{ doctor.name }}</a></td>
+              <td data-label="Email">{{ doctor.email }}</td>
+              <td data-label="Specialty">{{ doctor.specialty || 'N/A' }}</td>
+              <td data-label="Language">{{ doctor.language || 'en' }}</td>
+              <td data-label="Role"><span class="badge">{{ doctor.role }}</span></td>
+              <td data-label="Actions">
+                <div class="actions">
+                  <button class="btn-edit" (click)="goToEdit(doctor._id)">Edit</button>
+                  <button class="btn-delete" (click)="deleteDoctor(doctor._id)">Delete</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 
   @if (totalPages() > 1) {

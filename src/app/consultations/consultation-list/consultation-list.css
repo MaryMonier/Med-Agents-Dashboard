@@ -120,11 +120,16 @@ button:disabled {
 }
 
 /* Table styling */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
-  min-width: 600px;
+  min-width: 700px;
 }
 
 th {
@@ -324,5 +329,78 @@ tr:hover td {
   .pagination-controls {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .new-btn {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 600px) {
+  .table-wrapper {
+    overflow-x: visible;
+  }
+
+  table {
+    min-width: 0;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    display: block;
+    margin-bottom: 12px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 12px;
+    background: #fff;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f5f5f5;
+    padding: 8px 4px;
+    font-size: 13px;
+    gap: 8px;
+    text-align: right;
+  }
+
+  tr:last-child td,
+  td:last-child {
+    border-bottom: none;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: 500;
+    color: #888;
+    font-size: 12px;
+    flex-shrink: 0;
+    text-align: left;
+  }
+
+  td.actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  td.actions::before {
+    flex-basis: 100%;
+    text-align: left;
+    margin-bottom: 4px;
   }
 }

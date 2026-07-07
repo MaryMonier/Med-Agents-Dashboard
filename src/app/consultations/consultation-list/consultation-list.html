@@ -32,60 +32,62 @@
 
   @if (!isLoading() && pagedConsultations().length > 0) {
     <div class="table-card">
-      <table>
-        <thead>
-          <tr>
-            <th>Patient</th>
-            <th>Symptoms</th>
-            <th>Urgency</th>
-            <th>Specialist</th>
-            <th>Status</th>
-            <th>Follow-up</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (c of pagedConsultations(); track c._id) {
+      <div class="table-wrapper">
+        <table>
+          <thead>
             <tr>
-              <td>{{ getPatientName(c.patientId) }}</td>
-              <td>{{ (c.symptoms || []).join(', ') }}</td>
-              <td>
-                <span class="urgency-badge" [ngClass]="(c.urgencyLevel || '').toLowerCase()">
-                  {{ c.urgencyLevel }}
-                </span>
-              </td>
-              <td>{{ c.suggestedSpecialist || '—' }}</td>
-              <td>
-                <span class="status-badge" [ngClass]="(c.status || '').toLowerCase()">
-                  {{ c.status }}
-                </span>
-              </td>
-              <td>{{ c.followUpDate ? (c.followUpDate | date: 'mediumDate') : '—' }}</td>
-              <td class="actions">
-                <a
-                  class="btn-details"
-                  [routerLink]="['/dashboard/consultations', getConsultationId(c)]"
-                >
-                  Details
-                </a>
-                <a
-                  class="btn-edit"
-                  [routerLink]="['/dashboard/patients/visit', getPatientId(c)]"
-                  [queryParams]="{ editConsultationId: getConsultationId(c) }"
-                >
-                  Edit
-                </a>
-                <button
-                  class="btn-delete"
-                  (click)="deleteConsultation(getConsultationId(c))"
-                >
-                  Delete
-                </button>
-              </td>
+              <th>Patient</th>
+              <th>Symptoms</th>
+              <th>Urgency</th>
+              <th>Specialist</th>
+              <th>Status</th>
+              <th>Follow-up</th>
+              <th>Actions</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (c of pagedConsultations(); track c._id) {
+              <tr>
+                <td data-label="Patient">{{ getPatientName(c.patientId) }}</td>
+                <td data-label="Symptoms">{{ (c.symptoms || []).join(', ') }}</td>
+                <td data-label="Urgency">
+                  <span class="urgency-badge" [ngClass]="(c.urgencyLevel || '').toLowerCase()">
+                    {{ c.urgencyLevel }}
+                  </span>
+                </td>
+                <td data-label="Specialist">{{ c.suggestedSpecialist || '—' }}</td>
+                <td data-label="Status">
+                  <span class="status-badge" [ngClass]="(c.status || '').toLowerCase()">
+                    {{ c.status }}
+                  </span>
+                </td>
+                <td data-label="Follow-up">{{ c.followUpDate ? (c.followUpDate | date: 'mediumDate') : '—' }}</td>
+                <td class="actions" data-label="Actions">
+                  <a
+                    class="btn-details"
+                    [routerLink]="['/dashboard/consultations', getConsultationId(c)]"
+                  >
+                    Details
+                  </a>
+                  <a
+                    class="btn-edit"
+                    [routerLink]="['/dashboard/patients/visit', getPatientId(c)]"
+                    [queryParams]="{ editConsultationId: getConsultationId(c) }"
+                  >
+                    Edit
+                  </a>
+                  <button
+                    class="btn-delete"
+                    (click)="deleteConsultation(getConsultationId(c))"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
       <div class="pagination">
         <div class="pagination-controls">
