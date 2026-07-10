@@ -156,7 +156,7 @@ export class NewConsultationModalComponent implements OnChanges {
 
     this.isGeneratingAi.set(true);
 
-    const payload = {
+    const payload: any = {
       rawInput: this.rawInput().trim(),
       diagnosis: this.diagnosis().trim(),
       language: this.language(),
@@ -165,6 +165,15 @@ export class NewConsultationModalComponent implements OnChanges {
         .map((s: string) => s.trim())
         .filter((s: string) => s.length > 0),
     };
+
+    // لو ده Complete Follow-up، ابعت بيانات الزيارة السابقة (موجودة أصلاً في
+    // followupConsultationSummary) عشان الإيجنت يقارن ويقول هل المريض اتحسن
+    if (this.followupId && this.followupConsultationSummary) {
+      payload.visitType = 'followup';
+      payload.previousDiagnosis = this.followupConsultationSummary.diagnosis || '';
+      payload.previousSymptoms = (this.followupConsultationSummary.symptoms || []).join(', ');
+      payload.previousInstructions = this.followupConsultationSummary.rawInput || '';
+    }
 
     // أول كول ممكن يفشل لظروف بيئة عابرة، فبنعمل كذا محاولة هادية تلقائية
     // قبل ما نضايق الدكتور بإيرور (بدل ما هو يدوس الزرار يدوي كذا مرة)

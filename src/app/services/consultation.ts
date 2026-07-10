@@ -46,6 +46,10 @@ export class ConsultationService {
     symptoms: string[];
     diagnosis?: string;
     language: string;
+    visitType?: string;
+    previousDiagnosis?: string;
+    previousSymptoms?: string;
+    previousInstructions?: string;
   }): Observable<{ success: boolean; data: any }> {
     return this.http.post<{ success: boolean; data: any }>(
       `${this.apiUrl}/ai-recommendation`,
