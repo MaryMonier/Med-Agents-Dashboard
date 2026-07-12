@@ -1,13 +1,19 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnChanges,
+  SimpleChanges,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import Swal from 'sweetalert2';
-import {
-  PrescriptionService,
-  Medication,
-  DrugSuggestion,
-} from '../../services/prescription';
+import { PrescriptionService, Medication, DrugSuggestion } from '../../services/prescription';
+import { ConsultationService } from '../../services/consultation';
+import { printPrescription } from '../print-prescription.util';
 
 export interface MedicationFormState {
   _key: string;
@@ -65,6 +71,19 @@ export class PrescriptionModalComponent implements OnChanges {
   @Input() patient: any = null; // { _id, name, allergies, dateOfBirth, gender }
   @Input() language: 'en' | 'ar' = 'en';
   @Input() existingPrescription: any = null; // null when creating, prescription object when editing
+  // ─── نفس اللي محتاجينه لإيجنت اقتراح الأدوية (زي React بالظبط) ──────────
+  @Input() diagnosis = '';
+  @Input() symptoms: string[] = [];
+  @Input() rawInput = '';
+  @Input() isFollowup = false;
+  @Input() previousPrescription: {
+    name: string;
+    dosageAmount?: number;
+    dosageUnit?: string;
+    frequencyCount?: number;
+    frequencyPeriod?: string;
+    isChronic?: boolean;
+  }[] = [];
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<any>();
@@ -73,6 +92,10 @@ export class PrescriptionModalComponent implements OnChanges {
   checkedMedications = signal<Medication[] | null>(null);
   checkingSafety = signal(false);
   isSaving = signal(false);
+  // ─── اقتراح الأدوية (Medication Suggestion Agent) ────────────────────────
+  medicationSuggestions = signal<any[] | null>(null);
+  suggestingMedications = signal(false);
+  medSuggestionsError = signal('');
 
   // ─── Per-row drug autocomplete state (keyed by medication _key) ──────────
   suggestionsByKey: Record<string, DrugSuggestion[]> = {};
@@ -83,7 +106,10 @@ export class PrescriptionModalComponent implements OnChanges {
   private safetyCheckTimeout: any = null;
   private blurTimeouts: Record<string, any> = {};
 
-  constructor(private prescriptionService: PrescriptionService) {
+  constructor(
+    private prescriptionService: PrescriptionService,
+    private consultationService: ConsultationService,
+  ) {
     this.drugQuery$
       .pipe(
         debounceTime(350),
@@ -99,7 +125,9 @@ export class PrescriptionModalComponent implements OnChanges {
           this.searchingByKey[key] = true;
           return this.prescriptionService
             .searchDrugs(query.trim())
-            .pipe(switchMap((res: { data: DrugSuggestion[] }) => of({ key, data: res.data || [] })));
+            .pipe(
+              switchMap((res: { data: DrugSuggestion[] }) => of({ key, data: res.data || [] })),
+            );
         }),
       )
       .subscribe(({ key, data }: { key: string; data: DrugSuggestion[] }) => {
@@ -135,6 +163,8 @@ export class PrescriptionModalComponent implements OnChanges {
       this.medications.set([emptyMedication()]);
     }
     this.checkedMedications.set(null);
+    this.medicationSuggestions.set(null);
+    this.medSuggestionsError.set('');
     this.suggestionsByKey = {};
     this.searchingByKey = {};
     this.showSuggestionsByKey = {};
@@ -243,6 +273,73 @@ export class PrescriptionModalComponent implements OnChanges {
       });
   }
 
+  // ─── اقتراح الأدوية (Medication Suggestion Agent) ────────────────────────
+  // بيقرا التشخيص/الأعراض/ملاحظات الدكتور، ولو الزيارة دي فولو أب بيبعت
+  // كمان الروشتة السابقة عشان الإيجنت يقرر يزود الجرعة/يغيّر الدواء/يسيبه
+  suggestMedications(): void {
+    if (!this.diagnosis?.trim()) {
+      Swal.fire('Error', 'Add a diagnosis before requesting suggestions.', 'warning');
+      return;
+    }
+
+    this.suggestingMedications.set(true);
+    this.medSuggestionsError.set('');
+    this.medicationSuggestions.set(null);
+
+    this.consultationService
+      .getMedicationSuggestions({
+        diagnosis: this.diagnosis,
+        symptoms: this.symptoms,
+        rawInput: this.rawInput,
+        language: this.language,
+        patientId: this.patient?._id,
+        isFollowup: this.isFollowup,
+        previousPrescription: this.previousPrescription,
+      })
+      .subscribe({
+        next: (res: { data?: any[] }) => {
+          this.medicationSuggestions.set(res.data || []);
+          this.suggestingMedications.set(false);
+        },
+        error: (err: any) => {
+          this.suggestingMedications.set(false);
+          this.medSuggestionsError.set(
+            err?.error?.message || 'Failed to get medication suggestions',
+          );
+        },
+      });
+  }
+
+  // بيضيف دواء مقترح واحد بس (اللي دوس عليه الدكتور) في آخر قائمة الأدوية
+  // اللي هو كاتبها بالفعل - لو الفورم لسه فيه بس الصف الفاضي الافتراضي،
+  // بيستبدله؛ غير كده بيتضاف تحت اللي مكتوب أصلاً. وبيشيل الاقتراح ده من
+  // الليستة بعد ما يتضاف عشان منضيفوش مرتين بالغلط
+  addSuggestedMedication(index: number): void {
+    const suggestion = this.medicationSuggestions()?.[index];
+    if (!suggestion) return;
+
+    const newRow: MedicationFormState = {
+      _key: Math.random().toString(36).slice(2),
+      name: suggestion.name || '',
+      activeIngredient: suggestion.activeIngredient || '',
+      dosageAmount: suggestion.dosageAmount != null ? String(suggestion.dosageAmount) : '',
+      dosageUnit: suggestion.dosageUnit || 'mg',
+      frequencyCount: suggestion.frequencyCount != null ? String(suggestion.frequencyCount) : '',
+      frequencyPeriod: suggestion.frequencyPeriod || 'per day',
+      isChronic: !!suggestion.isChronic,
+      durationValue: suggestion.durationValue != null ? String(suggestion.durationValue) : '',
+      durationUnit: suggestion.durationUnit || 'days',
+    };
+
+    this.medications.update((list: MedicationFormState[]) => {
+      const isOnlyEmptyRow = list.length === 1 && !list[0].name.trim();
+      return isOnlyEmptyRow ? [newRow] : [...list, newRow];
+    });
+
+    this.medicationSuggestions.update((prev) => (prev || []).filter((_, i) => i !== index));
+    this.scheduleSafetyCheck();
+  }
+
   // ─── Save ─────────────────────────────────────────────────────────────────
   private validate(): string | null {
     for (const med of this.medications()) {
@@ -304,8 +401,14 @@ export class PrescriptionModalComponent implements OnChanges {
         Swal.fire({
           icon: 'success',
           title: isEdit ? 'Prescription updated' : 'Prescription saved',
-          timer: 1400,
-          showConfirmButton: false,
+          text: 'Do you want to print the prescription?',
+          showCancelButton: true,
+          confirmButtonText: 'Print',
+          cancelButtonText: 'No, thanks',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            printPrescription(this.patient?.name || '', medications);
+          }
         });
         this.saved.emit(res.data);
       },

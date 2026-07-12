@@ -233,6 +233,156 @@
   text-decoration: underline;
 }
 
+/* ─── Medication suggestion agent (matches the React card exactly) ────── */
+
+.pm-suggest-card {
+  background: #ffffff;
+  border: 1px solid #f3e8ff;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.pm-suggest-card-header {
+  background: #faf5ff;
+  border-bottom: 1px solid #f3e8ff;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #6b21a8;
+}
+
+.pm-suggest-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f3e8ff;
+  color: #7e22ce;
+  border: none;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  flex-shrink: 0;
+}
+
+.pm-suggest-btn:hover:not(:disabled) {
+  background: #7e22ce;
+  color: #fff;
+}
+
+.pm-suggest-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pm-suggest-card-body {
+  padding: 16px;
+}
+
+.pm-suggest-note {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0 0 12px;
+}
+
+.pm-suggest-error {
+  font-size: 12px;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0;
+}
+
+.pm-suggestion-empty {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.pm-suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pm-suggestion-item {
+  background: rgba(250, 245, 255, 0.6);
+  border: 1px solid #f3e8ff;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.pm-suggestion-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pm-suggestion-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.pm-suggestion-ingredient {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.pm-suggestion-chronic {
+  font-size: 10px;
+  font-weight: 700;
+  color: #7e22ce;
+  background: #f3e8ff;
+  border-radius: 999px;
+  padding: 1px 8px;
+  text-transform: uppercase;
+}
+
+.pm-suggestion-detail {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 2px 0 0;
+}
+
+.pm-suggestion-reason {
+  font-size: 12px;
+  color: #475569;
+  font-style: italic;
+  margin: 6px 0 0;
+}
+
+.pm-add-suggestion-btn {
+  width: 100%;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.15s;
+}
+
+.pm-add-suggestion-btn:hover {
+  background: #1565c0;
+}
+
 /* ─── Safety column ──────────────────────────────────────────────────── */
 
 .pm-safety-card {

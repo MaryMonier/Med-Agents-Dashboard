@@ -3,6 +3,7 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PrescriptionService } from '../services/prescription';
+import { printPrescription } from '../shared/print-prescription.util';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -94,6 +95,16 @@ export class PrescriptionsList implements OnInit {
   onPageSizeChange(event: Event): void {
     this.pageSize.set(Number((event.target as HTMLSelectElement).value));
     this.pageIndex.set(0);
+  }
+
+  // ─── Print ───────────────────────────────────────────────────────────────
+  printPrescriptionRow(prescription: any): void {
+    const patientName = prescription.patientId?.name || '';
+    printPrescription(
+      patientName,
+      prescription.medications || [],
+      new Date(prescription.createdAt),
+    );
   }
 
   // ─── Edit: يودي لصفحة الهيستوري مع الـ consultationId ──────────────────

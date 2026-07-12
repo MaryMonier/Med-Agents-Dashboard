@@ -42,6 +42,11 @@
         [patient]="patientForModal()"
         language="en"
         [existingPrescription]="existingPrescription()"
+        [diagnosis]="activeDiagnosis()"
+        [symptoms]="activeSymptoms()"
+        [rawInput]="activeRawInput()"
+        [isFollowup]="!!followupId()"
+        [previousPrescription]="followupConsultationSummary()?.previousPrescription || []"
         (closed)="goBack()"
         (saved)="onPrescriptionSaved()"
       />

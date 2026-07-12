@@ -172,6 +172,19 @@ tr:hover td {
   background: #e8eeff;
 }
 
+.btn-print {
+  padding: 5px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #6b7280;
+  color: #6b7280;
+  background: transparent;
+  cursor: pointer;
+}
+.btn-print:hover {
+  background: #f3f4f6;
+}
+
 .btn-delete {
   padding: 5px 12px;
   font-size: 12px;

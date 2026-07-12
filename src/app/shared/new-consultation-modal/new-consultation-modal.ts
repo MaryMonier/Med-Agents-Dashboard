@@ -50,6 +50,14 @@ export class NewConsultationModalComponent implements OnChanges {
     rawInput?: string;
     symptoms?: string[];
     diagnosis?: string;
+    previousPrescription?: {
+      name: string;
+      dosageAmount?: number;
+      dosageUnit?: string;
+      frequencyCount?: number;
+      frequencyPeriod?: string;
+      isChronic?: boolean;
+    }[];
   } | null = null;
   @Input() existingConsultation: any = null; // لو موجودة، يبقى ده "Edit" مش "Create"
 
@@ -173,6 +181,16 @@ export class NewConsultationModalComponent implements OnChanges {
       payload.previousDiagnosis = this.followupConsultationSummary.diagnosis || '';
       payload.previousSymptoms = (this.followupConsultationSummary.symptoms || []).join(', ');
       payload.previousInstructions = this.followupConsultationSummary.rawInput || '';
+      payload.previousPrescription = (this.followupConsultationSummary.previousPrescription || [])
+        .map((m) => {
+          const dose = m.dosageAmount && m.dosageUnit ? `${m.dosageAmount}${m.dosageUnit}` : '';
+          const freq =
+            m.frequencyCount && m.frequencyPeriod
+              ? `${m.frequencyCount}x ${m.frequencyPeriod}`
+              : '';
+          return [m.name, dose, freq].filter(Boolean).join(' ');
+        })
+        .join(', ');
     }
 
     // أول كول ممكن يفشل لظروف بيئة عابرة، فبنعمل كذا محاولة هادية تلقائية

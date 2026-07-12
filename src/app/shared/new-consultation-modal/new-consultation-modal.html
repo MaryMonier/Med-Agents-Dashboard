@@ -16,7 +16,21 @@
           </h2>
           <p class="ncm-patient-line">{{ patientName }}</p>
         </div>
-        <button type="button" class="ncm-close-btn" (click)="close()" aria-label="Close">✕</button>
+        <div class="ncm-header-actions">
+          @if (patientId) {
+            <a
+              [href]="'/dashboard/patients/history/' + patientId"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="ncm-see-history-btn"
+            >
+              See History
+            </a>
+          }
+          <button type="button" class="ncm-close-btn" (click)="close()" aria-label="Close">
+            ✕
+          </button>
+        </div>
       </div>
 
       @if (followupId && (followupConsultationSummary || followupInstructions)) {
@@ -82,7 +96,9 @@
               🧠 {{ isGeneratingAi() ? 'Analyzing...' : 'Get AI Recommendation' }}
             </button>
             @if (!aiResult()) {
-              <span class="ncm-ai-hint">Optional — helps with diagnosis suggestions, but you can save without it.</span>
+              <span class="ncm-ai-hint"
+                >Optional — helps with diagnosis suggestions, but you can save without it.</span
+              >
             }
           </div>
         </div>

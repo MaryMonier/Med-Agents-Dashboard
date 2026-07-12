@@ -50,9 +50,35 @@ export class ConsultationService {
     previousDiagnosis?: string;
     previousSymptoms?: string;
     previousInstructions?: string;
+    previousPrescription?: string;
   }): Observable<{ success: boolean; data: any }> {
     return this.http.post<{ success: boolean; data: any }>(
       `${this.apiUrl}/ai-recommendation`,
+      data,
+      { headers: this.getHeaders() },
+    );
+  }
+
+  // إيجنت اقتراح الأدوية — بيقرا التشخيص/الأعراض، ولو الزيارة دي فولو أب
+  // بيبص كمان على الروشتة السابقة عشان يقرر يزود الجرعة/يغيّر الدواء/يسيبه
+  getMedicationSuggestions(data: {
+    diagnosis: string;
+    symptoms: string[];
+    rawInput: string;
+    language: string;
+    patientId: string;
+    isFollowup?: boolean;
+    previousPrescription?: {
+      name: string;
+      dosageAmount?: number;
+      dosageUnit?: string;
+      frequencyCount?: number;
+      frequencyPeriod?: string;
+      isChronic?: boolean;
+    }[];
+  }): Observable<{ success: boolean; data: any[] }> {
+    return this.http.post<{ success: boolean; data: any[] }>(
+      `${this.apiUrl}/medication-suggestions`,
       data,
       { headers: this.getHeaders() },
     );

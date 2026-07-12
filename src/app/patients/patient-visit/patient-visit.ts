@@ -47,6 +47,14 @@ export class PatientVisit implements OnInit {
     rawInput?: string;
     symptoms?: string[];
     diagnosis?: string;
+    previousPrescription?: {
+      name: string;
+      dosageAmount?: number;
+      dosageUnit?: string;
+      frequencyCount?: number;
+      frequencyPeriod?: string;
+      isChronic?: boolean;
+    }[];
   } | null>(null);
 
   // وضع التعديل: لو معبية، الفورم بيتملى بيها والحفظ بيبقى Update مش Create
@@ -57,6 +65,11 @@ export class PatientVisit implements OnInit {
 
   activeConsultationId = signal('');
   existingPrescription = signal<any>(null);
+  // بيانات الكونسلتيشن الحالية اللي اتحفظت، عشان نبعتها لإيجنت اقتراح
+  // الأدوية في مودال الروشتة (نفس الحاجة اللي React بتعملها)
+  activeDiagnosis = signal('');
+  activeSymptoms = signal<string[]>([]);
+  activeRawInput = signal('');
 
   patientName = computed(() => this.data()?.patient?.name || '');
 
@@ -125,6 +138,34 @@ export class PatientVisit implements OnInit {
               symptoms: originConsultation.symptoms,
               diagnosis: originConsultation.diagnosis,
             });
+
+            // كمان نجيب الروشتة اللي اتكتبت في الزيارة دي عشان إيجنت
+            // التشخيص وإيجنت اقتراح الأدوية يقدروا يقارنوا بيها (تحسّن؟
+            // نفس الحالة؟ محتاج جرعة أعلى أو دواء تاني؟)
+            const originConsultationId = originConsultation._id;
+            if (originConsultationId) {
+              this.prescriptionService
+                .getPrescriptionByConsultation(originConsultationId)
+                .subscribe({
+                  next: (presRes: any) => {
+                    const meds = presRes?.data?.medications || [];
+                    this.followupConsultationSummary.update((prev) => ({
+                      ...(prev || {}),
+                      previousPrescription: meds.map((m: any) => ({
+                        name: m.name,
+                        dosageAmount: m.dosageAmount,
+                        dosageUnit: m.dosageUnit,
+                        frequencyCount: m.frequencyCount,
+                        frequencyPeriod: m.frequencyPeriod,
+                        isChronic: m.isChronic,
+                      })),
+                    }));
+                  },
+                  error: () => {
+                    // مفيش روشتة مسجلة للزيارة دي — طبيعي، منسيبش previousPrescription
+                  },
+                });
+            }
           }
 
           const completionId =
@@ -151,6 +192,15 @@ export class PatientVisit implements OnInit {
       this.showConsultationSection.set(false);
       this.activeConsultationId.set(consultationId);
       this.showPrescriptionSection.set(true);
+      this.consultationService.getById(consultationId).subscribe({
+        next: (res: any) => {
+          const c = res?.data;
+          this.activeDiagnosis.set(c?.diagnosis || '');
+          this.activeSymptoms.set(c?.symptoms || []);
+          this.activeRawInput.set(c?.rawInput || '');
+        },
+        error: () => {},
+      });
     }
   }
 
@@ -180,6 +230,9 @@ export class PatientVisit implements OnInit {
         }
         this.existingConsultation.set(consultation);
         this.activeConsultationId.set(consultationId);
+        this.activeDiagnosis.set(consultation?.diagnosis || '');
+        this.activeSymptoms.set(consultation?.symptoms || []);
+        this.activeRawInput.set(consultation?.rawInput || '');
         this.showConsultationSection.set(true);
         // ديف الروشتة مش بيتعرض فورًا هنا — بيفضل مستني لحد ما الدكتور
         // يدوس Save/Update على ديف الكونسلتيشن (نفس سلوك الإنشاء بالظبط)،
@@ -219,6 +272,18 @@ export class PatientVisit implements OnInit {
   onConsultationSaved(event: { consultationId: string; patientId: string }): void {
     this.activeConsultationId.set(event.consultationId);
     this.showPrescriptionSection.set(true);
+
+    this.consultationService.getById(event.consultationId).subscribe({
+      next: (res: any) => {
+        const c = res?.data;
+        this.activeDiagnosis.set(c?.diagnosis || '');
+        this.activeSymptoms.set(c?.symptoms || []);
+        this.activeRawInput.set(c?.rawInput || '');
+      },
+      error: () => {
+        // مش قاتل — زرار "اقترح أدوية" هيبقى معطّل لو مفيش diagnosis بس
+      },
+    });
   }
 
   onPrescriptionSaved(): void {

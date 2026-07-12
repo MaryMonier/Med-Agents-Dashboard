@@ -49,7 +49,10 @@
                     Active ingredient: <span>{{ med.activeIngredient }}</span>
                   </p>
                 }
-                @if (showSuggestionsByKey[med._key] && (searchingByKey[med._key] || (suggestionsByKey[med._key]?.length ?? 0) > 0)) {
+                @if (
+                  showSuggestionsByKey[med._key] &&
+                  (searchingByKey[med._key] || (suggestionsByKey[med._key]?.length ?? 0) > 0)
+                ) {
                   <ul class="pm-suggestions">
                     @if (searchingByKey[med._key]) {
                       <li class="pm-suggestion-loading">Searching FDA database...</li>
@@ -57,7 +60,10 @@
                     @for (drug of suggestionsByKey[med._key]; track drug.displayName) {
                       <li (mousedown)="selectSuggestion(i, drug)">
                         <strong>{{ drug.displayName }}</strong>
-                        @if (drug.genericName !== 'N/A' && drug.genericName.toLowerCase() !== drug.displayName.toLowerCase()) {
+                        @if (
+                          drug.genericName !== 'N/A' &&
+                          drug.genericName.toLowerCase() !== drug.displayName.toLowerCase()
+                        ) {
                           <span class="pm-suggestion-meta"> ({{ drug.genericName }})</span>
                         }
                         @if (drug.route !== 'N/A') {
@@ -165,6 +171,77 @@
 
         <!-- Safety panel -->
         <div class="pm-safety-col">
+          @if (diagnosis?.trim()) {
+            <div class="pm-suggest-card">
+              <div class="pm-suggest-card-header">
+                <span>💊 Suggested Medications</span>
+                <button
+                  type="button"
+                  class="pm-suggest-btn"
+                  [disabled]="suggestingMedications()"
+                  (click)="suggestMedications()"
+                >
+                  {{ suggestingMedications() ? 'Generating...' : 'Generate' }}
+                </button>
+              </div>
+              <div class="pm-suggest-card-body">
+                <p class="pm-suggest-note">
+                  AI-generated starting point based on the diagnosis — review before adding.
+                </p>
+
+                @if (medSuggestionsError()) {
+                  <p class="pm-suggest-error">{{ medSuggestionsError() }}</p>
+                }
+
+                @if (medicationSuggestions() !== null && medicationSuggestions()!.length === 0) {
+                  <p class="pm-suggestion-empty">No suggestions for this diagnosis.</p>
+                }
+
+                @if (medicationSuggestions() !== null && medicationSuggestions()!.length > 0) {
+                  <div class="pm-suggestion-list">
+                    @for (s of medicationSuggestions(); track s.name; let i = $index) {
+                      <div class="pm-suggestion-item">
+                        <div class="pm-suggestion-item-top">
+                          <span class="pm-suggestion-name">
+                            {{ s.name }}
+                            @if (
+                              s.activeIngredient &&
+                              s.activeIngredient.toLowerCase() !== s.name.toLowerCase()
+                            ) {
+                              <span class="pm-suggestion-ingredient">
+                                ({{ s.activeIngredient }})</span
+                              >
+                            }
+                          </span>
+                          @if (s.isChronic) {
+                            <span class="pm-suggestion-chronic">Chronic</span>
+                          }
+                        </div>
+                        <p class="pm-suggestion-detail">
+                          {{ s.dosageAmount }}{{ s.dosageUnit }} · {{ s.frequencyCount }}x
+                          {{ s.frequencyPeriod }}
+                          @if (!s.isChronic && s.durationValue) {
+                            <span> · {{ s.durationValue }} {{ s.durationUnit }}</span>
+                          }
+                        </p>
+                        @if (s.reason) {
+                          <p class="pm-suggestion-reason">{{ s.reason }}</p>
+                        }
+                        <button
+                          type="button"
+                          class="pm-add-suggestion-btn"
+                          (click)="addSuggestedMedication(i)"
+                        >
+                          Add this medication
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
           <div class="pm-safety-card">
             <div class="pm-safety-card-header">🛡️ Safety Screening</div>
             <div class="pm-safety-card-body">
@@ -209,7 +286,13 @@
       <div class="pm-footer">
         <button type="button" class="pm-cancel-btn" (click)="close()">Cancel</button>
         <button type="button" class="pm-save-btn" [disabled]="isSaving()" (click)="save()">
-          {{ isSaving() ? 'Saving...' : (existingPrescription ? 'Update Prescription' : 'Save Prescription') }}
+          {{
+            isSaving()
+              ? 'Saving...'
+              : existingPrescription
+                ? 'Update Prescription'
+                : 'Save Prescription'
+          }}
         </button>
       </div>
     </div>
