@@ -68,7 +68,7 @@ export class SubscriptionsList implements OnInit {
     Swal.fire({
       title: `Renew Subscription`,
       html: `
-        <div style="text-align:left">
+        <div style="text-align:left; display:flex; flex-direction:column;gap-15px;">
 
           <label style="font-weight:600">Plan</label>
           <select id="plan" class="swal2-select">
