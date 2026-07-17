@@ -1,5 +1,4 @@
 export const environment = {
   production: true,
-    apiUrl: 'https://med-agents-backend-new.vercel.app/api',
-
+  apiUrl: 'http://localhost:5000/api',
 };
