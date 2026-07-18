@@ -13,11 +13,15 @@ export class SubscriptionService {
 
   getDoctorsSubscriptions(
     search = '',
+    status = '',
+    plan = '',
     page = 1,
     limit = 10
   ): Observable<any> {
     let params = `?page=${page}&limit=${limit}`;
     if (search) params += `&search=${search}`;
+    if (status) params += `&status=${status}`;
+    if (plan) params += `&plan=${plan}`;
     return this.http.get(`${this.api}/doctors${params}`);
   }
 

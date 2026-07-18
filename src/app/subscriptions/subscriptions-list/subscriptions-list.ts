@@ -16,6 +16,8 @@ export class SubscriptionsList implements OnInit {
   doctors = signal<any[]>([]);
   isLoading = signal(false);
   searchQuery = signal('');
+  statusFilter = signal('');
+  planFilter = signal('');
 
   currentPage = signal(1);
   totalPages = signal(0);
@@ -30,7 +32,13 @@ export class SubscriptionsList implements OnInit {
     this.isLoading.set(true);
 
     this.subscriptionService
-      .getDoctorsSubscriptions(this.searchQuery(), this.currentPage(), this.limit)
+      .getDoctorsSubscriptions(
+        this.searchQuery(),
+        this.statusFilter(),
+        this.planFilter(),
+        this.currentPage(),
+        this.limit
+      )
       .subscribe({
         next: (res) => {
           this.doctors.set(res.data);
@@ -47,6 +55,26 @@ export class SubscriptionsList implements OnInit {
 
   onSearchChange(value: string): void {
     this.searchQuery.set(value);
+    this.currentPage.set(1);
+    this.loadDoctors();
+  }
+
+  onStatusFilterChange(value: string): void {
+    this.statusFilter.set(value);
+    this.currentPage.set(1);
+    this.loadDoctors();
+  }
+
+  onPlanFilterChange(value: string): void {
+    this.planFilter.set(value);
+    this.currentPage.set(1);
+    this.loadDoctors();
+  }
+
+  clearFilters(): void {
+    this.searchQuery.set('');
+    this.statusFilter.set('');
+    this.planFilter.set('');
     this.currentPage.set(1);
     this.loadDoctors();
   }

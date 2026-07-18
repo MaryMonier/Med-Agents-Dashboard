@@ -12,6 +12,28 @@
         placeholder="Search doctors..."
         [ngModel]="searchQuery()"
         (ngModelChange)="onSearchChange($event)" />
+
+      <select
+        [ngModel]="statusFilter()"
+        (ngModelChange)="onStatusFilterChange($event)">
+        <option value="">All Status</option>
+        <option value="trial">Trial</option>
+        <option value="active">Active</option>
+        <option value="expired">Expired</option>
+      </select>
+
+      <select
+        [ngModel]="planFilter()"
+        (ngModelChange)="onPlanFilterChange($event)">
+        <option value="">All Plans</option>
+        <option value="Trial">Trial</option>
+        <option value="Basic">Basic</option>
+        <option value="Pro">Pro</option>
+      </select>
+
+      @if (searchQuery() || statusFilter() || planFilter()) {
+        <button class="btn-clear" (click)="clearFilters()">Clear</button>
+      }
     </div>
   </div>
 
