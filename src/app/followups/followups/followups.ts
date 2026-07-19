@@ -83,8 +83,7 @@ export class Followups implements OnInit {
       ? all.filter((f) => {
           if (!f.patientId) return false;
           const name = (f.patientId as any)?.name?.toLowerCase() || '';
-          const nationalId = (f.patientId as any)?.nationalID?.toLowerCase() || '';
-          return name.includes(term) || nationalId.includes(term);
+          return name.includes(term);
         })
       : all;
 

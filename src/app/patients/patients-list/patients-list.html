@@ -1,5 +1,4 @@
 <div class="patients-page">
-
   <div class="page-header">
     <h2>Patients</h2>
     <button class="btn-add" (click)="goToAdd()">+ Add Patient</button>
@@ -12,7 +11,8 @@
         type="text"
         placeholder="Enter patient ID"
         [ngModel]="searchQuery()"
-        (ngModelChange)="searchQuery.set($event); loadPatients()" />
+        (ngModelChange)="searchQuery.set($event); loadPatients()"
+      />
       <button class="btn-search" (click)="loadPatients()">Search</button>
       <button class="btn-clear" (click)="searchQuery.set(''); loadPatients()">Clear</button>
     </div>
@@ -36,7 +36,7 @@
         <thead>
           <tr>
             <th data-label="Name">Name</th>
-            <th data-label="National ID">National ID</th>
+            <th data-label="Phone">Phone</th>
             <th data-label="Age">Age</th>
             <th data-label="Gender">Gender</th>
             <th data-label="Actions">Actions</th>
@@ -46,10 +46,14 @@
           @for (patient of patients(); track patient._id) {
             <tr>
               <td>{{ patient.name }}</td>
-              <td>{{ patient.nationalID }}</td>
+              <td dir="ltr">{{ patient.phone }}</td>
               <td>{{ calculateAge(patient.dateOfBirth) }}</td>
               <td>
-                <span class="badge" [class.male]="patient.gender === 'male'" [class.female]="patient.gender === 'female'">
+                <span
+                  class="badge"
+                  [class.male]="patient.gender === 'male'"
+                  [class.female]="patient.gender === 'female'"
+                >
                   {{ patient.gender }}
                 </span>
               </td>
@@ -69,14 +73,14 @@
 
   @if (totalPages() > 1 && !searchQuery()) {
     <div class="pagination">
-      <button class="page-btn" (click)="prevPage()" [disabled]="currentPage() === 1">
-        ← Prev
-      </button>
+      <button class="page-btn" (click)="prevPage()" [disabled]="currentPage() === 1">← Prev</button>
 
       @for (page of [].constructor(totalPages()); track $index) {
-        <button class="page-btn"
+        <button
+          class="page-btn"
           [class.active]="currentPage() === $index + 1"
-          (click)="goToPage($index + 1)">
+          (click)="goToPage($index + 1)"
+        >
           {{ $index + 1 }}
         </button>
       }

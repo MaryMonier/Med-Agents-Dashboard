@@ -1,16 +1,18 @@
 <div class="reports-page">
   <div class="reports-wrapper">
-
     <div class="reports-header">
       <h2 class="reports-title">⚡ AI Clinical Report Generator</h2>
-      <p class="reports-subtitle">Generate structured clinical summaries, monthly trends, or specific consultation reports.</p>
+      <p class="reports-subtitle">
+        Generate structured clinical summaries, monthly trends, or specific consultation reports.
+      </p>
     </div>
 
     <div class="reports-card">
       <form [formGroup]="reportForm" (ngSubmit)="generateReport()" class="reports-form">
-
         <div class="form-field">
-          <label class="form-label" for="patientSearch">Select Patient <span style="color: #ef4444;">*</span></label>
+          <label class="form-label" for="patientSearch"
+            >Select Patient <span style="color: #ef4444">*</span></label
+          >
           <div class="input-wrap">
             <input
               id="patientSearch"
@@ -36,11 +38,16 @@
               <ul class="dropdown-list">
                 @for (patient of patientResults; track patient.id) {
                   <li>
-                    <button type="button" class="dropdown-item" (mousedown)="selectPatient(patient)">
+                    <button
+                      type="button"
+                      class="dropdown-item"
+                      (mousedown)="selectPatient(patient)"
+                    >
                       <span class="dropdown-item-name">{{ patient.name }}</span>
                       @if (patient.mrn || patient.dob) {
                         <span class="dropdown-item-meta">
-                          MRN: {{ patient.mrn || 'N/A' }} | DOB: {{ formatConsultationDate(patient.dob) || 'N/A' }}
+                          Phone: {{ patient.mrn || 'N/A' }} | DOB:
+                          {{ formatConsultationDate(patient.dob) || 'N/A' }}
                         </span>
                       }
                     </button>
@@ -56,7 +63,7 @@
         </div>
 
         <div class="form-field">
-          <label class="form-label">Report Scope <span style="color: #ef4444;">*</span></label>
+          <label class="form-label">Report Scope <span style="color: #ef4444">*</span></label>
           <div class="scope-options">
             @for (option of scopeOptions; track option.value) {
               <label
@@ -78,7 +85,9 @@
         @if (isYearScope || isMonthScope) {
           <div class="month-year-row animate-fade-in">
             <div class="form-field">
-              <label class="form-label" for="year">Year <span style="color: #ef4444;">*</span></label>
+              <label class="form-label" for="year"
+                >Year <span style="color: #ef4444">*</span></label
+              >
               <select id="year" formControlName="year" class="select-input">
                 @for (y of yearOptions; track y) {
                   <option [value]="y">{{ y }}</option>
@@ -88,7 +97,9 @@
 
             @if (isMonthScope) {
               <div class="form-field">
-                <label class="form-label" for="month">Month <span style="color: #ef4444;">*</span></label>
+                <label class="form-label" for="month"
+                  >Month <span style="color: #ef4444">*</span></label
+                >
                 <select id="month" formControlName="month" class="select-input">
                   @for (m of monthOptions; track m.value) {
                     <option [value]="m.value">{{ m.label }}</option>
@@ -101,10 +112,14 @@
 
         @if (isSpecificConsultation) {
           <div class="consultation-panel">
-            <label class="form-label">Select Consultation <span style="color: #ef4444;">*</span></label>
+            <label class="form-label"
+              >Select Consultation <span style="color: #ef4444">*</span></label
+            >
 
             @if (!selectedPatient) {
-              <p class="field-warning">⚠️ Please select a patient first to load their consultations.</p>
+              <p class="field-warning">
+                ⚠️ Please select a patient first to load their consultations.
+              </p>
             } @else if (isLoadingConsultations()) {
               <div class="loading-row">
                 <div class="spinner"></div>
@@ -121,10 +136,15 @@
                     <button
                       type="button"
                       class="consultation-item"
-                      [class.consultation-item-active]="reportForm.get('consultationId')?.value === c.id"
+                      [class.consultation-item-active]="
+                        reportForm.get('consultationId')?.value === c.id
+                      "
                       (click)="selectConsultation(c)"
                     >
-                      <span class="consultation-diagnosis" [title]="c.diagnosis || 'No Diagnosis Recorded'">
+                      <span
+                        class="consultation-diagnosis"
+                        [title]="c.diagnosis || 'No Diagnosis Recorded'"
+                      >
                         {{ c.diagnosis || 'No diagnosis recorded' }}
                       </span>
                       <span class="consultation-date">{{ formatConsultationDate(c.date) }}</span>
@@ -140,12 +160,24 @@
         }
 
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="resetForm()" [disabled]="isGeneratingReport()">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="resetForm()"
+            [disabled]="isGeneratingReport()"
+          >
             Reset
           </button>
-          <button type="submit" class="btn btn-primary" [disabled]="reportForm.invalid || isGeneratingReport()">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="reportForm.invalid || isGeneratingReport()"
+          >
             @if (isGeneratingReport()) {
-              <div class="spinner spinner-on-dark" style="margin-right: 0.5rem; display: inline-block;"></div>
+              <div
+                class="spinner spinner-on-dark"
+                style="margin-right: 0.5rem; display: inline-block"
+              ></div>
               <span>Generating...</span>
             } @else {
               <span>Generate Report</span>
@@ -155,7 +187,7 @@
 
         @if (generateError) {
           <div class="result-error-card">
-            <p class="field-error" style="margin: 0;">❌ {{ generateError }}</p>
+            <p class="field-error" style="margin: 0">❌ {{ generateError }}</p>
           </div>
         }
       </form>
@@ -175,12 +207,16 @@
 
         <div class="result-patient-info">
           <span><strong>Patient:</strong> {{ generatedReport.patientName }}</span>
-          <span><strong>MRN:</strong> {{ generatedReport.mrn || 'N/A' }}</span>
-          <span><strong>DOB:</strong> {{ formatConsultationDate(generatedReport.dob) || 'N/A' }}</span>
+          <span><strong>Phone:</strong> {{ generatedReport.mrn || 'N/A' }}</span>
+          <span
+            ><strong>DOB:</strong> {{ formatConsultationDate(generatedReport.dob) || 'N/A' }}</span
+          >
         </div>
 
         @if (generatedReport.entries.length === 0) {
-          <p class="dropdown-empty result-empty">No clinical entries found for the selected timeline.</p>
+          <p class="dropdown-empty result-empty">
+            No clinical entries found for the selected timeline.
+          </p>
         } @else {
           <ul class="report-entries">
             @for (entry of generatedReport.entries; track entry.id) {
@@ -217,9 +253,7 @@
                     <strong>💊 Prescribed Medications:</strong>
                     <ul>
                       @for (med of entry.prescription.medications; track $index) {
-                        <li>
-                          {{ med.name }} — {{ med.dosage }} ({{ med.frequency }})
-                        </li>
+                        <li>{{ med.name }} — {{ med.dosage }} ({{ med.frequency }})</li>
                       }
                     </ul>
                   </div>
@@ -233,11 +267,10 @@
           </ul>
         }
 
-        <div class="result-meta" style="margin-top: 1.5rem; text-align: center;">
-          Generated at: {{ generatedReport.generatedAt | date:'medium' }}
+        <div class="result-meta" style="margin-top: 1.5rem; text-align: center">
+          Generated at: {{ generatedReport.generatedAt | date: 'medium' }}
         </div>
       </div>
     }
-
   </div>
 </div>
