@@ -25,6 +25,30 @@ export class DoctorsForm implements OnInit {
     language: 'en'
   });
 
+  // أخطاء التحقق الخاصة بكل حقل - بترجع فاضية لو الفورم سليم
+  fieldErrors = signal<{ password?: string }>({});
+
+  // بيتحقق من كل قواعد التحقق ويرجع true لو الفورم سليم، ويعبي fieldErrors لو لأ
+  validate(): boolean {
+    const errors: { password?: string } = {};
+    const { password } = this.doctor();
+
+    // نفس قاعدة الباسورد المستخدمة في تسجيل دخول الدكتور (6 حروف على الأقل)
+    // بنتحقق منها بس وقت الإضافة (مش وقت التعديل لو الحقل سيبته فاضي)
+    if (!this.isEditMode()) {
+      if (!password || !password.trim()) {
+        errors.password = 'Password is required';
+      } else if (password.length < 6) {
+        errors.password = 'Password must be at least 6 characters';
+      }
+    } else if (password && password.trim() && password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+
+    this.fieldErrors.set(errors);
+    return Object.keys(errors).length === 0;
+  }
+
   private apiUrl = environment.apiUrl;
 
   constructor(
@@ -61,8 +85,14 @@ export class DoctorsForm implements OnInit {
   }
 
   onSubmit() {
-    this.isLoading.set(true);
     this.errorMessage.set('');
+
+    if (!this.validate()) {
+      this.errorMessage.set('Please fix the highlighted fields before saving');
+      return;
+    }
+
+    this.isLoading.set(true);
 
     if (this.isEditMode()) {
       this.http.put(`${this.apiUrl}/auth/doctors/${this.doctorId()}`, this.doctor()).subscribe({

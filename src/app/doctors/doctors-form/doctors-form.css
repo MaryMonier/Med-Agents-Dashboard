@@ -140,6 +140,16 @@ margin-top: 15px;
 .loading { color: #888; padding: 20px; }
 .error { color: #e53e3e; margin-bottom: 16px; }
 
+.input-error {
+  border-color: #e53e3e !important;
+}
+
+.field-error {
+  color: #e53e3e;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
 
 @media (max-width: 600px) {
   .form-row { grid-template-columns: 1fr; }

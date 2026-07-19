@@ -35,7 +35,11 @@
         <input type="password"
           [ngModel]="doctor().password"
           (ngModelChange)="updateField('password', $event)"
+          [class.input-error]="fieldErrors().password"
           placeholder="Password" />
+        @if (fieldErrors().password) {
+          <p class="field-error">{{ fieldErrors().password }}</p>
+        }
       </div>
     }
 
