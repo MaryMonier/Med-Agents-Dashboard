@@ -24,7 +24,7 @@ export interface Followup {
   patientId?: {
     _id: string;
     name: string;
-    nationalID?: string;
+    phone?: string;
   };
   instructions: string;
   lastConsultationNote?: string; // من الباك عشان يظهر قبل Start Follow-up

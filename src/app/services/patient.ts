@@ -13,7 +13,7 @@ import { environment } from '../../environments/environment';
 export interface Patient {
   _id?: string;
   name: string;
-  nationalID: string;
+  phone: string;
   dateOfBirth: string;
   gender: 'male' | 'female';
   bloodType: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';

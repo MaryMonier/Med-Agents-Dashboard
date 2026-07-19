@@ -2,8 +2,20 @@ import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription, of } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
-import { PatientService, Patient, ConsultationHistory, PrescriptionInfo } from '../../services/patient';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
+import {
+  PatientService,
+  Patient,
+  ConsultationHistory,
+  PrescriptionInfo,
+} from '../../services/patient';
 
 export interface ReportPatient extends Patient {
   id: string;
@@ -194,14 +206,21 @@ export class ReportsList implements OnInit, OnDestroy {
       return;
     }
 
-    this.scopeSub = scopeControl.valueChanges.subscribe((value: 'year' | 'month' | 'consultation') => {
-      this.applyScopeValidators(value);
-      this.generatedReport = null;
+    this.scopeSub = scopeControl.valueChanges.subscribe(
+      (value: 'year' | 'month' | 'consultation') => {
+        this.applyScopeValidators(value);
+        this.generatedReport = null;
 
-      if (value === 'consultation' && this.selectedPatient && this.consultations.length === 0 && !this.isLoadingConsultations()) {
-        this.loadConsultations(this.selectedPatient.id);
-      }
-    });
+        if (
+          value === 'consultation' &&
+          this.selectedPatient &&
+          this.consultations.length === 0 &&
+          !this.isLoadingConsultations()
+        ) {
+          this.loadConsultations(this.selectedPatient.id);
+        }
+      },
+    );
   }
 
   private applyScopeValidators(scope: 'year' | 'month' | 'consultation'): void {
@@ -232,7 +251,7 @@ export class ReportsList implements OnInit, OnDestroy {
       ...patient,
       id: patient._id ?? '',
       dob: patient.dateOfBirth ? String(patient.dateOfBirth) : '',
-      mrn: patient.nationalID ?? '',
+      mrn: patient.phone ?? '',
     };
   }
 
@@ -379,7 +398,8 @@ export class ReportsList implements OnInit, OnDestroy {
         map((res) => res.data?.history || []),
         catchError((err) => {
           console.error('Failed to generate report:', err);
-          this.generateError = 'Failed to load patient data for the report. Check the server connection.';
+          this.generateError =
+            'Failed to load patient data for the report. Check the server connection.';
           return of(null);
         }),
       )
@@ -404,7 +424,8 @@ export class ReportsList implements OnInit, OnDestroy {
             return d.getFullYear() === Number(year) && d.getMonth() + 1 === Number(month);
           });
           scopeLabel = 'Monthly Report';
-          const monthLabel = this.monthOptions.find((m) => m.value === Number(month))?.label || month;
+          const monthLabel =
+            this.monthOptions.find((m) => m.value === Number(month))?.label || month;
           rangeLabel = `${monthLabel} ${year}`;
         } else if (scope === 'consultation') {
           filtered = history.filter((c) => c.consultationId === consultationId);
@@ -414,7 +435,9 @@ export class ReportsList implements OnInit, OnDestroy {
             : 'Selected consultation';
         }
 
-        filtered = [...filtered].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        filtered = [...filtered].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        );
 
         this.generatedReport = {
           patientName: this.selectedPatient?.name || '',
