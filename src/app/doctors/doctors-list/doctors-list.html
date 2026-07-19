@@ -7,12 +7,12 @@
   <div class="search-wrap">
     <p>Search by Name or Email</p>
     <div class="search-row">
-      <input type="text" placeholder="Enter name or email"
-        [ngModel]="searchQuery()"
-        (ngModelChange)="searchQuery.set($event); loadDoctors()" />
-      <button class="btn-search" (click)="loadDoctors()">Search</button>
-      <button class="btn-clear" (click)="searchQuery.set(''); loadDoctors()">Clear</button>
-    </div>
+  <input type="text" placeholder="Enter name or email"
+    [ngModel]="searchQuery()"
+    (ngModelChange)="onSearchChange($event)" />
+  <button class="btn-search" (click)="onSearchChange(searchQuery())">Search</button>
+  <button class="btn-clear" (click)="clearSearch()">Clear</button>
+</div>
   </div>
 
   @if (isLoading()) {
