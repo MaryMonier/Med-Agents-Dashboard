@@ -10,12 +10,8 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import {
-  PatientService,
-  Patient,
-  ConsultationHistory,
-  PrescriptionInfo,
-} from '../../services/patient';
+import { PatientService, Patient } from '../../services/patient';
+import { ReportService, GeneratedReportData, ReportMeta } from '../../services/report';
 
 export interface ReportPatient extends Patient {
   id: string;
@@ -27,18 +23,6 @@ export interface ReportConsultation {
   id: string;
   date: string;
   diagnosis: string;
-}
-
-export interface ReportEntry {
-  id: string;
-  date: string;
-  diagnosis: string;
-  symptoms: string[];
-  urgencyLevel: string;
-  suggestedSpecialist: string | null;
-  structuredNote: string | null;
-  isFollowup: boolean;
-  prescription: PrescriptionInfo | null;
 }
 
 interface ScopeOption {
@@ -64,24 +48,24 @@ export class ReportsList implements OnInit, OnDestroy {
   patientResults: ReportPatient[] = [];
   selectedPatient: ReportPatient | null = null;
 
-  // الـ Signals الأساسية المتحكمة في الـ Spinners والقوائم
   showPatientDropdown = signal<boolean>(false);
   isSearchingPatients = signal<boolean>(false);
   isLoadingConsultations = signal<boolean>(false);
   isGeneratingReport = signal<boolean>(false);
 
+  // للـ scope = consultation بس — بنجيبها من الـ patient history عشان المستخدم يختار
   consultations: ReportConsultation[] = [];
   consultationsError = '';
   generateError = '';
 
+  // الريبورت الـ AI اللي رجع من الـ agent
   generatedReport: {
+    data: GeneratedReportData;
+    meta: ReportMeta;
     patientName: string;
     mrn: string;
     dob: string;
-    scopeLabel: string;
-    rangeLabel: string;
     generatedAt: Date;
-    entries: ReportEntry[];
   } | null = null;
 
   scopeOptions: ScopeOption[] = [
@@ -114,6 +98,7 @@ export class ReportsList implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private patientService: PatientService,
+    private reportService: ReportService,
   ) {
     const currentYear = new Date().getFullYear();
     for (let y = currentYear; y >= currentYear - 9; y--) {
@@ -155,18 +140,14 @@ export class ReportsList implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.searchSub?.unsubscribe();
     this.scopeSub?.unsubscribe();
-    if (this.blurTimeout) {
-      clearTimeout(this.blurTimeout);
-    }
+    if (this.blurTimeout) clearTimeout(this.blurTimeout);
   }
 
   watchPatientSearch(): void {
-    const patientSearchControl = this.reportForm.get('patientSearch');
-    if (!patientSearchControl) {
-      return;
-    }
+    const ctrl = this.reportForm.get('patientSearch');
+    if (!ctrl) return;
 
-    this.searchSub = patientSearchControl.valueChanges
+    this.searchSub = ctrl.valueChanges
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
@@ -183,7 +164,7 @@ export class ReportsList implements OnInit, OnDestroy {
         }),
         switchMap((value: string) =>
           this.patientService.getAll(value || '').pipe(
-            map((res) => (res.data || []).map((patient) => this.mapToReportPatient(patient))),
+            map((res) => (res.data || []).map((p) => this.mapToReportPatient(p))),
             catchError(() => of([])),
           ),
         ),
@@ -201,49 +182,46 @@ export class ReportsList implements OnInit, OnDestroy {
   }
 
   watchScopeChanges(): void {
-    const scopeControl = this.reportForm.get('scope');
-    if (!scopeControl) {
-      return;
-    }
+    const ctrl = this.reportForm.get('scope');
+    if (!ctrl) return;
 
-    this.scopeSub = scopeControl.valueChanges.subscribe(
-      (value: 'year' | 'month' | 'consultation') => {
-        this.applyScopeValidators(value);
-        this.generatedReport = null;
+    this.scopeSub = ctrl.valueChanges.subscribe((value: 'year' | 'month' | 'consultation') => {
+      this.applyScopeValidators(value);
+      this.generatedReport = null;
 
-        if (
-          value === 'consultation' &&
-          this.selectedPatient &&
-          this.consultations.length === 0 &&
-          !this.isLoadingConsultations()
-        ) {
-          this.loadConsultations(this.selectedPatient.id);
-        }
-      },
-    );
+      // لو اختار كونسلتيشن محدد، نجيب القايمة من الهيستوري عشان يختار
+      if (
+        value === 'consultation' &&
+        this.selectedPatient &&
+        this.consultations.length === 0 &&
+        !this.isLoadingConsultations()
+      ) {
+        this.loadConsultationsForPicker(this.selectedPatient.id);
+      }
+    });
   }
 
   private applyScopeValidators(scope: 'year' | 'month' | 'consultation'): void {
-    const yearControl = this.reportForm.get('year');
-    const monthControl = this.reportForm.get('month');
-    const consultationIdControl = this.reportForm.get('consultationId');
+    const yearCtrl = this.reportForm.get('year');
+    const monthCtrl = this.reportForm.get('month');
+    const consultationIdCtrl = this.reportForm.get('consultationId');
 
-    yearControl?.clearValidators();
-    monthControl?.clearValidators();
-    consultationIdControl?.clearValidators();
+    yearCtrl?.clearValidators();
+    monthCtrl?.clearValidators();
+    consultationIdCtrl?.clearValidators();
 
     if (scope === 'year') {
-      yearControl?.setValidators([Validators.required]);
+      yearCtrl?.setValidators([Validators.required]);
     } else if (scope === 'month') {
-      yearControl?.setValidators([Validators.required]);
-      monthControl?.setValidators([Validators.required]);
-    } else if (scope === 'consultation') {
-      consultationIdControl?.setValidators([Validators.required]);
+      yearCtrl?.setValidators([Validators.required]);
+      monthCtrl?.setValidators([Validators.required]);
+    } else {
+      consultationIdCtrl?.setValidators([Validators.required]);
     }
 
-    yearControl?.updateValueAndValidity();
-    monthControl?.updateValueAndValidity();
-    consultationIdControl?.updateValueAndValidity();
+    yearCtrl?.updateValueAndValidity();
+    monthCtrl?.updateValueAndValidity();
+    consultationIdCtrl?.updateValueAndValidity();
   }
 
   private mapToReportPatient(patient: Patient): ReportPatient {
@@ -255,52 +233,30 @@ export class ReportsList implements OnInit, OnDestroy {
     };
   }
 
-  private mapToReportConsultation(consultation: ConsultationHistory): ReportConsultation {
-    return {
-      id: consultation.consultationId,
-      date: consultation.date,
-      diagnosis: consultation.diagnosis,
-    };
-  }
-
-  private mapToReportEntry(consultation: ConsultationHistory): ReportEntry {
-    return {
-      id: consultation.consultationId,
-      date: consultation.date,
-      diagnosis: consultation.diagnosis || 'No diagnosis recorded',
-      symptoms: consultation.symptoms || [],
-      urgencyLevel: consultation.urgencyLevel || 'unknown',
-      suggestedSpecialist: consultation.suggestedSpecialist,
-      structuredNote: consultation.structuredNote,
-      isFollowup: !!consultation.isFollowup,
-      prescription: consultation.prescription,
-    };
-  }
-
-  loadConsultations(patientId: string): void {
+  /** بتجيب الكونسلتيشنز من الـ history بس عشان عرضها في الـ picker (scope = consultation) */
+  loadConsultationsForPicker(patientId: string): void {
     this.isLoadingConsultations.set(true);
     this.consultations = [];
     this.consultationsError = '';
 
-    if (!patientId) {
-      this.isLoadingConsultations.set(false);
-      this.consultationsError = 'This patient has no valid ID.';
-      return;
-    }
-
     this.patientService
       .getHistory(patientId)
       .pipe(
-        map((res) => (res.data?.history || []).map((c) => this.mapToReportConsultation(c))),
-        catchError((err) => {
-          console.error('Failed to load consultations:', err);
-          this.consultationsError = 'Failed to load consultations. Check the server connection.';
+        map((res) =>
+          (res.data?.history || []).map((c) => ({
+            id: c.consultationId,
+            date: c.date,
+            diagnosis: c.diagnosis,
+          })),
+        ),
+        catchError(() => {
+          this.consultationsError = 'Failed to load consultations.';
           return of([]);
         }),
       )
       .subscribe({
-        next: (consultations) => {
-          this.consultations = consultations;
+        next: (list) => {
+          this.consultations = list;
           this.isLoadingConsultations.set(false);
         },
         error: () => {
@@ -311,24 +267,17 @@ export class ReportsList implements OnInit, OnDestroy {
   }
 
   onPatientSearchFocus(): void {
-    if (this.blurTimeout) {
-      clearTimeout(this.blurTimeout);
-    }
+    if (this.blurTimeout) clearTimeout(this.blurTimeout);
     this.showPatientDropdown.set(true);
   }
 
   onPatientSearchBlur(): void {
-    this.blurTimeout = setTimeout(() => {
-      this.showPatientDropdown.set(false);
-    }, 150);
+    this.blurTimeout = setTimeout(() => this.showPatientDropdown.set(false), 150);
   }
 
   selectPatient(patient: ReportPatient): void {
     this.selectedPatient = patient;
-    this.reportForm.patchValue({
-      patientId: patient.id,
-      patientSearch: patient.name,
-    });
+    this.reportForm.patchValue({ patientId: patient.id, patientSearch: patient.name });
     this.patientResults = [];
     this.showPatientDropdown.set(false);
     this.consultations = [];
@@ -336,22 +285,19 @@ export class ReportsList implements OnInit, OnDestroy {
     this.generatedReport = null;
     this.reportForm.get('consultationId')?.setValue('');
 
-    this.loadConsultations(patient.id);
+    if (this.isSpecificConsultation) {
+      this.loadConsultationsForPicker(patient.id);
+    }
   }
 
-  selectConsultation(consultation: ReportConsultation): void {
-    this.reportForm.get('consultationId')?.setValue(consultation.id);
+  selectConsultation(c: ReportConsultation): void {
+    this.reportForm.get('consultationId')?.setValue(c.id);
   }
 
-  formatConsultationDate(dateValue: string): string {
-    if (!dateValue) {
-      return '';
-    }
-    const parsed = new Date(dateValue);
-    if (isNaN(parsed.getTime())) {
-      return dateValue;
-    }
-    return parsed.toLocaleDateString();
+  formatDate(dateValue: string): string {
+    if (!dateValue) return '';
+    const d = new Date(dateValue);
+    return isNaN(d.getTime()) ? dateValue : d.toLocaleDateString();
   }
 
   resetForm(): void {
@@ -392,63 +338,35 @@ export class ReportsList implements OnInit, OnDestroy {
     const month = this.reportForm.get('month')?.value;
     const consultationId = this.reportForm.get('consultationId')?.value;
 
-    this.patientService
-      .getHistory(patientId)
-      .pipe(
-        map((res) => res.data?.history || []),
-        catchError((err) => {
-          console.error('Failed to generate report:', err);
-          this.generateError =
-            'Failed to load patient data for the report. Check the server connection.';
-          return of(null);
-        }),
-      )
-      .subscribe((history) => {
+    this.reportService.generate({ patientId, scope, year, month, consultationId }).subscribe({
+      next: (res) => {
         this.isGeneratingReport.set(false);
 
-        if (history === null) {
+        if (!res.success) {
+          this.generateError = res.message || 'Failed to generate report.';
           return;
         }
 
-        let filtered: ConsultationHistory[] = [];
-        let scopeLabel = '';
-        let rangeLabel = '';
-
-        if (scope === 'year') {
-          filtered = history.filter((c) => new Date(c.date).getFullYear() === Number(year));
-          scopeLabel = 'Yearly Report';
-          rangeLabel = `Year ${year}`;
-        } else if (scope === 'month') {
-          filtered = history.filter((c) => {
-            const d = new Date(c.date);
-            return d.getFullYear() === Number(year) && d.getMonth() + 1 === Number(month);
-          });
-          scopeLabel = 'Monthly Report';
-          const monthLabel =
-            this.monthOptions.find((m) => m.value === Number(month))?.label || month;
-          rangeLabel = `${monthLabel} ${year}`;
-        } else if (scope === 'consultation') {
-          filtered = history.filter((c) => c.consultationId === consultationId);
-          scopeLabel = 'Specific Consultation';
-          rangeLabel = filtered.length
-            ? `${filtered[0].diagnosis || 'No diagnosis recorded'} — ${this.formatConsultationDate(filtered[0].date)}`
-            : 'Selected consultation';
+        if (res.empty || !res.data) {
+          this.generateError = res.message || 'No consultations found in the selected time range.';
+          return;
         }
 
-        filtered = [...filtered].sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-        );
-
         this.generatedReport = {
+          data: res.data,
+          meta: res.meta,
           patientName: this.selectedPatient?.name || '',
           mrn: this.selectedPatient?.mrn || '',
           dob: this.selectedPatient?.dob || '',
-          scopeLabel,
-          rangeLabel,
-          generatedAt: new Date(),
-          entries: filtered.map((c) => this.mapToReportEntry(c)),
+          generatedAt: new Date(res.meta.generatedAt),
         };
-      });
+      },
+      error: (err) => {
+        this.isGeneratingReport.set(false);
+        this.generateError =
+          err?.error?.message || 'Failed to generate report. Check server connection.';
+      },
+    });
   }
 
   printReport(): void {

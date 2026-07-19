@@ -1,14 +1,9 @@
-// import { Injectable } from '@angular/core';
-
-// @Injectable({
-//   providedIn: 'root',
-// })
-// export class Patient {}
-
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+
+export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 
 export interface Patient {
   _id?: string;
@@ -16,7 +11,8 @@ export interface Patient {
   phone: string;
   dateOfBirth: string;
   gender: 'male' | 'female';
-  bloodType: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
+  // اختياري — ممكن يبقى undefined لو الدكتور مسيبش فصيلة الدم
+  bloodType?: BloodType;
   allergies?: string[];
   chronicConditions?: string[];
   chronicMedications?: string[];
@@ -97,9 +93,11 @@ export class PatientService {
     if (search) params += `&search=${search}`;
     return this.http.get<any>(`${this.apiUrl}${params}`);
   }
+
   getById(id: string): Observable<{ success: boolean; data: Patient }> {
     return this.http.get<{ success: boolean; data: Patient }>(`${this.apiUrl}/${id}`);
   }
+
   getByDoctorId(
     doctorId: string,
     page = 1,
@@ -111,11 +109,13 @@ export class PatientService {
   }> {
     return this.http.get<any>(`${this.apiUrl}/by-doctor/${doctorId}?page=${page}&limit=${limit}`);
   }
+
   getHistory(id: string): Observable<{ success: boolean; data: IPatientHistory }> {
     return this.http.get<{ success: boolean; data: IPatientHistory }>(
       `${this.apiUrl}/${id}/history`,
     );
   }
+
   create(patient: Partial<Patient>): Observable<{ success: boolean; data: Patient }> {
     return this.http.post<{ success: boolean; data: Patient }>(this.apiUrl, patient);
   }

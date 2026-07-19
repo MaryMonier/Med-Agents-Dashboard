@@ -2,9 +2,14 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PatientService, Patient } from '../../services/patient';
+import { PatientService, Patient, BloodType } from '../../services/patient';
 import { PrescriptionService, DrugSuggestion } from '../../services/prescription';
 import { Subject, debounceTime, switchMap, of } from 'rxjs';
+
+// نوع داخلي للفورم يسمح بـ bloodType = '' (قبل ما المستخدم يختار)
+type PatientFormState = Omit<Partial<Patient>, 'bloodType'> & {
+  bloodType?: BloodType | '';
+};
 
 @Component({
   selector: 'app-patients-form',
@@ -18,12 +23,12 @@ export class PatientsForm implements OnInit {
   isLoading = signal(false);
   errorMessage = signal('');
 
-  patient = signal<Partial<Patient>>({
+  patient = signal<PatientFormState>({
     name: '',
     phone: '',
     dateOfBirth: '',
     gender: 'male',
-    bloodType: 'A+',
+    bloodType: '', // '' = لم يختر — بيتشال في _clean قبل ما يوصل للـ API
     allergies: [],
     chronicConditions: [],
     chronicMedications: [],
@@ -32,27 +37,30 @@ export class PatientsForm implements OnInit {
   allergyInput = signal('');
   conditionInput = signal('');
   medicationInput = signal('');
-  bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-  // أخطاء التحقق الخاصة بكل حقل - بترجع فاضية لو الفورم سليم
-  fieldErrors = signal<{ name?: string; phone?: string }>({});
+  bloodTypes: BloodType[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  todayDate = new Date().toISOString().split('T')[0];
+  fieldErrors = signal<{ name?: string; phone?: string; dateOfBirth?: string }>({});
 
-  // بيتحقق من كل قواعد التحقق ويرجع true لو الفورم سليم، ويعبي fieldErrors لو لأ
   validate(): boolean {
-    const errors: { name?: string; phone?: string } = {};
-    const { name, phone } = this.patient();
+    const errors: { name?: string; phone?: string; dateOfBirth?: string } = {};
+    const { name, phone, dateOfBirth } = this.patient();
 
-    // الاسم لازم يكون حروف عربية بس
     if (!name || !name.trim()) {
-      errors.name = 'Full name is required';
+      errors.name = 'الاسم الكامل مطلوب';
     } else if (!/^[\u0621-\u064A\s]+$/.test(name)) {
-      errors.name = 'Name must be written in Arabic letters only';
+      errors.name = 'الاسم لازم يتكتب بحروف عربية بس';
     }
 
-    // رقم الموبايل مطلوب، ولازم يكون رقم مصري صحيح (01 + 0/1/2/5 + 8 أرقام)
     if (!phone || !phone.trim()) {
-      errors.phone = 'Phone number is required';
+      errors.phone = 'رقم الموبايل مطلوب';
     } else if (!/^01[0125][0-9]{8}$/.test(phone.trim())) {
-      errors.phone = 'Enter a valid Egyptian mobile number (e.g. 010/011/012/015XXXXXXXX)';
+      errors.phone = 'اكتب رقم موبايل مصري صحيح (زي 010/011/012/015XXXXXXXX)';
+    }
+
+    if (!dateOfBirth) {
+      errors.dateOfBirth = 'تاريخ الميلاد مطلوب';
+    } else if (new Date(dateOfBirth) > new Date()) {
+      errors.dateOfBirth = 'تاريخ الميلاد مينفعش يكون في المستقبل';
     }
 
     this.fieldErrors.set(errors);
@@ -103,7 +111,11 @@ export class PatientsForm implements OnInit {
     this.isLoading.set(true);
     this.patientService.getById(this.patientId()).subscribe({
       next: (res) => {
-        const data = { ...res.data, dateOfBirth: res.data.dateOfBirth?.split('T')[0] };
+        const data: PatientFormState = {
+          ...res.data,
+          dateOfBirth: res.data.dateOfBirth?.split('T')[0],
+          bloodType: res.data.bloodType ?? '', // undefined → '' عشان الـ select يشتغل صح
+        };
         this.patient.set(data);
         this.isLoading.set(false);
       },
@@ -117,10 +129,7 @@ export class PatientsForm implements OnInit {
   addAllergy(): void {
     const val = this.allergyInput().trim();
     if (val) {
-      this.patient.update((p) => ({
-        ...p,
-        allergies: [...(p.allergies || []), val],
-      }));
+      this.patient.update((p) => ({ ...p, allergies: [...(p.allergies || []), val] }));
       this.allergyInput.set('');
     }
   }
@@ -185,22 +194,30 @@ export class PatientsForm implements OnInit {
     }));
   }
 
-  updateField(field: keyof Patient, value: any): void {
+  updateField(field: keyof PatientFormState, value: any): void {
     this.patient.update((p) => ({ ...p, [field]: value }));
+  }
+
+  // بيحول الـ form state لـ Partial<Patient> نظيف —
+  // بيشيل bloodType لو '' عشان الـ service و TypeScript يقبلوه
+  private toPatient(state: PatientFormState): Partial<Patient> {
+    const { bloodType, ...rest } = state;
+    return bloodType ? { ...rest, bloodType } : rest;
   }
 
   onSubmit(): void {
     this.errorMessage.set('');
 
     if (!this.validate()) {
-      this.errorMessage.set('Please fix the highlighted fields before saving');
+      this.errorMessage.set('من فضلك صحّح الحقول المظلّلة قبل الحفظ');
       return;
     }
 
     this.isLoading.set(true);
+    const payload = this.toPatient(this.patient());
 
     if (this.isEditMode()) {
-      this.patientService.update(this.patientId(), this.patient()).subscribe({
+      this.patientService.update(this.patientId(), payload).subscribe({
         next: () => this.router.navigate(['/dashboard/patients']),
         error: (err) => {
           this.errorMessage.set(err?.error?.message || 'Failed to update patient');
@@ -208,7 +225,7 @@ export class PatientsForm implements OnInit {
         },
       });
     } else {
-      this.patientService.create(this.patient()).subscribe({
+      this.patientService.create(payload).subscribe({
         next: () => this.router.navigate(['/dashboard/patients']),
         error: (err) => {
           this.errorMessage.set(err?.error?.message || 'Failed to create patient');

@@ -45,9 +45,14 @@
         <label>Date of Birth *</label>
         <input
           type="date"
+          [max]="todayDate"
           [ngModel]="patient().dateOfBirth"
           (ngModelChange)="updateField('dateOfBirth', $event)"
+          [class.input-error]="fieldErrors().dateOfBirth"
         />
+        @if (fieldErrors().dateOfBirth) {
+          <p class="field-error">{{ fieldErrors().dateOfBirth }}</p>
+        }
       </div>
 
       <div class="form-group">
@@ -58,8 +63,9 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Blood Type *</label>
+        <label>Blood Type (optional)</label>
         <select [ngModel]="patient().bloodType" (ngModelChange)="updateField('bloodType', $event)">
+          <option value="">—</option>
           @for (bt of bloodTypes; track bt) {
             <option [value]="bt">{{ bt }}</option>
           }

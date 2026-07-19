@@ -47,7 +47,7 @@
                       @if (patient.mrn || patient.dob) {
                         <span class="dropdown-item-meta">
                           Phone: {{ patient.mrn || 'N/A' }} | DOB:
-                          {{ formatConsultationDate(patient.dob) || 'N/A' }}
+                          {{ formatDate(patient.dob) || 'N/A' }}
                         </span>
                       }
                     </button>
@@ -147,7 +147,7 @@
                       >
                         {{ c.diagnosis || 'No diagnosis recorded' }}
                       </span>
-                      <span class="consultation-date">{{ formatConsultationDate(c.date) }}</span>
+                      <span class="consultation-date">{{ formatDate(c.date) }}</span>
                     </button>
                   </li>
                 }
@@ -191,86 +191,65 @@
           </div>
         }
       </form>
-    </div>
 
-    @if (generatedReport) {
-      <div class="result-card">
-        <div class="result-header">
-          <div>
-            <h3 class="result-title">🩺 {{ generatedReport.scopeLabel }}</h3>
-            <p class="result-subtitle">{{ generatedReport.rangeLabel }}</p>
+      @if (generatedReport) {
+        <div class="result-card">
+          <div class="result-header">
+            <div>
+              <h3 class="result-title">🩺 {{ generatedReport.meta.scopeLabel }}</h3>
+              <p class="result-subtitle">{{ generatedReport.meta.rangeLabel }}</p>
+            </div>
+            <button type="button" class="btn btn-primary" (click)="printReport()">
+              🖨️ Print Report
+            </button>
           </div>
-          <button type="button" class="btn btn-primary" (click)="printReport()">
-            🖨️ Print Report
-          </button>
+
+          <div class="result-patient-info">
+            <span><strong>Patient:</strong> {{ generatedReport.patientName }}</span>
+            <span><strong>Phone:</strong> {{ generatedReport.mrn || 'N/A' }}</span>
+            <span><strong>DOB:</strong> {{ formatDate(generatedReport.dob) || 'N/A' }}</span>
+            <span
+              ><strong>Consultations reviewed:</strong>
+              {{ generatedReport.meta.consultationCount }}</span
+            >
+          </div>
+
+          <div class="ai-report-body">
+            <div class="ai-report-section">
+              <h4 class="ai-section-title">📋 {{ generatedReport.data.reportTitle }}</h4>
+              <p class="ai-section-text">{{ generatedReport.data.executiveSummary }}</p>
+            </div>
+
+            <div class="ai-report-grid">
+              <div class="ai-report-section">
+                <h4 class="ai-section-title">🏥 Patient Condition</h4>
+                <p class="ai-section-text">{{ generatedReport.data.patientCondition }}</p>
+              </div>
+              <div class="ai-report-section">
+                <h4 class="ai-section-title">🔬 Clinical Findings</h4>
+                <p class="ai-section-text">{{ generatedReport.data.clinicalFindings }}</p>
+              </div>
+              <div class="ai-report-section">
+                <h4 class="ai-section-title">💊 Treatment Plan</h4>
+                <p class="ai-section-text">{{ generatedReport.data.treatmentPlan }}</p>
+              </div>
+              <div class="ai-report-section">
+                <h4 class="ai-section-title">✅ Recommendations</h4>
+                <p class="ai-section-text">{{ generatedReport.data.recommendations }}</p>
+              </div>
+            </div>
+
+            <div class="ai-report-section">
+              <h4 class="ai-section-title">📅 Follow-up Notes</h4>
+              <p class="ai-section-text">{{ generatedReport.data.followupNotes }}</p>
+            </div>
+          </div>
+
+          <div class="result-meta">
+            Generated at: {{ generatedReport.generatedAt | date: 'medium' }}
+          </div>
         </div>
-
-        <div class="result-patient-info">
-          <span><strong>Patient:</strong> {{ generatedReport.patientName }}</span>
-          <span><strong>Phone:</strong> {{ generatedReport.mrn || 'N/A' }}</span>
-          <span
-            ><strong>DOB:</strong> {{ formatConsultationDate(generatedReport.dob) || 'N/A' }}</span
-          >
-        </div>
-
-        @if (generatedReport.entries.length === 0) {
-          <p class="dropdown-empty result-empty">
-            No clinical entries found for the selected timeline.
-          </p>
-        } @else {
-          <ul class="report-entries">
-            @for (entry of generatedReport.entries; track entry.id) {
-              <li class="report-entry">
-                <div class="report-entry-header">
-                  <span class="report-entry-date">📅 {{ formatConsultationDate(entry.date) }}</span>
-                  <span class="report-entry-urgency" [class]="'urgency-' + entry.urgencyLevel">
-                    {{ entry.urgencyLevel }}
-                  </span>
-                </div>
-
-                <h4 class="report-entry-diagnosis">{{ entry.diagnosis }}</h4>
-
-                @if (entry.symptoms && entry.symptoms.length > 0) {
-                  <p class="report-entry-symptoms">
-                    <strong>Symptoms:</strong> {{ entry.symptoms.join(', ') }}
-                  </p>
-                }
-
-                @if (entry.structuredNote) {
-                  <p class="report-entry-line">
-                    <strong>Notes:</strong> {{ entry.structuredNote }}
-                  </p>
-                }
-
-                @if (entry.suggestedSpecialist) {
-                  <p class="report-entry-line">
-                    <strong>Referral:</strong> {{ entry.suggestedSpecialist }}
-                  </p>
-                }
-
-                @if (entry.prescription && entry.prescription.medications.length) {
-                  <div class="report-entry-prescription">
-                    <strong>💊 Prescribed Medications:</strong>
-                    <ul>
-                      @for (med of entry.prescription.medications; track $index) {
-                        <li>{{ med.name }} — {{ med.dosage }} ({{ med.frequency }})</li>
-                      }
-                    </ul>
-                  </div>
-                }
-
-                @if (entry.isFollowup) {
-                  <span class="report-entry-followup">Follow-up Visit</span>
-                }
-              </li>
-            }
-          </ul>
-        }
-
-        <div class="result-meta" style="margin-top: 1.5rem; text-align: center">
-          Generated at: {{ generatedReport.generatedAt | date: 'medium' }}
-        </div>
-      </div>
-    }
+      }
+    </div>
   </div>
 </div>
