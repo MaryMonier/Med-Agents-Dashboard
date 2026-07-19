@@ -9,47 +9,36 @@
 
     <div class="reports-card">
       <form [formGroup]="reportForm" (ngSubmit)="generateReport()" class="reports-form">
+        <!-- ── Step 1: Doctor ── -->
         <div class="form-field">
-          <label class="form-label" for="patientSearch"
-            >Select Patient <span style="color: #ef4444">*</span></label
-          >
+          <label class="form-label" for="doctorSearch">
+            Step 1 — Select Doctor <span style="color: #ef4444">*</span>
+          </label>
           <div class="input-wrap">
             <input
-              id="patientSearch"
+              id="doctorSearch"
               type="text"
-              formControlName="patientSearch"
+              formControlName="doctorSearch"
               class="text-input"
-              [class.input-invalid]="f['patientSearch'].touched && f['patientSearch'].invalid"
-              placeholder="Type patient name to search..."
+              [class.input-invalid]="f['doctorSearch'].touched && f['doctorSearch'].invalid"
+              placeholder="Type doctor name or email..."
               autocomplete="off"
-              (focus)="onPatientSearchFocus()"
-              (blur)="onPatientSearchBlur()"
+              (focus)="onDoctorSearchFocus()"
+              (blur)="onDoctorSearchBlur()"
             />
-
-            @if (isSearchingPatients()) {
-              <div class="input-status">
-                <div class="spinner"></div>
-              </div>
+            @if (isSearchingDoctors()) {
+              <div class="input-status"><div class="spinner"></div></div>
             }
           </div>
 
-          @if (showPatientDropdown() && patientResults.length > 0) {
+          @if (showDoctorDropdown() && doctorResults().length > 0) {
             <div class="dropdown-panel">
               <ul class="dropdown-list">
-                @for (patient of patientResults; track patient.id) {
+                @for (doc of doctorResults(); track doc.id) {
                   <li>
-                    <button
-                      type="button"
-                      class="dropdown-item"
-                      (mousedown)="selectPatient(patient)"
-                    >
-                      <span class="dropdown-item-name">{{ patient.name }}</span>
-                      @if (patient.mrn || patient.dob) {
-                        <span class="dropdown-item-meta">
-                          Phone: {{ patient.mrn || 'N/A' }} | DOB:
-                          {{ formatDate(patient.dob) || 'N/A' }}
-                        </span>
-                      }
+                    <button type="button" class="dropdown-item" (mousedown)="selectDoctor(doc)">
+                      <span class="dropdown-item-name">{{ doc.name }}</span>
+                      <span class="dropdown-item-meta">{{ doc.email }}</span>
                     </button>
                   </li>
                 }
@@ -57,11 +46,68 @@
             </div>
           }
 
-          @if (f['patientSearch'].touched && f['patientSearch'].hasError('required')) {
-            <p class="field-error">Patient selection is required.</p>
+          @if (f['doctorSearch'].touched && f['doctorSearch'].hasError('required')) {
+            <p class="field-error">Doctor selection is required.</p>
           }
         </div>
 
+        <!-- ── Step 2: Patient (مفلترة بالدكتور) ── -->
+        <div class="form-field">
+          <label class="form-label" for="patientSearch">
+            Step 2 — Select Patient <span style="color: #ef4444">*</span>
+          </label>
+
+          @if (!selectedDoctor()) {
+            <p class="field-warning">⚠️ Please select a doctor first.</p>
+          } @else {
+            <div class="input-wrap">
+              <input
+                id="patientSearch"
+                type="text"
+                formControlName="patientSearch"
+                class="text-input"
+                [class.input-invalid]="f['patientSearch'].touched && f['patientSearch'].invalid"
+                placeholder="Type patient name..."
+                autocomplete="off"
+                (focus)="onPatientSearchFocus()"
+                (blur)="onPatientSearchBlur()"
+              />
+              @if (isSearchingPatients()) {
+                <div class="input-status"><div class="spinner"></div></div>
+              }
+            </div>
+
+            @if (showPatientDropdown() && patientResults.length > 0) {
+              <div class="dropdown-panel">
+                <ul class="dropdown-list">
+                  @for (patient of patientResults; track patient.id) {
+                    <li>
+                      <button
+                        type="button"
+                        class="dropdown-item"
+                        (mousedown)="selectPatient(patient)"
+                      >
+                        <span class="dropdown-item-name">{{ patient.name }}</span>
+                        @if (patient.mrn || patient.dob) {
+                          <span class="dropdown-item-meta">
+                            Phone: {{ patient.mrn || 'N/A' }} | DOB:
+                            {{ formatDate(patient.dob) || 'N/A' }}
+                          </span>
+                        }
+                      </button>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
+            @if (f['patientSearch'].touched && f['patientSearch'].hasError('required')) {
+              <p class="field-error">Patient selection is required.</p>
+            }
+          }
+        </div>
+
+        <!-- ── Report Scope ── -->
         <div class="form-field">
           <label class="form-label">Report Scope <span style="color: #ef4444">*</span></label>
           <div class="scope-options">
@@ -82,6 +128,7 @@
           </div>
         </div>
 
+        <!-- ── Year / Month ── -->
         @if (isYearScope || isMonthScope) {
           <div class="month-year-row animate-fade-in">
             <div class="form-field">
@@ -94,7 +141,6 @@
                 }
               </select>
             </div>
-
             @if (isMonthScope) {
               <div class="form-field">
                 <label class="form-label" for="month"
@@ -110,6 +156,7 @@
           </div>
         }
 
+        <!-- ── Consultation Picker ── -->
         @if (isSpecificConsultation) {
           <div class="consultation-panel">
             <label class="form-label"
@@ -117,9 +164,7 @@
             >
 
             @if (!selectedPatient) {
-              <p class="field-warning">
-                ⚠️ Please select a patient first to load their consultations.
-              </p>
+              <p class="field-warning">⚠️ Please select a patient first.</p>
             } @else if (isLoadingConsultations()) {
               <div class="loading-row">
                 <div class="spinner"></div>
@@ -141,10 +186,7 @@
                       "
                       (click)="selectConsultation(c)"
                     >
-                      <span
-                        class="consultation-diagnosis"
-                        [title]="c.diagnosis || 'No Diagnosis Recorded'"
-                      >
+                      <span class="consultation-diagnosis" [title]="c.diagnosis || 'No Diagnosis'">
                         {{ c.diagnosis || 'No diagnosis recorded' }}
                       </span>
                       <span class="consultation-date">{{ formatDate(c.date) }}</span>
@@ -156,6 +198,13 @@
                 <p class="field-error">You must select a specific consultation.</p>
               }
             }
+          </div>
+        }
+
+        <!-- ── Actions ── -->
+        @if (generateError) {
+          <div class="result-error-card">
+            <p class="field-error" style="margin: 0">❌ {{ generateError }}</p>
           </div>
         }
 
@@ -184,72 +233,68 @@
             }
           </button>
         </div>
-
-        @if (generateError) {
-          <div class="result-error-card">
-            <p class="field-error" style="margin: 0">❌ {{ generateError }}</p>
-          </div>
-        }
       </form>
+    </div>
 
-      @if (generatedReport) {
-        <div class="result-card">
-          <div class="result-header">
-            <div>
-              <h3 class="result-title">🩺 {{ generatedReport.meta.scopeLabel }}</h3>
-              <p class="result-subtitle">{{ generatedReport.meta.rangeLabel }}</p>
-            </div>
-            <button type="button" class="btn btn-primary" (click)="printReport()">
-              🖨️ Print Report
-            </button>
+    <!-- ── AI Report Result ── -->
+    @if (generatedReport) {
+      <div class="result-card">
+        <div class="result-header">
+          <div>
+            <h3 class="result-title">🩺 {{ generatedReport.meta.scopeLabel }}</h3>
+            <p class="result-subtitle">{{ generatedReport.meta.rangeLabel }}</p>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="printReport()">
+            🖨️ Print Report
+          </button>
+        </div>
+
+        <div class="result-patient-info">
+          <span><strong>Doctor:</strong> {{ selectedDoctor()?.name || 'N/A' }}</span>
+          <span><strong>Patient:</strong> {{ generatedReport.patientName }}</span>
+          <span><strong>Phone:</strong> {{ generatedReport.mrn || 'N/A' }}</span>
+          <span><strong>DOB:</strong> {{ formatDate(generatedReport.dob) || 'N/A' }}</span>
+          <span
+            ><strong>Consultations reviewed:</strong>
+            {{ generatedReport.meta.consultationCount }}</span
+          >
+        </div>
+
+        <div class="ai-report-body">
+          <div class="ai-report-section">
+            <h4 class="ai-section-title">📋 {{ generatedReport.data.reportTitle }}</h4>
+            <p class="ai-section-text">{{ generatedReport.data.executiveSummary }}</p>
           </div>
 
-          <div class="result-patient-info">
-            <span><strong>Patient:</strong> {{ generatedReport.patientName }}</span>
-            <span><strong>Phone:</strong> {{ generatedReport.mrn || 'N/A' }}</span>
-            <span><strong>DOB:</strong> {{ formatDate(generatedReport.dob) || 'N/A' }}</span>
-            <span
-              ><strong>Consultations reviewed:</strong>
-              {{ generatedReport.meta.consultationCount }}</span
-            >
-          </div>
-
-          <div class="ai-report-body">
+          <div class="ai-report-grid">
             <div class="ai-report-section">
-              <h4 class="ai-section-title">📋 {{ generatedReport.data.reportTitle }}</h4>
-              <p class="ai-section-text">{{ generatedReport.data.executiveSummary }}</p>
+              <h4 class="ai-section-title">🏥 Patient Condition</h4>
+              <p class="ai-section-text">{{ generatedReport.data.patientCondition }}</p>
             </div>
-
-            <div class="ai-report-grid">
-              <div class="ai-report-section">
-                <h4 class="ai-section-title">🏥 Patient Condition</h4>
-                <p class="ai-section-text">{{ generatedReport.data.patientCondition }}</p>
-              </div>
-              <div class="ai-report-section">
-                <h4 class="ai-section-title">🔬 Clinical Findings</h4>
-                <p class="ai-section-text">{{ generatedReport.data.clinicalFindings }}</p>
-              </div>
-              <div class="ai-report-section">
-                <h4 class="ai-section-title">💊 Treatment Plan</h4>
-                <p class="ai-section-text">{{ generatedReport.data.treatmentPlan }}</p>
-              </div>
-              <div class="ai-report-section">
-                <h4 class="ai-section-title">✅ Recommendations</h4>
-                <p class="ai-section-text">{{ generatedReport.data.recommendations }}</p>
-              </div>
-            </div>
-
             <div class="ai-report-section">
-              <h4 class="ai-section-title">📅 Follow-up Notes</h4>
-              <p class="ai-section-text">{{ generatedReport.data.followupNotes }}</p>
+              <h4 class="ai-section-title">🔬 Clinical Findings</h4>
+              <p class="ai-section-text">{{ generatedReport.data.clinicalFindings }}</p>
+            </div>
+            <div class="ai-report-section">
+              <h4 class="ai-section-title">💊 Treatment Plan</h4>
+              <p class="ai-section-text">{{ generatedReport.data.treatmentPlan }}</p>
+            </div>
+            <div class="ai-report-section">
+              <h4 class="ai-section-title">✅ Recommendations</h4>
+              <p class="ai-section-text">{{ generatedReport.data.recommendations }}</p>
             </div>
           </div>
 
-          <div class="result-meta">
-            Generated at: {{ generatedReport.generatedAt | date: 'medium' }}
+          <div class="ai-report-section">
+            <h4 class="ai-section-title">📅 Follow-up Notes</h4>
+            <p class="ai-section-text">{{ generatedReport.data.followupNotes }}</p>
           </div>
         </div>
-      }
-    </div>
+
+        <div class="result-meta" style="margin-top: 1.5rem; text-align: center">
+          Generated at: {{ generatedReport.generatedAt | date: 'medium' }}
+        </div>
+      </div>
+    }
   </div>
 </div>

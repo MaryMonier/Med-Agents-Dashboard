@@ -35,7 +35,7 @@
         type="text"
         [ngModel]="searchTerm()"
         (ngModelChange)="searchTerm.set($event)"
-        placeholder="Search follow up by patient name or national ID"
+        placeholder="Search follow-up by patient name"
       />
       <button (click)="applySearch()" [disabled]="isLoading()">Search</button>
       <select

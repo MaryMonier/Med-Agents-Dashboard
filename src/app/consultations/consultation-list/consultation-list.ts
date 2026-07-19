@@ -11,11 +11,7 @@ import { Consultations } from '../../models/consultations';
 @Component({
   selector: 'app-consultation-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    FormsModule
-  ],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './consultation-list.html',
   styleUrl: './consultation-list.css',
 })
@@ -70,18 +66,7 @@ export class ConsultationListComponent implements OnInit {
     if (query) {
       filtered = this.consultations().filter((consultation) => {
         const patientName = this.getPatientName(consultation.patientId).toLowerCase();
-        const symptoms = (consultation.symptoms || []).join(', ').toLowerCase();
-        const specialist = (consultation.suggestedSpecialist || '').toLowerCase();
-        const status = (consultation.status || '').toLowerCase();
-        const urgency = (consultation.urgencyLevel || '').toLowerCase();
-
-        return (
-          patientName.includes(query) ||
-          symptoms.includes(query) ||
-          specialist.includes(query) ||
-          status.includes(query) ||
-          urgency.includes(query)
-        );
+        return patientName.includes(query);
       });
     }
 

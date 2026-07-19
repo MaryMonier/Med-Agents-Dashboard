@@ -13,7 +13,7 @@
         [ngModel]="searchTerm()"
         (ngModelChange)="searchTerm.set($event)"
         (keyup.enter)="search()"
-        placeholder="Search by name or national ID..."
+        placeholder="Search by name..."
       />
       <button (click)="search()" [disabled]="isLoading()">
         {{ isLoading() ? 'Searching...' : 'Search' }}
@@ -41,7 +41,7 @@
             <span class="age">{{ calculateAge(patient.dateOfBirth) }} yrs</span>
             <span class="blood-type">{{ patient.bloodType }}</span>
           </div>
-          <div class="national-id" dir="ltr">📞 {{ patient.phone }}</div>
+          <div class="patient-phone" dir="ltr">📞 {{ patient.phone }}</div>
         </div>
       }
     </div>

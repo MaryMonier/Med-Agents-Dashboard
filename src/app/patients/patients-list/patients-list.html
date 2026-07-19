@@ -5,11 +5,11 @@
   </div>
 
   <div class="search-wrap">
-    <p>Search by Patient ID</p>
+    <p>Search by Name</p>
     <div class="search-row">
       <input
         type="text"
-        placeholder="Enter patient ID"
+        placeholder="Enter patient name"
         [ngModel]="searchQuery()"
         (ngModelChange)="searchQuery.set($event); loadPatients()"
       />

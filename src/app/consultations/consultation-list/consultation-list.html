@@ -15,7 +15,7 @@
         [ngModel]="searchQuery()"
         (ngModelChange)="searchQuery.set($event)"
         (keyup.enter)="applySearch()"
-        placeholder="Search by patient name, symptoms, specialist, status..."
+        placeholder="Search by patient name"
       />
       <button (click)="applySearch()" [disabled]="isLoading()">Search</button>
       <button class="clear-btn" (click)="clearSearch()">Clear</button>
@@ -61,7 +61,9 @@
                     {{ c.status }}
                   </span>
                 </td>
-                <td data-label="Follow-up">{{ c.followUpDate ? (c.followUpDate | date: 'mediumDate') : '—' }}</td>
+                <td data-label="Follow-up">
+                  {{ c.followUpDate ? (c.followUpDate | date: 'mediumDate') : '—' }}
+                </td>
                 <td class="actions" data-label="Actions">
                   <a
                     class="btn-details"
@@ -76,10 +78,7 @@
                   >
                     Edit
                   </a>
-                  <button
-                    class="btn-delete"
-                    (click)="deleteConsultation(getConsultationId(c))"
-                  >
+                  <button class="btn-delete" (click)="deleteConsultation(getConsultationId(c))">
                     Delete
                   </button>
                 </td>
