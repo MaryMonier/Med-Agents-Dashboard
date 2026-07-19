@@ -31,4 +31,8 @@ export class SubscriptionService {
   ): Observable<any> {
     return this.http.patch(`${this.api}/${doctorId}/renew`, data);
   }
+
+  unsubscribeDoctor(doctorId: string): Observable<any> {
+    return this.http.patch(`${this.api}/${doctorId}/unsubscribe`, {});
+  }
 }

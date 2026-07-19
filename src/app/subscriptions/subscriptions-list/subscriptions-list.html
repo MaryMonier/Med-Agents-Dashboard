@@ -57,7 +57,7 @@
             <th data-label="Plan">Plan</th>
             <th data-label="Days Left">Days Left</th>
             <th data-label="Expire Date">Expire Date</th>
-            <th data-label="Renew">Renew</th>
+            <th data-label="Actions">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -102,10 +102,15 @@
                 }
               </td>
 
-              <td data-label="Renew">
+              <td data-label="Actions">
                 <button class="btn-edit" (click)="renewSubscription(doctor)">
                   Renew
                 </button>
+                @if (doctor.subscription.status !== 'expired') {
+                  <button class="btn-danger" (click)="unsubscribeDoctor(doctor)">
+                    Unsubscribe
+                  </button>
+                }
               </td>
             </tr>
           }

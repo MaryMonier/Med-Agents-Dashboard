@@ -157,6 +157,20 @@
 
 .btn-edit:hover { background: #134a82; }
 
+.btn-danger {
+  padding: 6px 16px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-inline-start: 6px;
+}
+
+.btn-danger:hover { background: #b91c1c; }
+
 /* ===== Pagination ===== */
 
 .pagination {

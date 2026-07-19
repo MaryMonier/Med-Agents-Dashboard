@@ -152,4 +152,39 @@ export class SubscriptionsList implements OnInit {
         });
     });
   }
+
+  unsubscribeDoctor(doctor: any) {
+    Swal.fire({
+      title: 'Cancel Subscription?',
+      text: `Are you sure you want to cancel ${doctor.name}'s subscription? This will revoke their access immediately.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, cancel it',
+      cancelButtonText: 'No, keep it',
+      confirmButtonColor: '#dc2626',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      this.subscriptionService.unsubscribeDoctor(doctor._id).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Cancelled',
+            text: 'Subscription has been cancelled.',
+            timer: 1500,
+            showConfirmButton: false,
+          });
+
+          this.loadDoctors();
+        },
+        error: (err) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: err.error?.message || 'Something went wrong',
+          });
+        },
+      });
+    });
+  }
 }
