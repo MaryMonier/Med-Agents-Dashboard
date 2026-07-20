@@ -141,6 +141,19 @@ export class ConsultationListComponent implements OnInit {
     return patient.name || patient._id || 'Unknown';
   }
 
+  getDoctorName(doctor: any): string {
+    if (!doctor) return '—';
+    if (typeof doctor === 'string') return '—';
+    return doctor.name || '—';
+  }
+
+  getSpecialistShortName(specialist: string | null | undefined): string {
+    if (!specialist) return '—';
+    // بناخد كل حاجة قبل أول ( أو , أو " for " أو " should "
+    const short = specialist.split(/[\(,]| for | should | may /i)[0].trim();
+    return short || '—';
+  }
+
   getId(value: any): string {
     if (!value) return '';
     if (typeof value === 'string') {

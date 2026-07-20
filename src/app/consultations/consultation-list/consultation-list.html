@@ -37,7 +37,7 @@
           <thead>
             <tr>
               <th>Patient</th>
-              <th>Symptoms</th>
+              <th>Doctor</th>
               <th>Urgency</th>
               <th>Specialist</th>
               <th>Status</th>
@@ -49,13 +49,13 @@
             @for (c of pagedConsultations(); track c._id) {
               <tr>
                 <td data-label="Patient">{{ getPatientName(c.patientId) }}</td>
-                <td data-label="Symptoms">{{ (c.symptoms || []).join(', ') }}</td>
+                <td data-label="Doctor">{{ getDoctorName(c.doctorId) }}</td>
                 <td data-label="Urgency">
                   <span class="urgency-badge" [ngClass]="(c.urgencyLevel || '').toLowerCase()">
                     {{ c.urgencyLevel }}
                   </span>
                 </td>
-                <td data-label="Specialist">{{ c.suggestedSpecialist || '—' }}</td>
+                <td data-label="Specialist">{{ getSpecialistShortName(c.suggestedSpecialist) }}</td>
                 <td data-label="Status">
                   <span class="status-badge" [ngClass]="(c.status || '').toLowerCase()">
                     {{ c.status }}
