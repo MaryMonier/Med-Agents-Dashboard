@@ -74,6 +74,13 @@
   flex-direction: column;
 }
 
+/* Subscriptions by Plan / by Status / New Doctor Signups row */
+.subscriptions-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
 .activity-feed-body {
   flex: 1;
   display: flex;
@@ -414,6 +421,9 @@
   .charts-row {
     grid-template-columns: 1fr 1fr;
   }
+  .subscriptions-row {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 900px) {
@@ -428,6 +438,14 @@
 @media (max-width: 700px) {
   .charts-row {
     grid-template-columns: 1fr;
+  }
+  .subscriptions-row {
+    grid-template-columns: 1fr;
+  }
+  .donut-wrap {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
   }
 }
 
