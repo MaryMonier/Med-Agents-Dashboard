@@ -38,7 +38,8 @@ export class ConsultationDetails implements OnInit {
 
   diagnosis = computed(() => this.consultation()?.diagnosis || '—');
   urgencyLevel = computed(() => this.consultation()?.urgencyLevel || 'low');
-  suggestedSpecialist = computed(() => this.consultation()?.suggestedSpecialist || '—');
+  suggestedSpecialist = computed(() => this.consultation()?.suggestedSpecialist || null);
+  structuredNote = computed(() => this.consultation()?.structuredNote || null);
   followUpDate = computed(() => this.consultation()?.followUpDate || null);
   status = computed(() => this.consultation()?.status || 'pending');
   rawInput = computed(() => this.consultation()?.rawInput || '—');

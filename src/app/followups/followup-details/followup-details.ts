@@ -32,6 +32,9 @@ export class FollowupDetails implements OnInit {
     return Array.isArray(list) && list.length ? list.join(', ') : '—';
   });
   diagnosis = computed(() => this.effectiveConsultation()?.diagnosis || '—');
+  structuredNote = computed(() => this.effectiveConsultation()?.structuredNote || null);
+  urgencyLevel = computed(() => this.effectiveConsultation()?.urgencyLevel || null);
+  suggestedSpecialist = computed(() => this.effectiveConsultation()?.suggestedSpecialist || null);
   scheduledDate = computed(() => this.followup()?.scheduledDate || null);
   status = computed(() => this.followup()?.status || 'pending');
 

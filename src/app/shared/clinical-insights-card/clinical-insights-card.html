@@ -10,7 +10,8 @@
         <div class="ci-icon">🧠</div>
         <p class="ci-state-title">Agent Ready</p>
         <p class="ci-state-subtitle">
-          Fill out the consultation form to receive automated diagnosis suggestions and drug safety warnings.
+          Fill out the consultation form to receive automated diagnosis suggestions and drug safety
+          warnings.
         </p>
       </div>
     }
@@ -25,11 +26,13 @@
 
     @if (result && !isGenerating) {
       <div class="ci-result">
+        <!-- Urgency -->
         <div class="ci-urgency-box" [ngClass]="urgencyClass(result.urgencyLevel)">
           <p class="ci-label">Urgency Level</p>
           <p class="ci-urgency-value">{{ result.urgencyLevel }}</p>
         </div>
 
+        <!-- Suggested Specialist -->
         @if (result.suggestedSpecialist) {
           <div class="ci-box">
             <p class="ci-label">Suggested Specialist</p>
@@ -37,7 +40,36 @@
           </div>
         }
 
-        @if (result.structuredNote) {
+        <!-- Full agent output: clinicalReading + possibleDiagnoses + recommendedProtocol -->
+        @if (
+          result.clinicalReading || result.possibleDiagnoses?.length || result.recommendedProtocol
+        ) {
+          @if (result.clinicalReading) {
+            <div class="ci-box">
+              <p class="ci-label">Clinical Reading</p>
+              <p class="ci-text ci-note">{{ result.clinicalReading }}</p>
+            </div>
+          }
+
+          @if (result.possibleDiagnoses?.length) {
+            <div class="ci-box">
+              <p class="ci-label">Possible Diagnoses</p>
+              <ol class="ci-diagnoses-list">
+                @for (d of result.possibleDiagnoses; track d) {
+                  <li>{{ d }}</li>
+                }
+              </ol>
+            </div>
+          }
+
+          @if (result.recommendedProtocol) {
+            <div class="ci-box">
+              <p class="ci-label">Recommended Protocol</p>
+              <p class="ci-text ci-note">{{ result.recommendedProtocol }}</p>
+            </div>
+          }
+        } @else if (result.structuredNote) {
+          <!-- fallback لو الـ agent رجع structuredNote بس -->
           <div class="ci-box">
             <p class="ci-label">Structured Note</p>
             <p class="ci-text ci-note">{{ result.structuredNote }}</p>

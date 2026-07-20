@@ -97,6 +97,12 @@
             }}</span>
           </div>
           <div class="card-body">
+            @if (item.doctorNotes) {
+              <div class="field">
+                <span class="label">Doctor's Notes</span>
+                <p class="note">{{ item.doctorNotes }}</p>
+              </div>
+            }
             <div class="field">
               <span class="label">Symptoms</span>
               <div class="tags">
@@ -105,16 +111,6 @@
                 }
               </div>
             </div>
-            <div class="field">
-              <span class="label">Diagnosis</span>
-              <p>{{ item.diagnosis }}</p>
-            </div>
-            @if (item.doctorNotes) {
-              <div class="field">
-                <span class="label">Doctor's Notes</span>
-                <p class="note">{{ item.doctorNotes }}</p>
-              </div>
-            }
             @if (item.suggestedSpecialist) {
               <div class="field">
                 <span class="label">Suggested Specialist</span>
@@ -122,11 +118,15 @@
               </div>
             }
             @if (item.structuredNote) {
-              <div class="field">
-                <span class="label">Clinical Note</span>
-                <p class="note">{{ item.structuredNote }}</p>
+              <div class="field ai-note-field">
+                <span class="label">🤖 AI Clinical Note</span>
+                <p class="note ai-note-text">{{ item.structuredNote }}</p>
               </div>
             }
+            <div class="field">
+              <span class="label">Diagnosis</span>
+              <p class="diagnosis-value">{{ item.diagnosis }}</p>
+            </div>
             @if (item.prescription) {
               <div class="field prescription-block">
                 <div class="prescription-block-header">

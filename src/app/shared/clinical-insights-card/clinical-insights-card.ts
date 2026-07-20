@@ -4,7 +4,10 @@ import { CommonModule } from '@angular/common';
 export interface AiRecommendationResult {
   structuredNote?: string;
   suggestedSpecialist?: string;
-  urgencyLevel?: 'low' | 'medium' | 'critical' | 'unknown';
+  urgencyLevel?: 'low' | 'medium' | 'high' | 'critical' | 'unknown';
+  clinicalReading?: string;
+  possibleDiagnoses?: string[];
+  recommendedProtocol?: string;
 }
 
 /**

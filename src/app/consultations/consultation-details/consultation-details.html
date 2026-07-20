@@ -46,11 +46,6 @@
       </div>
 
       <div class="cd-row">
-        <span class="cd-label">Diagnosis</span>
-        <span class="cd-value cd-strong">{{ diagnosis() }}</span>
-      </div>
-
-      <div class="cd-row">
         <span class="cd-label">Urgency Level</span>
         <span class="cd-value">
           <span [class]="'cd-badge-urgency cd-badge-urgency-' + urgencyLevel()">
@@ -59,9 +54,23 @@
         </span>
       </div>
 
+      @if (suggestedSpecialist()) {
+        <div class="cd-row">
+          <span class="cd-label">Suggested Specialist</span>
+          <span class="cd-value">{{ suggestedSpecialist() }}</span>
+        </div>
+      }
+
+      @if (structuredNote()) {
+        <div class="cd-row cd-ai-note-row">
+          <span class="cd-label">🤖 AI Clinical Note</span>
+          <span class="cd-value cd-ai-note-text">{{ structuredNote() }}</span>
+        </div>
+      }
+
       <div class="cd-row">
-        <span class="cd-label">Suggested Specialist</span>
-        <span class="cd-value">{{ suggestedSpecialist() }}</span>
+        <span class="cd-label">Diagnosis</span>
+        <span class="cd-value cd-strong">{{ diagnosis() }}</span>
       </div>
 
       <div class="cd-row">
@@ -74,8 +83,8 @@
               @for (med of medications(); track med.name) {
                 <li>
                   <strong>{{ med.name }}</strong>
-                  — {{ med.dose || (med.dosageAmount + ' ' + med.dosageUnit) }},
-                  {{ med.frequency || (med.frequencyCount + 'x ' + med.frequencyPeriod) }}
+                  — {{ med.dose || med.dosageAmount + ' ' + med.dosageUnit }},
+                  {{ med.frequency || med.frequencyCount + 'x ' + med.frequencyPeriod }}
                   @if (!med.isChronic && med.duration) {
                     , for {{ med.duration }}
                   }
@@ -86,13 +95,6 @@
               }
             </ul>
           }
-        </span>
-      </div>
-
-      <div class="cd-row">
-        <span class="cd-label">Follow-up Date</span>
-        <span class="cd-value cd-strong">
-          {{ followUpDate() ? (followUpDate() | date: 'EEE, MMM d, y') : '—' }}
         </span>
       </div>
 

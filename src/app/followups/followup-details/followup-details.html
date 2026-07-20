@@ -45,6 +45,31 @@
         <span class="fd-value">{{ symptoms() }}</span>
       </div>
 
+      @if (urgencyLevel()) {
+        <div class="fd-row">
+          <span class="fd-label">Urgency Level</span>
+          <span class="fd-value">
+            <span [class]="'fd-badge-urgency fd-badge-urgency-' + urgencyLevel()">
+              {{ urgencyLevel() }}
+            </span>
+          </span>
+        </div>
+      }
+
+      @if (suggestedSpecialist()) {
+        <div class="fd-row">
+          <span class="fd-label">Suggested Specialist</span>
+          <span class="fd-value">{{ suggestedSpecialist() }}</span>
+        </div>
+      }
+
+      @if (structuredNote()) {
+        <div class="fd-row fd-ai-note-row">
+          <span class="fd-label">🤖 AI Clinical Note</span>
+          <span class="fd-value fd-ai-note-text">{{ structuredNote() }}</span>
+        </div>
+      }
+
       <div class="fd-row">
         <span class="fd-label">Diagnosis</span>
         <span class="fd-value fd-strong">{{ diagnosis() }}</span>
@@ -60,8 +85,8 @@
               @for (med of medications(); track med.name) {
                 <li>
                   <strong>{{ med.name }}</strong>
-                  — {{ med.dose || (med.dosageAmount + ' ' + med.dosageUnit) }},
-                  {{ med.frequency || (med.frequencyCount + 'x ' + med.frequencyPeriod) }}
+                  — {{ med.dose || med.dosageAmount + ' ' + med.dosageUnit }},
+                  {{ med.frequency || med.frequencyCount + 'x ' + med.frequencyPeriod }}
                   @if (!med.isChronic && med.duration) {
                     , for {{ med.duration }}
                   }
@@ -72,13 +97,6 @@
               }
             </ul>
           }
-        </span>
-      </div>
-
-      <div class="fd-row">
-        <span class="fd-label">Follow-up Date</span>
-        <span class="fd-value fd-strong">
-          {{ scheduledDate() ? (scheduledDate() | date: 'EEE, MMM d, y') : '—' }}
         </span>
       </div>
 
