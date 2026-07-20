@@ -39,6 +39,7 @@
             <th data-label="Phone">Phone</th>
             <th data-label="Age">Age</th>
             <th data-label="Gender">Gender</th>
+            <th data-label="Doctor">Doctor</th>
             <th data-label="Actions">Actions</th>
           </tr>
         </thead>
@@ -57,6 +58,7 @@
                   {{ patient.gender }}
                 </span>
               </td>
+              <td data-label="Doctor">{{ doctorName(patient) }}</td>
               <td>
                 <div class="actions">
                   <button class="btn-history" (click)="goToHistory(patient._id!)">History</button>

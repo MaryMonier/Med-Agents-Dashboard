@@ -149,27 +149,37 @@
       </div>
     </div>
 
-    <!-- Activity Feed -->
+    <!-- Follow-up Completion Rate -->
     <div class="card chart-card">
       <div class="card-header">
-        <span class="card-title">Recent Activity</span>
+        <span class="card-title">Follow-up Completion Rate</span>
+        <a routerLink="/dashboard/followups" class="card-link">View all</a>
       </div>
-      <div class="activity-feed-body">
-        @if (activityFeed().length === 0) {
-          <div class="empty-state">No activity yet</div>
-        }
-        @for (item of activityFeed(); track $index) {
-          <div class="activity-item">
-            <div class="activity-icon" [style.background]="item.color + '18'" [style.color]="item.color">
-              <i class="material-icons">{{ item.icon }}</i>
-            </div>
-            <div class="activity-info">
-              <div class="activity-text">{{ item.text }}</div>
-              <div class="activity-time">{{ item.time }}</div>
-            </div>
+      @if (followupCompletion().total === 0) {
+        <div class="empty-state">No follow-ups yet</div>
+      } @else {
+        <div class="age-group-item">
+          <div class="age-group-header">
+            <span class="age-label">Completed</span>
+            <span class="age-count">{{ followupCompletion().completed }} ({{ followupCompletion().rate }}%)</span>
           </div>
-        }
-      </div>
+          <div class="age-bar-bg">
+            <div [style.width.%]="followupCompletion().rate" class="age-bar-fill" style="background:#2F9E44"></div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-item-left">
+            <div class="list-item-title">Pending</div>
+          </div>
+          <span class="status-badge pending">{{ followupCompletion().pending }}</span>
+        </div>
+        <div class="list-item">
+          <div class="list-item-left">
+            <div class="list-item-title">Cancelled</div>
+          </div>
+          <span class="status-badge pending">{{ followupCompletion().cancelled }}</span>
+        </div>
+      }
     </div>
 
   </div>
@@ -436,37 +446,27 @@
         </div>
       </div>
 
-      <!-- Follow-up Completion Rate -->
+      <!-- Recent Activity -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Follow-up Completion Rate</span>
-          <a routerLink="/dashboard/followups" class="card-link">View all</a>
+          <span class="card-title">Recent Activity</span>
         </div>
-        @if (followupCompletion().total === 0) {
-          <div class="empty-state">No follow-ups yet</div>
-        } @else {
-          <div class="age-group-item">
-            <div class="age-group-header">
-              <span class="age-label">Completed</span>
-              <span class="age-count">{{ followupCompletion().completed }} ({{ followupCompletion().rate }}%)</span>
+        <div class="activity-feed-body">
+          @if (activityFeed().length === 0) {
+            <div class="empty-state">No activity yet</div>
+          }
+          @for (item of activityFeed(); track $index) {
+            <div class="activity-item">
+              <div class="activity-icon" [style.background]="item.color + '18'" [style.color]="item.color">
+                <i class="material-icons">{{ item.icon }}</i>
+              </div>
+              <div class="activity-info">
+                <div class="activity-text">{{ item.text }}</div>
+                <div class="activity-time">{{ item.time }}</div>
+              </div>
             </div>
-            <div class="age-bar-bg">
-              <div [style.width.%]="followupCompletion().rate" class="age-bar-fill" style="background:#2F9E44"></div>
-            </div>
-          </div>
-          <div class="list-item">
-            <div class="list-item-left">
-              <div class="list-item-title">Pending</div>
-            </div>
-            <span class="status-badge pending">{{ followupCompletion().pending }}</span>
-          </div>
-          <div class="list-item">
-            <div class="list-item-left">
-              <div class="list-item-title">Cancelled</div>
-            </div>
-            <span class="status-badge pending">{{ followupCompletion().cancelled }}</span>
-          </div>
-        }
+          }
+        </div>
       </div>
 
     </div>

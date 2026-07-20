@@ -5,6 +5,13 @@ import { environment } from '../../environments/environment';
 
 export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 
+export interface DoctorInfo {
+  _id: string;
+  name: string;
+  specialty?: string;
+  email?: string;
+}
+
 export interface Patient {
   _id?: string;
   name: string;
@@ -23,20 +30,15 @@ export interface Patient {
     discontinuedAt: string;
     reason?: string | null;
   }[];
-  createdBy?: string;
+  // ممكن يرجع ID نصي بس (زي معظم الأماكن)، أو object الدكتور كامل لو
+  // الـ endpoint عمل .populate("createdBy") زي getAllPatients بتاع الأدمن
+  createdBy?: string | DoctorInfo;
   createdAt?: string;
 }
 
-export interface DoctorInfo {
-  _id: string;
-  name: string;
-  specialty?: string;
-  email?: string;
-}
-
-export interface PatientWithDoctor extends Omit<Patient, 'createdBy'> {
-  createdBy?: DoctorInfo | string;
-}
+// موجودة عشان التوافق مع كود قديم كان بيستخدمها - Patient نفسها بقت
+// تقبل الشكلين دلوقتي، فمفيش داعي لنوع منفصل تاني
+export type PatientWithDoctor = Patient;
 
 export interface PrescriptionInfo {
   _id?: string;

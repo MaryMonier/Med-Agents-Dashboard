@@ -107,6 +107,15 @@ deletePatient(id: string): void {
   });
 }
 
+  // اسم الدكتور بتاع المريض - patient.createdBy ممكن تيجي string (ID) لو
+  // مفيش populate، أو object كامل فيه name لو الـ backend عمل populate
+  doctorName(patient: Patient): string {
+    const createdBy = patient.createdBy;
+    if (!createdBy) return '—';
+    if (typeof createdBy === 'string') return '—';
+    return createdBy.name || '—';
+  }
+
   calculateAge(dateOfBirth: string): number {
     const today = new Date();
     const birth = new Date(dateOfBirth);
@@ -116,4 +125,3 @@ deletePatient(id: string): void {
     return age;
   }
 }
-

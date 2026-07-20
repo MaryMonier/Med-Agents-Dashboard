@@ -2,7 +2,11 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { ConsultationService } from '../../services/consultation';
+import { PatientService } from '../../services/patient';
+import { PrescriptionService } from '../../services/prescription';
+import { FollowupService } from '../../services/followup';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -56,11 +60,15 @@ export class Home implements OnInit, OnDestroy {
   constructor(
     private http: HttpClient,
     private consultationService: ConsultationService,
+    private patientService: PatientService,
+    private prescriptionService: PrescriptionService,
+    private followupService: FollowupService,
   ) {}
 
   ngOnInit() {
     this.loadDashboardStats();
     this.loadRecentConsultations();
+    this.loadActivityFeed();
   }
 
   ngOnDestroy() {}
@@ -143,19 +151,74 @@ export class Home implements OnInit, OnDestroy {
           if (key in months) months[key]++;
         });
         this.monthlyStats.set(Object.entries(months).map(([month, count]) => ({ month, count })));
-
-        const feed = [...data]
-          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-          .slice(0, 3)
-          .map((c: any) => ({
-            icon: 'medical_services',
-            text: `New consultation — ${this.getPatientName(c.patientId)}`,
-            time: this.timeAgo(new Date(c.createdAt)),
-            color: '#7048E8'
-          }));
-        this.activityFeed.set(feed);
       },
       error: () => this.recentConsultations.set([]),
+    });
+  }
+
+  // Activity Feed حقيقية - بتجمع آخر الأحداث من 4 مصادر مختلفة (مش بس
+  // كونسلتيشنز زي الأول، اللي كانت بتبقى نفس محتوى Recent Consultations
+  // بالظبط) وترتبهم مع بعض بالتاريخ عشان تبقى نظرة عامة فعلية على النظام كله.
+  loadActivityFeed() {
+    forkJoin({
+      consultations: this.consultationService.getAll(),
+      patients: this.patientService.getAll('', 1, 5),
+      prescriptions: this.prescriptionService.getAllPrescriptions({ limit: 5 }),
+      followups: this.followupService.getAllFollowups(),
+    }).subscribe({
+      next: ({ consultations, patients, prescriptions, followups }) => {
+        type FeedItem = { icon: string; text: string; color: string; createdAt: string };
+        const items: FeedItem[] = [];
+
+        (consultations.data || []).forEach((c: any) => {
+          items.push({
+            icon: 'medical_services',
+            color: '#7048E8',
+            text: `New consultation — ${this.getPatientName(c.patientId)}`,
+            createdAt: c.createdAt,
+          });
+        });
+
+        (patients.data || []).forEach((p: any) => {
+          items.push({
+            icon: 'person_add',
+            color: '#2F9E44',
+            text: `New patient added — ${p.name}`,
+            createdAt: p.createdAt,
+          });
+        });
+
+        (prescriptions.data || []).forEach((p: any) => {
+          items.push({
+            icon: 'medication',
+            color: '#3B5BDB',
+            text: `New prescription — ${this.getPatientName(p.patientId)}`,
+            createdAt: p.createdAt,
+          });
+        });
+
+        (followups.data || []).forEach((f: any) => {
+          items.push({
+            icon: 'event',
+            color: '#E67700',
+            text: `Follow-up scheduled — ${this.getPatientName(f.patientId)}`,
+            createdAt: f.createdAt,
+          });
+        });
+
+        const feed = items
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 6)
+          .map((item) => ({
+            icon: item.icon,
+            color: item.color,
+            text: item.text,
+            time: this.timeAgo(new Date(item.createdAt)),
+          }));
+
+        this.activityFeed.set(feed);
+      },
+      error: () => this.activityFeed.set([]),
     });
   }
 
