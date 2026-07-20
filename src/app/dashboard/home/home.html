@@ -1,6 +1,7 @@
 <div class="home-container">
 
-  <!-- Stats -->
+  <!-- Overview -->
+  <div class="section-title">Overview</div>
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-icon icon-blue">
@@ -41,19 +42,54 @@
         <div class="stat-label">Follow-ups</div>
       </div>
     </div>
+  </div>
+
+  <!-- Subscriptions & Revenue -->
+  <div class="section-title">Subscriptions &amp; Revenue</div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon icon-green">
+        <i class="material-icons">payments</i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ revenueTotalEGP() | number:'1.0-0' }} EGP</div>
+        <div class="stat-label">Total Revenue</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-blue">
+        <i class="material-icons">workspace_premium</i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ subscriptionsByStatus().active }}</div>
+        <div class="stat-label">Active Subscriptions</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-orange">
+        <i class="material-icons">hourglass_top</i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value">{{ subscriptionsByStatus().trial }}</div>
+        <div class="stat-label">On Trial</div>
+      </div>
+    </div>
 
     <div class="stat-card">
       <div class="stat-icon icon-red">
-        <i class="material-icons">warning</i>
+        <i class="material-icons">event_busy</i>
       </div>
       <div class="stat-info">
-        <div class="stat-value">{{ totalWarnings() }}</div>
-        <div class="stat-label">Drug Warnings</div>
+        <div class="stat-value">{{ subscriptionsByStatus().expired }}</div>
+        <div class="stat-label">Expired</div>
       </div>
     </div>
   </div>
 
   <!-- Charts Row -->
+  <div class="section-title">Clinical Insights</div>
   <div class="charts-row">
 
     <!-- Donut Chart -->
@@ -138,7 +174,78 @@
 
   </div>
 
-  <!-- Bottom Section -->
+  <!-- Growth & Revenue Charts Row -->
+  <div class="section-title">Business Growth</div>
+  <div class="charts-row">
+
+    <!-- Patient Growth Bar Chart -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-title">Patient Growth — Last 6 Months</span>
+      </div>
+      <div class="bar-chart">
+        @for (m of patientGrowth(); track m.month) {
+          <div class="bar-col">
+            <div class="bar-track">
+              <div class="bar-fill" [style.height]="getPatientGrowthBarHeight(m.count)">
+                <span class="bar-tooltip">{{ m.count }}</span>
+              </div>
+            </div>
+            <div class="bar-label">{{ m.month }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Revenue - Last 6 Months -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-title">Revenue — Last 6 Months (EGP)</span>
+      </div>
+      <div class="bar-chart">
+        @for (m of revenueByMonth(); track m.month) {
+          <div class="bar-col">
+            <div class="bar-track">
+              <div class="bar-fill" [style.height]="getRevenueBarHeight(m.totalEGP)">
+                <span class="bar-tooltip">{{ m.totalEGP | number:'1.0-0' }}</span>
+              </div>
+            </div>
+            <div class="bar-label">{{ m.month }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Revenue by Plan -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-title">Revenue by Plan</span>
+      </div>
+      @if (getRevenueByPlanTotal() === 0) {
+        <div class="empty-state">No payments yet</div>
+      } @else {
+        <div class="donut-wrap">
+          <div class="donut" [style.background]="getRevenueDonutStyle()">
+            <div class="donut-hole">
+              <div class="donut-total">{{ getRevenueByPlanTotal() | number:'1.0-0' }}</div>
+              <div class="donut-label">EGP</div>
+            </div>
+          </div>
+          <div class="donut-legend">
+            @for (p of objectEntries(revenueByPlan()); track p[0]) {
+              <div class="legend-item">
+                <span class="legend-dot" [style.background]="getPlanColor(p[0])"></span>
+                <span class="legend-text">{{ p[0] }}</span>
+                <span class="legend-val">{{ p[1] | number:'1.0-0' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+  <div class="section-title">Activity &amp; Actions</div>
   <div class="bottom-grid">
 
     <!-- Left Column -->
@@ -199,24 +306,35 @@
         </div>
       </div>
 
-      <!-- Pending Follow-ups -->
+      <!-- Follow-up Completion Rate -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Pending Follow-ups</span>
+          <span class="card-title">Follow-up Completion Rate</span>
           <a routerLink="/dashboard/followups" class="card-link">View all</a>
         </div>
-        @if (upcomingFollowups().length === 0) {
-          <div class="empty-state">No pending follow-ups</div>
-        }
-        @for (f of upcomingFollowups(); track f._id) {
+        @if (followupCompletion().total === 0) {
+          <div class="empty-state">No follow-ups yet</div>
+        } @else {
+          <div class="age-group-item">
+            <div class="age-group-header">
+              <span class="age-label">Completed</span>
+              <span class="age-count">{{ followupCompletion().completed }} ({{ followupCompletion().rate }}%)</span>
+            </div>
+            <div class="age-bar-bg">
+              <div [style.width.%]="followupCompletion().rate" class="age-bar-fill" style="background:#2F9E44"></div>
+            </div>
+          </div>
           <div class="list-item">
             <div class="list-item-left">
-              <div class="list-item-title">{{ getPatientName(f.patientId) }}</div>
-              <div class="list-item-sub">
-                {{ f.scheduledDate ? (f.scheduledDate | date:'MMM d, y') : 'No date set' }}
-              </div>
+              <div class="list-item-title">Pending</div>
             </div>
-            <span class="status-badge pending">pending</span>
+            <span class="status-badge pending">{{ followupCompletion().pending }}</span>
+          </div>
+          <div class="list-item">
+            <div class="list-item-left">
+              <div class="list-item-title">Cancelled</div>
+            </div>
+            <span class="status-badge pending">{{ followupCompletion().cancelled }}</span>
           </div>
         }
       </div>
@@ -224,7 +342,8 @@
     </div>
   </div>
 
-  <!-- Full-width Bottom Row: Top Doctors + Age Distribution -->
+  <!-- Full-width Bottom Row: Top Doctors + Age Distribution + Subscriptions by Plan -->
+  <div class="section-title">Rankings &amp; Distribution</div>
   <div class="full-bottom-row">
 
     <!-- Top Doctors -->
@@ -259,6 +378,34 @@
           </div>
           <div class="age-bar-bg">
             <div [style.width.%]="g.percent" class="age-bar-fill"></div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Subscriptions by Plan -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-title">📋 Subscriptions by Plan</span>
+      </div>
+      @if (getSubscriptionsPlanTotal() === 0) {
+        <div class="empty-state">No data available</div>
+      } @else {
+        <div class="donut-wrap">
+          <div class="donut" [style.background]="getSubscriptionsDonutStyle()">
+            <div class="donut-hole">
+              <div class="donut-total">{{ getSubscriptionsPlanTotal() }}</div>
+              <div class="donut-label">doctors</div>
+            </div>
+          </div>
+          <div class="donut-legend">
+            @for (p of objectEntries(subscriptionsByPlan()); track p[0]) {
+              <div class="legend-item">
+                <span class="legend-dot" [style.background]="getPlanColor(p[0])"></span>
+                <span class="legend-text">{{ p[0] }}</span>
+                <span class="legend-val">{{ p[1] }}</span>
+              </div>
+            }
           </div>
         </div>
       }
