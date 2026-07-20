@@ -245,6 +245,136 @@
     </div>
 
   </div>
+
+  <!-- Subscriptions by Plan, by Status & New Doctor Signups (under Business Growth) -->
+  <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-title">📋 Subscriptions by Plan</span>
+      </div>
+      @if (getSubscriptionsPlanTotal() === 0) {
+        <div class="empty-state">No data available</div>
+      } @else {
+        <div class="donut-wrap">
+          <div class="donut" [style.background]="getSubscriptionsDonutStyle()">
+            <div class="donut-hole">
+              <div class="donut-total">{{ getSubscriptionsPlanTotal() }}</div>
+              <div class="donut-label">doctors</div>
+            </div>
+          </div>
+          <div class="donut-legend">
+            @for (p of objectEntries(subscriptionsByPlan()); track p[0]) {
+              <div class="legend-item">
+                <span class="legend-dot" [style.background]="getPlanColor(p[0])"></span>
+                <span class="legend-text">{{ p[0] }}</span>
+                <span class="legend-val">{{ p[1] }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-title">📈 Subscriptions by Status</span>
+      </div>
+      @if (getSubscriptionsStatusTotal() === 0) {
+        <div class="empty-state">No data available</div>
+      } @else {
+        <div class="donut-wrap">
+          <div class="donut" [style.background]="getSubscriptionsStatusDonutStyle()">
+            <div class="donut-hole">
+              <div class="donut-total">{{ getSubscriptionsStatusTotal() }}</div>
+              <div class="donut-label">doctors</div>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div class="legend-item">
+              <span class="legend-dot" [style.background]="getStatusColor('active')"></span>
+              <span class="legend-text">Active</span>
+              <span class="legend-val">{{ subscriptionsByStatus().active }}</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" [style.background]="getStatusColor('trial')"></span>
+              <span class="legend-text">Trial</span>
+              <span class="legend-val">{{ subscriptionsByStatus().trial }}</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" [style.background]="getStatusColor('expired')"></span>
+              <span class="legend-text">Expired</span>
+              <span class="legend-val">{{ subscriptionsByStatus().expired }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-title">🩺 New Doctor Signups — Last 6 Months</span>
+      </div>
+      <div class="bar-chart">
+        @for (m of doctorGrowth(); track m.month) {
+          <div class="bar-col">
+            <div class="bar-track">
+              <div class="bar-fill" [style.height]="getDoctorGrowthBarHeight(m.count)">
+                <span class="bar-tooltip">{{ m.count }}</span>
+              </div>
+            </div>
+            <div class="bar-label">{{ m.month }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Full-width Bottom Row: Top Doctors + Age Distribution -->
+  <div class="section-title">Rankings &amp; Distribution</div>
+  <div class="full-bottom-row">
+
+    <!-- Top Doctors -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🏆 Top Doctors by Patients</span>
+      </div>
+      @if (topDoctors().length === 0) {
+        <div class="empty-state">No data available</div>
+      }
+      @for (d of topDoctors(); track d._id; let i = $index) {
+        <div class="list-item">
+          <div class="list-item-left">
+            <div class="list-item-title">{{ i + 1 }}. {{ d.name }}</div>
+            <div class="list-item-sub">{{ d.specialty || 'N/A' }}</div>
+          </div>
+          <span class="status-badge pending">{{ d.patientCount }} patients</span>
+        </div>
+      }
+    </div>
+
+    <!-- Age Distribution -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">👥 Patient Age Distribution</span>
+      </div>
+      @for (g of ageGroups(); track g.label) {
+        <div class="age-group-item">
+          <div class="age-group-header">
+            <span class="age-label">{{ g.label }}</span>
+            <span class="age-count">{{ g.count }} ({{ g.percent }}%)</span>
+          </div>
+          <div class="age-bar-bg">
+            <div [style.width.%]="g.percent" class="age-bar-fill"></div>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- Activity & Actions - last section, left to expand downward freely -->
   <div class="section-title">Activity &amp; Actions</div>
   <div class="bottom-grid">
 
@@ -340,77 +470,6 @@
       </div>
 
     </div>
-  </div>
-
-  <!-- Full-width Bottom Row: Top Doctors + Age Distribution + Subscriptions by Plan -->
-  <div class="section-title">Rankings &amp; Distribution</div>
-  <div class="full-bottom-row">
-
-    <!-- Top Doctors -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">🏆 Top Doctors by Patients</span>
-      </div>
-      @if (topDoctors().length === 0) {
-        <div class="empty-state">No data available</div>
-      }
-      @for (d of topDoctors(); track d._id; let i = $index) {
-        <div class="list-item">
-          <div class="list-item-left">
-            <div class="list-item-title">{{ i + 1 }}. {{ d.name }}</div>
-            <div class="list-item-sub">{{ d.specialty || 'N/A' }}</div>
-          </div>
-          <span class="status-badge pending">{{ d.patientCount }} patients</span>
-        </div>
-      }
-    </div>
-
-    <!-- Age Distribution -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">👥 Patient Age Distribution</span>
-      </div>
-      @for (g of ageGroups(); track g.label) {
-        <div class="age-group-item">
-          <div class="age-group-header">
-            <span class="age-label">{{ g.label }}</span>
-            <span class="age-count">{{ g.count }} ({{ g.percent }}%)</span>
-          </div>
-          <div class="age-bar-bg">
-            <div [style.width.%]="g.percent" class="age-bar-fill"></div>
-          </div>
-        </div>
-      }
-    </div>
-
-    <!-- Subscriptions by Plan -->
-    <div class="card chart-card">
-      <div class="card-header">
-        <span class="card-title">📋 Subscriptions by Plan</span>
-      </div>
-      @if (getSubscriptionsPlanTotal() === 0) {
-        <div class="empty-state">No data available</div>
-      } @else {
-        <div class="donut-wrap">
-          <div class="donut" [style.background]="getSubscriptionsDonutStyle()">
-            <div class="donut-hole">
-              <div class="donut-total">{{ getSubscriptionsPlanTotal() }}</div>
-              <div class="donut-label">doctors</div>
-            </div>
-          </div>
-          <div class="donut-legend">
-            @for (p of objectEntries(subscriptionsByPlan()); track p[0]) {
-              <div class="legend-item">
-                <span class="legend-dot" [style.background]="getPlanColor(p[0])"></span>
-                <span class="legend-text">{{ p[0] }}</span>
-                <span class="legend-val">{{ p[1] }}</span>
-              </div>
-            }
-          </div>
-        </div>
-      }
-    </div>
-
   </div>
 
 </div>

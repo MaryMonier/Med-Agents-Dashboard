@@ -42,6 +42,9 @@ export class Home implements OnInit, OnDestroy {
   // نمو المرضى شهريًا (آخر 6 شهور)
   patientGrowth = signal<{ month: string; count: number }[]>([]);
 
+  // نمو عدد الدكاترة المسجلين شهريًا (بيجاوب على "هل الاشتراكات الجديدة بتزيد؟")
+  doctorGrowth = signal<{ month: string; count: number }[]>([]);
+
   // معدل إنجاز الفوللو أب (بدل ليستة Pending Follow-ups)
   followupCompletion = signal<{
     total: number; completed: number; pending: number; cancelled: number; rate: number;
@@ -93,6 +96,7 @@ export class Home implements OnInit, OnDestroy {
         this.revenueByMonth.set(d.revenue?.byMonth || []);
 
         this.patientGrowth.set(d.patientGrowth || []);
+        this.doctorGrowth.set(d.doctorGrowth || []);
 
         this.followupCompletion.set(
           d.followupCompletion || { total: 0, completed: 0, pending: 0, cancelled: 0, rate: 0 },
@@ -194,6 +198,11 @@ export class Home implements OnInit, OnDestroy {
     return `${Math.round((count / max) * 100)}%`;
   }
 
+  getDoctorGrowthBarHeight(count: number): string {
+    const max = Math.max(...this.doctorGrowth().map(m => m.count), 1);
+    return `${Math.round((count / max) * 100)}%`;
+  }
+
   getRevenueBarHeight(totalEGP: number): string {
     const max = Math.max(...this.revenueByMonth().map(m => m.totalEGP), 1);
     return `${Math.round((totalEGP / max) * 100)}%`;
@@ -232,6 +241,42 @@ export class Home implements OnInit, OnDestroy {
 
   getSubscriptionsPlanTotal(): number {
     return this.objectEntries(this.subscriptionsByPlan()).reduce((s, [, v]) => s + v, 0);
+  }
+
+  // نفس فكرة الدونات بالظبط، بس هنا للاشتراكات حسب الحالة (Active/Trial/Expired)
+  // بدل الخطة - البيانات موجودة أصلاً في subscriptionsByStatus، بس كانت متعرضة
+  // كأرقام بس فوق من غير رسم.
+  private statusColors: { [status: string]: string } = {
+    active: '#3B5BDB',
+    trial: '#E67700',
+    expired: '#C92A2A',
+  };
+
+  getStatusColor(status: string): string {
+    return this.statusColors[status] || '#CED4DA';
+  }
+
+  getSubscriptionsStatusDonutStyle(): string {
+    const s = this.subscriptionsByStatus();
+    const entries: [string, number][] = [
+      ['active', s.active],
+      ['trial', s.trial],
+      ['expired', s.expired],
+    ];
+    const total = entries.reduce((sum, [, v]) => sum + v, 0) || 1;
+    let acc = 0;
+    const stops = entries.map(([label, value]) => {
+      const start = (acc / total) * 100;
+      acc += value;
+      const end = (acc / total) * 100;
+      return `${this.getStatusColor(label)} ${start}% ${end}%`;
+    });
+    return `conic-gradient(${stops.join(', ')})`;
+  }
+
+  getSubscriptionsStatusTotal(): number {
+    const s = this.subscriptionsByStatus();
+    return s.active + s.trial + s.expired;
   }
 
   getRevenueDonutStyle(): string {
