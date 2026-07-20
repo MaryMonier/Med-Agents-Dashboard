@@ -165,6 +165,7 @@ export class NewConsultationModalComponent implements OnChanges {
     this.isGeneratingAi.set(true);
 
     const payload: any = {
+      patientId: this.patientId,
       rawInput: this.rawInput().trim(),
       diagnosis: this.diagnosis().trim(),
       language: this.language(),

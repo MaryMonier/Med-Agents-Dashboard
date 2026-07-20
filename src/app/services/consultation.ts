@@ -42,6 +42,7 @@ export class ConsultationService {
   }
 
   getAIRecommendation(data: {
+    patientId?: string | null;
     rawInput: string;
     symptoms: string[];
     diagnosis?: string;
