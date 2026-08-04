@@ -13,9 +13,20 @@ import Swal from 'sweetalert2';
 import { ConsultationService } from '../../services/consultation';
 import { FollowupService } from '../../services/followup';
 import {
-  ClinicalInsightsCardComponent,
-  AiRecommendationResult,
-} from '../clinical-insights-card/clinical-insights-card';
+  DifferentialDiagnosisPanelComponent,
+  PossibleDiagnosis,
+  GroundingSource,
+} from '../differential-diagnosis-panel/differential-diagnosis-panel';
+import { MicButtonComponent } from '../mic-button/mic-button';
+
+export interface AiRecommendationResult {
+  structuredNote?: string;
+  suggestedSpecialist?: string;
+  urgencyLevel?: 'low' | 'medium' | 'high' | 'critical' | 'unknown';
+  clinicalReading?: string;
+  possibleDiagnoses?: PossibleDiagnosis[];
+  groundingSourcesUsed?: GroundingSource[];
+}
 
 /**
  * NewConsultationModal — shared standalone component matching the React
@@ -35,7 +46,7 @@ import {
  */
 @Component({
   selector: 'app-new-consultation-modal',
-  imports: [CommonModule, FormsModule, ClinicalInsightsCardComponent],
+  imports: [CommonModule, FormsModule, DifferentialDiagnosisPanelComponent, MicButtonComponent],
   templateUrl: './new-consultation-modal.html',
   styleUrl: './new-consultation-modal.css',
 })
@@ -150,6 +161,30 @@ export class NewConsultationModalComponent implements OnChanges {
       this.aiResult.set(null);
     }
     this.isSaved.set(false);
+  }
+
+  urgencyClass(level?: string): string {
+    const map: Record<string, string> = {
+      low: 'ncm-urgency-low',
+      medium: 'ncm-urgency-medium',
+      critical: 'ncm-urgency-critical',
+    };
+    return map[level || ''] || 'ncm-urgency-unknown';
+  }
+
+  // بيضيف النص المُفرَّغ من الميكروفون لآخر الحقل الحالي (مش بيستبدل اللي
+  // مكتوب قبل كده) - بالظبط زي الرياكت، بفاصل مسافة لملاحظات الدكتور
+  // وفاصلة للأعراض (لأنها comma-separated)
+  onDoctorNotesTranscript(text: string): void {
+    const current = this.rawInput();
+    this.rawInput.set(current ? `${current} ${text}` : text);
+    this.onFieldChanged();
+  }
+
+  onSymptomsTranscript(text: string): void {
+    const current = this.symptoms();
+    this.symptoms.set(current ? `${current}, ${text}` : text);
+    this.onFieldChanged();
   }
 
   getAiRecommendation(): void {

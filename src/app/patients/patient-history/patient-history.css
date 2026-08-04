@@ -600,6 +600,89 @@
   font-size: 13px;
 }
 
+.lab-files-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lab-file-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 220px;
+  padding: 6px 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.lab-file-chip:hover {
+  background: #f3f4f6;
+}
+
+.lab-file-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #e5e7eb;
+}
+
+.lab-file-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 15px;
+}
+
+.lab-file-name {
+  font-size: 12px;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-note-field {
+  background: #eff6ff;
+  border-inline-start: 4px solid #60a5fa;
+  border-radius: 0 8px 8px 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-note-field > .label {
+  color: #1d4ed8;
+}
+
+.ai-note-specialist .label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+}
+
+.ai-note-specialist p {
+  font-size: 13px;
+  color: #111;
+  margin: 0;
+}
+
 .med-list {
   list-style: none;
   padding: 0;

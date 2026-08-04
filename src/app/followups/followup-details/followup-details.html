@@ -63,10 +63,16 @@
         </div>
       }
 
-      @if (structuredNote()) {
+      @if (clinicalReading() || possibleDiagnoses().length > 0 || structuredNote()) {
         <div class="fd-row fd-ai-note-row">
           <span class="fd-label">🤖 AI Clinical Note</span>
-          <span class="fd-value fd-ai-note-text">{{ structuredNote() }}</span>
+          <span class="fd-value">
+            <app-differential-diagnosis-panel
+              [clinicalReading]="clinicalReading()"
+              [diagnoses]="possibleDiagnoses()"
+              [structuredNoteFallback]="structuredNote()"
+            ></app-differential-diagnosis-panel>
+          </span>
         </div>
       }
 

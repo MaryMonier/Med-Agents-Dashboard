@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FollowupService } from '../../services/followup';
 import { PrescriptionService, Medication } from '../../services/prescription';
+import { DifferentialDiagnosisPanelComponent } from '../../shared/differential-diagnosis-panel/differential-diagnosis-panel';
 
 @Component({
   selector: 'app-followup-details',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, DifferentialDiagnosisPanelComponent],
   templateUrl: './followup-details.html',
   styleUrl: './followup-details.css',
 })
@@ -35,6 +36,9 @@ export class FollowupDetails implements OnInit {
   structuredNote = computed(() => this.effectiveConsultation()?.structuredNote || null);
   urgencyLevel = computed(() => this.effectiveConsultation()?.urgencyLevel || null);
   suggestedSpecialist = computed(() => this.effectiveConsultation()?.suggestedSpecialist || null);
+  // رؤية إيجنت التشخيص التفريقي - نفس شكل الرياكت في صفحة الفولو أب
+  clinicalReading = computed(() => this.effectiveConsultation()?.clinicalReading || null);
+  possibleDiagnoses = computed(() => this.effectiveConsultation()?.possibleDiagnoses || []);
   scheduledDate = computed(() => this.followup()?.scheduledDate || null);
   status = computed(() => this.followup()?.status || 'pending');
 

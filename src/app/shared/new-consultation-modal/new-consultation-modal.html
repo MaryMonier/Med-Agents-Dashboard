@@ -67,7 +67,13 @@
       <div class="ncm-body">
         <div class="ncm-form-col">
           <div class="ncm-field">
-            <label>Doctor's Notes</label>
+            <div class="ncm-field-label-row">
+              <label>Doctor's Notes</label>
+              <app-mic-button
+                [language]="language()"
+                (transcript)="onDoctorNotesTranscript($event)"
+              />
+            </div>
             <textarea
               rows="4"
               [ngModel]="rawInput()"
@@ -77,7 +83,10 @@
           </div>
 
           <div class="ncm-field">
-            <label>Symptoms (comma separated)</label>
+            <div class="ncm-field-label-row">
+              <label>Symptoms (comma separated)</label>
+              <app-mic-button [language]="language()" (transcript)="onSymptomsTranscript($event)" />
+            </div>
             <input
               type="text"
               [ngModel]="symptoms()"
@@ -104,7 +113,64 @@
         </div>
 
         <div class="ncm-sidebar-col">
-          <app-clinical-insights-card [result]="aiResult()" [isGenerating]="isGeneratingAi()" />
+          <div class="ncm-ci-card">
+            <div class="ncm-ci-header">
+              <span class="ncm-ci-title">⚡ Clinical Insights</span>
+              <span class="ncm-ci-beta">BETA</span>
+            </div>
+
+            <div class="ncm-ci-body">
+              @if (!aiResult() && !isGeneratingAi()) {
+                <div class="ncm-ci-state">
+                  <div class="ncm-ci-icon">🧠</div>
+                  <p class="ncm-ci-state-title">Agent Ready</p>
+                  <p class="ncm-ci-state-subtitle">
+                    Fill out the consultation form to receive automated diagnosis suggestions and
+                    drug safety warnings.
+                  </p>
+                </div>
+              }
+
+              @if (isGeneratingAi()) {
+                <div class="ncm-ci-state">
+                  <div class="ncm-ci-icon ncm-ci-icon-pulse">🧠</div>
+                  <p class="ncm-ci-state-title">Analyzing...</p>
+                  <p class="ncm-ci-state-subtitle">The AI agent is reviewing the clinical data.</p>
+                </div>
+              }
+
+              @if (aiResult() && !isGeneratingAi()) {
+                <div class="ncm-ci-result">
+                  <!-- Urgency -->
+                  <div
+                    class="ncm-ci-urgency-box"
+                    [ngClass]="urgencyClass(aiResult()!.urgencyLevel)"
+                  >
+                    <p class="ncm-ci-label">Urgency Level</p>
+                    <p class="ncm-ci-urgency-value">{{ aiResult()!.urgencyLevel }}</p>
+                  </div>
+
+                  <!-- Suggested Specialist -->
+                  @if (aiResult()!.suggestedSpecialist) {
+                    <div class="ncm-ci-box">
+                      <p class="ncm-ci-label">Suggested Specialist</p>
+                      <p class="ncm-ci-text">{{ aiResult()!.suggestedSpecialist }}</p>
+                    </div>
+                  }
+
+                  <!-- Differential Diagnosis Agent output -->
+                  <div class="ncm-ci-box">
+                    <app-differential-diagnosis-panel
+                      [clinicalReading]="aiResult()!.clinicalReading"
+                      [diagnoses]="aiResult()!.possibleDiagnoses"
+                      [structuredNoteFallback]="aiResult()!.structuredNote"
+                      [groundingSourcesUsed]="aiResult()!.groundingSourcesUsed"
+                    ></app-differential-diagnosis-panel>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
         </div>
       </div>
 

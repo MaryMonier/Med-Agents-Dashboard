@@ -2,13 +2,14 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PatientService, IPatientHistory } from '../../services/patient';
+import { PatientService, IPatientHistory, resolveLabFileUrl } from '../../services/patient';
+import { DifferentialDiagnosisPanelComponent } from '../../shared/differential-diagnosis-panel/differential-diagnosis-panel';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-patient-history',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DifferentialDiagnosisPanelComponent],
   templateUrl: './patient-history.html',
   styleUrl: './patient-history.css',
 })
@@ -57,6 +58,14 @@ export class PatientHistory implements OnInit {
 
   urgencyClass(level: string): string {
     return 'urgency-' + (level || 'low').toLowerCase();
+  }
+
+  labFileUrl(url: string): string {
+    return resolveLabFileUrl(url);
+  }
+
+  isImageFile(mimeType?: string): boolean {
+    return !!mimeType && mimeType.startsWith('image/');
   }
 
   goBack(): void {

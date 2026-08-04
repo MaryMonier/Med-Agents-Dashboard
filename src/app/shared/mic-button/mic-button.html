@@ -1,0 +1,18 @@
+<span class="mic-wrap">
+  <button
+    type="button"
+    class="mic-btn"
+    [class.mic-btn-recording]="isRecording()"
+    [disabled]="disabled || isTranscribing()"
+    (click)="toggle()"
+    [title]="isRecording() ? 'Stop recording' : 'Start recording'"
+  >
+    {{ isRecording() ? '⏹' : isTranscribing() ? '⏳' : '🎤' }}
+  </button>
+  @if (isTranscribing()) {
+    <span class="mic-status">Transcribing...</span>
+  }
+  @if (error()) {
+    <span class="mic-error" [title]="error()">Recording error</span>
+  }
+</span>

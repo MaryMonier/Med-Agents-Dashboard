@@ -1,0 +1,102 @@
+@if (!hasStructuredData) {
+  @if (structuredNoteFallback) {
+    <div class="ddp-fallback">
+      <p class="ddp-fallback-label">Structured Note</p>
+      <p class="ddp-fallback-text">{{ structuredNoteFallback }}</p>
+    </div>
+  }
+} @else {
+  <div class="ddp-root">
+    @if (clinicalReading) {
+      <div class="ddp-fallback">
+        <p class="ddp-fallback-label">Clinical Reading</p>
+        <p class="ddp-reading-text">{{ clinicalReading }}</p>
+      </div>
+    }
+
+    @if (diagnosesList.length > 0) {
+      <div>
+        <div class="ddp-list-header">
+          <p class="ddp-fallback-label ddp-no-margin">Possible Diagnoses</p>
+          @if ((groundingSourcesUsed?.length || 0) > 0) {
+            <p class="ddp-sources-line">
+              📖 <span>Sources consulted:</span>
+              <span class="ddp-sources-value">{{ groundingSourcesLabel() }}</span>
+            </p>
+          }
+        </div>
+
+        <div class="ddp-accordion">
+          @for (d of diagnosesList; track d.diagnosis; let i = $index) {
+            <div>
+              <button
+                type="button"
+                class="ddp-item-header"
+                [attr.aria-expanded]="openIndex() === i"
+                (click)="toggle(i)"
+              >
+                <span class="ddp-item-title-row">
+                  <span class="ddp-item-title-left">
+                    <span class="ddp-dot" [ngClass]="likelihoodDotClass(d.likelihood)"></span>
+                    <span class="ddp-item-title">{{ i + 1 }}. {{ d.diagnosis }}</span>
+                  </span>
+                  <span class="ddp-chevron" [class.ddp-chevron-open]="openIndex() === i">⌄</span>
+                </span>
+
+                @if (isReferenced(d) || d.likelihood) {
+                  <span class="ddp-badges-row">
+                    @if (isReferenced(d)) {
+                      <span class="ddp-badge-evidence" title="Backed by a cited clinical reference">
+                        📖 Referenced
+                        @if (d.referenceSource) {
+                          <span class="ddp-badge-evidence-source">
+                            ({{ sourceLabel(d.referenceSource) }})
+                          </span>
+                        }
+                      </span>
+                    }
+                    @if (d.likelihood) {
+                      <span
+                        class="ddp-badge-likelihood"
+                        [ngClass]="likelihoodBadgeClass(d.likelihood)"
+                      >
+                        {{ d.likelihood }}
+                      </span>
+                    }
+                  </span>
+                }
+              </button>
+
+              @if (openIndex() === i) {
+                <div class="ddp-item-details">
+                  <p>
+                    <span class="ddp-detail-label">Supporting reasoning:</span>
+                    {{ d.supportingReasoning }}
+                  </p>
+                  <p>
+                    <span class="ddp-detail-label">Against reasoning:</span>
+                    {{ d.againstReasoning }}
+                  </p>
+                  <p>
+                    <span class="ddp-detail-label">Recommended tests:</span>
+                    {{ d.recommendedTests }}
+                  </p>
+                  <p>
+                    <span class="ddp-detail-label">Recommended protocol:</span> {{ d.protocol }}
+                  </p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if ((labFiles?.length || 0) > 0) {
+      <p class="ddp-lab-files-line">
+        📎 <span>Lab files attached:</span>
+        <span class="ddp-sources-value">{{ labFilesLabel() }}</span>
+      </p>
+    }
+  </div>
+}

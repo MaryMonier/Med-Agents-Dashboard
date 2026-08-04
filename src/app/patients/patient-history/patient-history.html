@@ -97,12 +97,6 @@
             }}</span>
           </div>
           <div class="card-body">
-            @if (item.doctorNotes) {
-              <div class="field">
-                <span class="label">Doctor's Notes</span>
-                <p class="note">{{ item.doctorNotes }}</p>
-              </div>
-            }
             <div class="field">
               <span class="label">Symptoms</span>
               <div class="tags">
@@ -111,16 +105,64 @@
                 }
               </div>
             </div>
-            @if (item.suggestedSpecialist) {
+            @if (item.doctorNotes) {
               <div class="field">
-                <span class="label">Suggested Specialist</span>
-                <p>{{ item.suggestedSpecialist }}</p>
+                <span class="label">Doctor's Notes</span>
+                <p class="note">{{ item.doctorNotes }}</p>
               </div>
             }
-            @if (item.structuredNote) {
+
+            @if (item.labFiles && item.labFiles.length > 0) {
+              <div class="field">
+                <span class="label">Lab Files</span>
+                <div class="lab-files-row">
+                  @for (file of item.labFiles; track file.url) {
+                    <a
+                      [href]="labFileUrl(file.url)"
+                      target="_blank"
+                      rel="noreferrer"
+                      [title]="file.originalName"
+                      class="lab-file-chip"
+                    >
+                      @if (isImageFile(file.mimeType)) {
+                        <img
+                          [src]="labFileUrl(file.url)"
+                          [alt]="file.originalName"
+                          class="lab-file-thumb"
+                        />
+                      } @else {
+                        <span class="lab-file-icon">📄</span>
+                      }
+                      <span class="lab-file-name">{{ file.originalName }}</span>
+                    </a>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- رؤية إيجنت التشخيص التفريقي: نفس شكل الرياكت بالظبط - قراءة
+                 سريرية + أكورديون تشخيصات تفريقية، وإلا structuredNote كنص
+                 واحد لو الكونسلتيشن قديمة قبل إضافة الحقول المنظمة -->
+            @if (
+              item.clinicalReading ||
+              (item.possibleDiagnoses && item.possibleDiagnoses.length > 0) ||
+              item.suggestedSpecialist ||
+              item.structuredNote
+            ) {
               <div class="field ai-note-field">
                 <span class="label">🤖 AI Clinical Note</span>
-                <p class="note ai-note-text">{{ item.structuredNote }}</p>
+                <app-differential-diagnosis-panel
+                  [clinicalReading]="item.clinicalReading"
+                  [diagnoses]="item.possibleDiagnoses"
+                  [structuredNoteFallback]="item.structuredNote"
+                ></app-differential-diagnosis-panel>
+
+                @if (item.suggestedSpecialist) {
+                  <div class="ai-note-specialist">
+                    <span class="label">Suggested Specialist</span>
+                    <p>{{ item.suggestedSpecialist }}</p>
+                  </div>
+                }
               </div>
             }
             <div class="field">

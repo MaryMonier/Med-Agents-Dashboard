@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { PossibleDiagnosis } from '../shared/differential-diagnosis-panel/differential-diagnosis-panel';
 
 export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 
@@ -58,6 +59,13 @@ export interface PrescriptionInfo {
   warnings: string[];
 }
 
+export interface ConsultationLabFile {
+  url: string;
+  originalName?: string;
+  mimeType?: string;
+  size?: number;
+}
+
 export interface ConsultationHistory {
   consultationId: string;
   date: string;
@@ -69,7 +77,23 @@ export interface ConsultationHistory {
   doctorNotes: string | null;
   isFollowup?: boolean;
   prescription: PrescriptionInfo | null;
+  // نفس اللي راجع من الـ Differential Diagnosis Agent وقت الزيارة دي
+  clinicalReading?: string | null;
+  possibleDiagnoses?: PossibleDiagnosis[];
+  // ملفات التحاليل المعملية/تقارير الأشعة اللي الدكتور رفعها مع الزيارة دي
+  labFiles?: ConsultationLabFile[];
 }
+
+// بنشتق دومين السيرفر (من غير /api في الآخر) عشان نبني رابط كامل لملف
+// متخزن على السيرفر (اللي بيرجع كمسار نسبي زي /uploads/lab-files/xxx.jpg)
+// - نفس منطق api/consultation.js في الرياكت بالظبط
+const API_ORIGIN = environment.apiUrl.replace(/\/api\/?$/, '');
+
+export const resolveLabFileUrl = (relativeUrl?: string | null): string => {
+  if (!relativeUrl) return '';
+  if (/^https?:\/\//i.test(relativeUrl)) return relativeUrl;
+  return `${API_ORIGIN}${relativeUrl}`;
+};
 
 export interface IPatientHistory {
   patient: PatientWithDoctor;

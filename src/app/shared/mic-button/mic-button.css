@@ -1,0 +1,55 @@
+.mic-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mic-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #eff6ff;
+  color: #1976d2;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.mic-btn:hover:not(:disabled) {
+  background: #dbeafe;
+}
+
+.mic-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.mic-btn-recording {
+  background: #ef4444;
+  color: #ffffff;
+  animation: mic-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.mic-status {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.mic-error {
+  font-size: 11px;
+  color: #ef4444;
+}
