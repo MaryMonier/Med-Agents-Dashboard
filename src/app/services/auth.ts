@@ -34,4 +34,27 @@ export class AuthService {
   saveToken(token: string): void {
     localStorage.setItem('token', token);
   }
+
+  // ===== طلبات تسجيل الأطباء المعلّقة (موافقة الأدمن) =====
+
+  getPendingDoctors(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/auth/doctors/pending`);
+  }
+
+  // بنجيب صورة/PDF الإثبات كـ blob (مش رابط <img src> مباشر) عشان الـ
+  // interceptor يقدر يرفق التوكن في الهيدر - الـ endpoint ده محمي ومش
+  // شغال من غير تسجيل دخول admin
+  getCredentialProofBlob(doctorId: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/auth/doctors/${doctorId}/credential-proof`, {
+      responseType: 'blob',
+    });
+  }
+
+  approveDoctor(doctorId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/doctors/${doctorId}/approve`, {});
+  }
+
+  rejectDoctor(doctorId: string, reason: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/doctors/${doctorId}/reject`, { reason });
+  }
 }

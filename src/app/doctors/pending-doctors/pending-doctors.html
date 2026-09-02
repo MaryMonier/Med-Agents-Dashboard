@@ -1,0 +1,81 @@
+<div class="pending-doctors-page">
+  <div class="page-header">
+    <h1>Doctors Registeration Orders</h1>
+    <!-- <p class="subtitle">راجع إثبات الهوية ووافق أو ارفض قبل ما الحساب يتفعّل</p> -->
+  </div>
+
+  <div *ngIf="isLoading()" class="state-message">Loading....</div>
+
+  <div *ngIf="errorMessage()" class="state-message error">
+    {{ errorMessage() }}
+  </div>
+
+  <div *ngIf="!isLoading() && !errorMessage() && doctors().length === 0" class="state-message empty">
+   No pending Doctors
+  </div>
+
+  <div class="doctors-grid" *ngIf="!isLoading() && doctors().length > 0">
+    <div class="doctor-card" *ngFor="let doctor of doctors()">
+      <div class="doctor-info">
+        <div class="doctor-avatar">{{ doctor.name?.charAt(0) }}</div>
+        <div>
+          <h3>{{ doctor.name }}</h3>
+          <p class="email">{{ doctor.email }}</p>
+        </div>
+      </div>
+
+      <div class="doctor-details">
+        <div class="detail-row">
+          <span class="label">specialty</span>
+          <span class="value">{{ doctor.specialty || '—' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label"> Registeration Date</span>
+          <span class="value">{{ doctor.createdAt | date: 'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+
+      <button
+        class="btn btn-outline"
+        (click)="viewProof(doctor._id)"
+        [disabled]="loadingProofFor() === doctor._id"
+      >
+        {{ loadingProofFor() === doctor._id ? 'Loading....' : 'Proof of identity' }}
+      </button>
+
+      <div class="actions">
+        <button class="btn btn-approve" (click)="approve(doctor)">
+          ✓ Accepted
+        </button>
+        <button class="btn btn-reject" (click)="openRejectDialog(doctor._id)">
+          ✕ Rejectd
+        </button>
+      </div>
+
+      <!-- فورم سبب الرفض - بيظهر بس تحت الكارت اللي دوسنا عليه Reject -->
+      <div class="reject-form" *ngIf="rejectingDoctorId() === doctor._id">
+        <textarea
+          [(ngModel)]="rejectionReason"
+          placeholder="Reason of rejection"
+          rows="2"
+        ></textarea>
+        <div class="reject-form-actions">
+          <button class="btn btn-outline btn-sm" (click)="cancelReject()">Cancel</button>
+          <button class="btn btn-reject btn-sm" (click)="confirmReject(doctor)"> Confirm Rejection</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال معاينة ملف الإثبات -->
+  <div class="proof-modal-overlay" *ngIf="previewDoctorId()" (click)="closePreview()">
+    <div class="proof-modal" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closePreview()">✕</button>
+
+      <ng-container *ngIf="getProofData(previewDoctorId()!) as proof">
+        <img *ngIf="!proof.isPdf" [src]="proof.url" alt= "proof" class="proof-image" />
+        <iframe *ngIf="proof.isPdf" [src]="proof.safeUrl" class="proof-pdf"></iframe>
+      </ng-container>
+    </div>
+  </div>
+</div>

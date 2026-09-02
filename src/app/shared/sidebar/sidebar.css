@@ -28,6 +28,20 @@
 .nav-item:hover { background: #fff; color: #1a1a1a; }
 .nav-item.active { background: #fff; color: #185FA5; font-weight: 500; border: 0.5px solid #e0e0e0; }
 .nav-item i { font-size: 16px; }
+.nav-badge {
+  margin-inline-start: auto;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
 .sidebar-footer { margin-top: auto; padding: 1rem; }
 .logout-btn {
   width: 100%; padding: 8px; background: transparent;

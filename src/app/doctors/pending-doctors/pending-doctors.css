@@ -1,0 +1,240 @@
+.pending-doctors-page {
+  padding: 24px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+}
+
+.state-message {
+  background: #fff;
+  border-radius: 10px;
+  padding: 40px;
+  text-align: center;
+  color: #666;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.state-message.error {
+  color: #c0392b;
+}
+
+.state-message.empty {
+  font-size: 16px;
+}
+
+.doctors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.doctor-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.doctor-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.doctor-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #3b5bdb;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.doctor-info h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.email {
+  font-size: 13px;
+  color: #666;
+}
+
+.doctor-details {
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 10px 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 3px 0;
+}
+
+.detail-row .label {
+  color: #888;
+}
+
+.detail-row .value {
+  color: #333;
+  font-weight: 500;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  background: #f5f5f5;
+  color: #333;
+  width: 100%;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: #e8e8e8;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-approve {
+  background: #1d9e75;
+  color: #fff;
+  flex: 1;
+}
+
+.btn-approve:hover {
+  background: #178061;
+}
+
+.btn-reject {
+  background: #e74c3c;
+  color: #fff;
+  flex: 1;
+}
+
+.btn-reject:hover {
+  background: #c0392b;
+}
+
+.reject-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px dashed #eee;
+  padding-top: 12px;
+}
+
+.reject-form textarea {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.reject-form textarea:focus {
+  border-color: #e74c3c;
+}
+
+.reject-form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+/* ===== مودال معاينة الملف ===== */
+
+.proof-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.proof-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 90vw;
+  max-height: 90vh;
+  position: relative;
+  display: flex;
+}
+
+.close-btn {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.proof-image {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.proof-pdf {
+  width: 70vw;
+  height: 80vh;
+  border: none;
+  border-radius: 8px;
+}

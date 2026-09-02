@@ -17,8 +17,12 @@
     <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="isOpen.set(false)">
       <i class="ti ti-layout-dashboard"></i> Dashboard
     </a>
-    <a class="nav-item" routerLink="/dashboard/doctors" routerLinkActive="active" (click)="isOpen.set(false)">
+    <a class="nav-item" routerLink="/dashboard/doctors" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="isOpen.set(false)">
       <i class="ti ti-stethoscope"></i> Doctors
+    </a>
+    <a class="nav-item" routerLink="/dashboard/doctors/pending" routerLinkActive="active" (click)="isOpen.set(false)">
+      <i class="ti ti-user-check"></i> Pending Registrations
+      <span class="nav-badge" *ngIf="pendingCount() > 0">{{ pendingCount() }}</span>
     </a>
     <a class="nav-item" routerLink="/dashboard/patients" routerLinkActive="active" (click)="isOpen.set(false)">
       <i class="ti ti-users"></i> Patients
